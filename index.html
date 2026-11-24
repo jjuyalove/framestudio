@@ -347,30 +347,30 @@
     <!-- =========================================================
          화면 1: 첫 화면 (뒤에 미리보기 재생 + 4개 화이트 카드 + 미리보기 버튼)
          ========================================================= -->
-    <div id="view-home" class="relative z-10 w-full h-full flex flex-col justify-between p-4 sm:p-5 bg-gradient-to-b from-black/15 via-transparent to-black/30">
+    <div id="view-home" class="relative z-10 w-full h-full flex flex-col justify-between px-4 py-3 sm:p-5 bg-gradient-to-b from-black/15 via-transparent to-black/30">
 
       <!-- 상단 인앱 브라우저 안내 + Bean 스타일 타이틀 배너 -->
-      <div class="space-y-2.5">
+      <div class="space-y-2">
         <div id="inAppBanner" class="hidden bg-[#F59E0B] text-white text-xs font-extrabold px-3.5 py-2 rounded-2xl items-center justify-between gap-2 shadow-md">
           <span>저장이 안 되면 ⋮ 눌러 '다른 브라우저로 열기'</span>
           <button type="button" id="closeInAppBanner" class="bg-black/20 px-2.5 py-0.5 rounded-lg shrink-0">닫기</button>
         </div>
 
-        <div class="bean-header-pill relative rounded-3xl px-4 py-3.5 flex items-center justify-center">
-          <div class="flex items-center justify-center gap-3 min-w-0">
-            <svg class="w-[72px] h-[72px] sm:w-20 sm:h-20 shrink-0" aria-hidden="true"><use href="#char-clapper" /></svg>
+        <div class="bean-header-pill relative rounded-[24px] px-3.5 py-2.5 flex items-center justify-center">
+          <div class="flex items-center justify-center gap-2.5 min-w-0">
+            <svg class="w-14 h-14 sm:w-16 sm:h-16 shrink-0" aria-hidden="true"><use href="#char-clapper" /></svg>
             <div class="min-w-0 text-center">
-              <p class="text-xs sm:text-sm font-extrabold text-slate-500 leading-tight mb-0.5 truncate">디강이와 함께하는 쉬운 영상 만들기</p>
-              <h1 class="text-[28px] sm:text-[32px] font-black text-[#3A3D42] leading-tight tracking-tight truncate">
+              <p class="text-[11px] sm:text-xs font-extrabold text-slate-500 leading-tight mb-0.5 truncate">디강이와 함께하는 쉬운 영상 만들기</p>
+              <h1 class="text-[24px] sm:text-[28px] font-black text-[#3A3D42] leading-tight tracking-tight truncate">
                 <span class="bean-underline">프레임</span> 공방
               </h1>
-              <p class="text-[11px] sm:text-xs font-black text-amber-600/90 tracking-[0.22em] mt-0.5 truncate">F R A M E　S T U D I O</p>
+              <p class="text-[10px] sm:text-[11px] font-black text-amber-600/90 tracking-[0.2em] mt-0.5 truncate">F R A M E　S T U D I O</p>
             </div>
           </div>
 
           <!-- 음악 소리 켜기/끄기 버튼 (음악 적용 시 우측 상단 표시) -->
           <button type="button" id="btnToggleHomeSound"
-            class="hidden absolute top-2.5 right-2.5 items-center gap-1 px-2.5 py-1.5 rounded-2xl bg-[#FFF8E1] text-[#B45309] border border-[#FDE68A] active:scale-95 text-xs font-black transition shadow-sm"
+            class="hidden absolute top-2 right-2 items-center gap-1 px-2.5 py-1 rounded-2xl bg-[#FFF8E1] text-[#B45309] border border-[#FDE68A] active:scale-95 text-xs font-black transition shadow-sm"
             aria-label="음악 소리 끄기 또는 켜기">
             <span id="homeSoundIcon" class="text-sm">🔊</span>
             <span id="homeSoundLabel">켜짐</span>
@@ -379,14 +379,14 @@
       </div>
 
       <!-- 중앙~하단: Bean 화이트 2x2 카드 그리드 + 하단 큰 미리보기 버튼 -->
-      <div class="space-y-3 pb-0.5">
-        <div class="grid grid-cols-2 gap-3">
+      <div class="space-y-2.5 pb-0.5">
+        <div class="grid grid-cols-2 gap-2.5">
           <!-- 1. 갤러리 (사진 없을 때는 네이티브 파일 선택기가 직접 터치되도록 오버레이 배치) -->
           <div id="btnOpenGallery" role="button" tabindex="0"
-            class="floating-card relative overflow-hidden rounded-[26px] py-3.5 px-2.5 flex flex-col items-center justify-center gap-1.5 text-center cursor-pointer">
-            <svg class="w-20 h-20 sm:w-[88px] sm:h-[88px] pointer-events-none" aria-hidden="true"><use href="#char-gallery" /></svg>
-            <span class="text-[25px] sm:text-[28px] font-black text-[#3A3D42] leading-tight tracking-tight pointer-events-none">1. 갤러리</span>
-            <span id="badgeGallery" class="text-sm font-extrabold text-[#3B82F6] bg-[#EFF6FF] px-3 py-0.5 rounded-full pointer-events-none">사진 선택</span>
+            class="floating-card relative overflow-hidden rounded-[24px] py-2.5 px-2 flex flex-col items-center justify-center gap-1 text-center cursor-pointer">
+            <svg class="w-16 h-16 sm:w-[74px] sm:h-[74px] pointer-events-none" aria-hidden="true"><use href="#char-gallery" /></svg>
+            <span class="text-[22px] sm:text-[25px] font-black text-[#3A3D42] leading-tight tracking-tight pointer-events-none">1. 갤러리</span>
+            <span id="badgeGallery" class="text-xs sm:text-sm font-extrabold text-[#3B82F6] bg-[#EFF6FF] px-2.5 py-0.5 rounded-full pointer-events-none">사진 선택</span>
             <input type="file" id="galleryDirectInput" accept="image/*" multiple
               aria-label="갤러리 사진 선택"
               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
@@ -394,42 +394,42 @@
 
           <!-- 2. 문구 -->
           <button type="button" id="btnOpenText"
-            class="floating-card rounded-[26px] py-3.5 px-2.5 flex flex-col items-center justify-center gap-1.5 text-center">
-            <svg class="w-20 h-20 sm:w-[88px] sm:h-[88px]" aria-hidden="true"><use href="#char-text" /></svg>
-            <span class="text-[25px] sm:text-[28px] font-black text-[#3A3D42] leading-tight tracking-tight">2. 문구</span>
-            <span id="badgeText" class="text-sm font-extrabold text-[#E11D48] bg-[#FFF1F2] px-3 py-0.5 rounded-full">글 없음</span>
+            class="floating-card rounded-[24px] py-2.5 px-2 flex flex-col items-center justify-center gap-1 text-center">
+            <svg class="w-16 h-16 sm:w-[74px] sm:h-[74px]" aria-hidden="true"><use href="#char-text" /></svg>
+            <span class="text-[22px] sm:text-[25px] font-black text-[#3A3D42] leading-tight tracking-tight">2. 문구</span>
+            <span id="badgeText" class="text-xs sm:text-sm font-extrabold text-[#E11D48] bg-[#FFF1F2] px-2.5 py-0.5 rounded-full">글 없음</span>
           </button>
 
           <!-- 3. 음악 -->
           <button type="button" id="btnOpenMusic"
-            class="floating-card rounded-[26px] py-3.5 px-2.5 flex flex-col items-center justify-center gap-1.5 text-center">
-            <svg class="w-20 h-20 sm:w-[88px] sm:h-[88px]" aria-hidden="true"><use href="#char-music" /></svg>
-            <span class="text-[25px] sm:text-[28px] font-black text-[#3A3D42] leading-tight tracking-tight">3. 음악</span>
-            <span id="badgeMusic" class="text-sm font-extrabold text-[#B45309] bg-[#FFFBEB] px-3 py-0.5 rounded-full">음악 없음</span>
+            class="floating-card rounded-[24px] py-2.5 px-2 flex flex-col items-center justify-center gap-1 text-center">
+            <svg class="w-16 h-16 sm:w-[74px] sm:h-[74px]" aria-hidden="true"><use href="#char-music" /></svg>
+            <span class="text-[22px] sm:text-[25px] font-black text-[#3A3D42] leading-tight tracking-tight">3. 음악</span>
+            <span id="badgeMusic" class="text-xs sm:text-sm font-extrabold text-[#B45309] bg-[#FFFBEB] px-2.5 py-0.5 rounded-full">음악 없음</span>
           </button>
 
           <!-- 4. 효과 -->
           <button type="button" id="btnOpenEffect"
-            class="floating-card rounded-[26px] py-3.5 px-2.5 flex flex-col items-center justify-center gap-1.5 text-center">
-            <svg class="w-20 h-20 sm:w-[88px] sm:h-[88px]" aria-hidden="true"><use href="#char-effect" /></svg>
-            <span class="text-[25px] sm:text-[28px] font-black text-[#3A3D42] leading-tight tracking-tight">4. 효과</span>
-            <span id="badgeEffect" class="text-sm font-extrabold text-[#047857] bg-[#ECFDF5] px-3 py-0.5 rounded-full">눈·반짝이</span>
+            class="floating-card rounded-[24px] py-2.5 px-2 flex flex-col items-center justify-center gap-1 text-center">
+            <svg class="w-16 h-16 sm:w-[74px] sm:h-[74px]" aria-hidden="true"><use href="#char-effect" /></svg>
+            <span class="text-[22px] sm:text-[25px] font-black text-[#3A3D42] leading-tight tracking-tight">4. 효과</span>
+            <span id="badgeEffect" class="text-xs sm:text-sm font-extrabold text-[#047857] bg-[#ECFDF5] px-2.5 py-0.5 rounded-full">눈·반짝이</span>
           </button>
         </div>
 
         <!-- 하단 큰 미리보기 버튼 -->
         <button type="button" id="btnOpenPreview"
-          class="w-full py-4 px-5 rounded-[26px] bg-gradient-to-r from-[#FBC246] via-[#F59E0B] to-[#F97316] active:scale-[0.98] text-white text-[26px] font-black shadow-xl shadow-amber-600/30 border-2 border-white/80 flex items-center justify-center gap-2.5 transition">
+          class="w-full py-3.5 px-5 rounded-[24px] bg-gradient-to-r from-[#FBC246] via-[#F59E0B] to-[#F97316] active:scale-[0.98] text-white text-[23px] sm:text-[25px] font-black shadow-xl shadow-amber-600/30 border-2 border-white/80 flex items-center justify-center gap-2 transition">
           <span>▶️</span>
           <span>미리보기</span>
         </button>
 
         <!-- 하단 브랜드 문구 & 제작자 표기 -->
         <div class="text-center pt-0.5 space-y-0.5 select-none">
-          <p class="text-sm sm:text-base font-extrabold text-white/95 drop-shadow-[0_1px_4px_rgba(0,0,0,0.65)]">
+          <p class="text-xs sm:text-sm font-extrabold text-white/95 drop-shadow-[0_1px_4px_rgba(0,0,0,0.65)]">
             사진으로 나만의 영상 한 편
           </p>
-          <p class="text-xs font-bold text-amber-200/95 tracking-wide drop-shadow-[0_1px_4px_rgba(0,0,0,0.65)]">
+          <p class="text-[11px] font-bold text-amber-200/95 tracking-wide drop-shadow-[0_1px_4px_rgba(0,0,0,0.65)]">
             디강쭈야 제작
           </p>
         </div>
