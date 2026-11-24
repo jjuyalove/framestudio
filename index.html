@@ -1137,21 +1137,13 @@
     // 오디오 미리듣기 / 백그라운드 재생 제어
     let liveAudioCtx = null;
     let liveAudioSource = null;
+    let liveGainNode = null;
     let isPreviewAudioPlaying = false;
     let playingDraftKey = ''; // 음악 선택 화면에서 현재 재생 중인 곡 키 ('builtin:0' | 'custom' | '')
     let homeSoundMuted = false;
     let activeBgAudioKey = '';
-    let audioPlayRequestId = 0; // 음악 버튼 연타 시 두 곡 겹침 방지용 토큰
+    let audioPlayRequestId = 0;
     const builtinBufferCache = new Map();
-
-    // 스마트폰(특히 iOS Safari)의 AudioContext 생성 개수 제한 초과 방지용 싱글톤
-    function getSharedAudioContext() {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!liveAudioCtx || liveAudioCtx.state === 'closed') {
-        liveAudioCtx = new AudioCtx();
-      }
-      return liveAudioCtx;
-    }
 
     // 애니메이션 및 내보내기 상태
     let animStartTime = performance.now();
@@ -1207,7 +1199,6 @@
     const galleryCountLabel = document.getElementById('galleryCountLabel');
     const galleryGrid = document.getElementById('galleryGrid');
     const galleryEmptyNotice = document.getElementById('galleryEmptyNotice');
-    const btnGalleryRepick = document.getElementById('btnGalleryRepick');
     const btnGalleryConfirm = document.getElementById('btnGalleryConfirm');
 
     const btnTextBack = document.getElementById('btnTextBack');
@@ -1226,8 +1217,8 @@
     const musicTrackBtns = document.querySelectorAll('.music-track-btn');
     const btnPickCustomAudio = document.getElementById('btnPickCustomAudio');
     const customAudioNameEl = document.getElementById('customAudioName');
-    const customAudioStatusEl = document.getElementById('customAudioStatus');
     const customAudioLenEl = document.getElementById('customAudioLen');
+    const customAudioStatusEl = document.getElementById('customAudioStatus');
     const btnNoMusic = document.getElementById('btnNoMusic');
     const btnMusicConfirm = document.getElementById('btnMusicConfirm');
 
@@ -1238,10 +1229,9 @@
     const btnEffectConfirm = document.getElementById('btnEffectConfirm');
 
     const btnPreviewBack = document.getElementById('btnPreviewBack');
+    const btnPreviewQuickEdit = document.getElementById('btnPreviewQuickEdit');
     const previewTimerBadge = document.getElementById('previewTimerBadge');
     const btnStartExport = document.getElementById('btnStartExport');
-
-    // 미리보기 실시간 조절 버튼 & 간편 문구 수정 시트
     const btnFontSmaller = document.getElementById('btnFontSmaller');
     const btnFontLarger = document.getElementById('btnFontLarger');
     const fontStepDots = document.getElementById('fontStepDots');
@@ -1249,7 +1239,6 @@
     const btnSpeedFaster = document.getElementById('btnSpeedFaster');
     const speedStepDots = document.getElementById('speedStepDots');
 
-    const btnPreviewQuickEdit = document.getElementById('btnPreviewQuickEdit');
     const previewQuickEditSheet = document.getElementById('previewQuickEditSheet');
     const btnCloseQuickEdit = document.getElementById('btnCloseQuickEdit');
     const quickEditBody = document.getElementById('quickEditBody');
@@ -1306,37 +1295,6 @@
         return Math.max(DEFAULT_NO_AUDIO_SEC, selectedImages.length * PHOTO_SLIDE_SEC);
       }
       return DEFAULT_NO_AUDIO_SEC;
-    }
-
-    // ===== 미리보기 실시간 조절 UI 갱신 (5단계 점 표시) =====
-    function updateStepDots(container, level) {
-      if (!container) return;
-      const dots = container.querySelectorAll('span');
-      dots.forEach((dot, idx) => {
-        dot.className = idx < level
-          ? 'w-2.5 h-2.5 rounded-full bg-[#F59E0B] transition-colors'
-          : 'w-2.5 h-2.5 rounded-full bg-slate-200 transition-colors';
-      });
-    }
-
-    function refreshPreviewAdjustUI() {
-      // 글자 크기 5단계 (32, 40, 48, 56, 64)
-      let sizeLevel = 3;
-      if (textFontSizePx <= 32) sizeLevel = 1;
-      else if (textFontSizePx <= 40) sizeLevel = 2;
-      else if (textFontSizePx <= 48) sizeLevel = 3;
-      else if (textFontSizePx <= 56) sizeLevel = 4;
-      else sizeLevel = 5;
-      updateStepDots(fontStepDots, sizeLevel);
-
-      // 글자 속도 5단계 (24, 33, 42, 51, 60)
-      let speedLevel = 3;
-      if (textScrollSpeed <= 24) speedLevel = 1;
-      else if (textScrollSpeed <= 33) speedLevel = 2;
-      else if (textScrollSpeed <= 42) speedLevel = 3;
-      else if (textScrollSpeed <= 51) speedLevel = 4;
-      else speedLevel = 5;
-      updateStepDots(speedStepDots, speedLevel);
     }
 
     // ===== 화면 전환 관리 =====
@@ -1405,8 +1363,6 @@
         previewSoundSvgOn.classList.add('hidden');
         previewSoundSvgOff.classList.remove('hidden');
         previewSoundLabel.textContent = '음소거';
-        btnTogglePreviewSound.classList.add('text-slate-400');
-        btnTogglePreviewSound.classList.remove('text-[#3A3D42]');
       } else {
         homeSoundIcon.textContent = '🔊';
         homeSoundLabel.textContent = '켜짐';
@@ -1415,8 +1371,26 @@
         previewSoundSvgOn.classList.remove('hidden');
         previewSoundSvgOff.classList.add('hidden');
         previewSoundLabel.textContent = '소리';
-        btnTogglePreviewSound.classList.add('text-[#3A3D42]');
-        btnTogglePreviewSound.classList.remove('text-slate-400');
+      }
+    }
+
+    function refreshPreviewAdjustUI() {
+      const fontStep = Math.round((textFontSizePx - 32) / 8) + 1; // 1 ~ 5
+      const speedStep = Math.round((textScrollSpeed - 24) / 9) + 1; // 1 ~ 5
+
+      if (fontStepDots) {
+        Array.from(fontStepDots.children).forEach((dot, idx) => {
+          dot.className = idx < fontStep
+            ? 'w-2.5 h-2.5 rounded-full bg-[#F59E0B]'
+            : 'w-2.5 h-2.5 rounded-full bg-slate-200';
+        });
+      }
+      if (speedStepDots) {
+        Array.from(speedStepDots.children).forEach((dot, idx) => {
+          dot.className = idx < speedStep
+            ? 'w-2.5 h-2.5 rounded-full bg-[#F59E0B]'
+            : 'w-2.5 h-2.5 rounded-full bg-slate-200';
+        });
       }
     }
 
@@ -1533,7 +1507,7 @@
       defaultBgCanvas = off;
     }
 
-    // ===== 파티클 초기화 (천천히, 복잡하지 않게) =====
+    // ===== 파티클 초기화 =====
     function initParticles() {
       const rndSnow = createSeededRandom(7701);
       snowflakes.length = 0;
@@ -1572,33 +1546,38 @@
       }
     }
 
-    // ===== 9:16 채움(Cover) 그리기 =====
+    // ===== 9:16 채움(Cover) 그리기 (최적화 캔버스 & 일반 이미지 모두 지원) =====
     function drawCoverImage(targetCtx, imgItem, alpha = 1) {
       if (!imgItem) return;
-      const src = imgItem.canvas || imgItem;
-      const imgW = src.naturalWidth || src.width;
-      const imgH = src.naturalHeight || src.height;
-      if (!imgW || !imgH) return;
-
       targetCtx.save();
       targetCtx.globalAlpha = alpha;
-      // 이미 720x1280으로 최적화된 캔버스면 바로 고속 복사
-      if (imgW === WIDTH && imgH === HEIGHT) {
-        targetCtx.drawImage(src, 0, 0, WIDTH, HEIGHT);
-      } else {
-        const canvasRatio = WIDTH / HEIGHT;
-        const imgRatio = imgW / imgH;
-        let sx = 0, sy = 0, sw = imgW, sh = imgH;
 
-        if (imgRatio > canvasRatio) {
-          sw = imgH * canvasRatio;
-          sx = (imgW - sw) / 2;
-        } else {
-          sh = imgW / canvasRatio;
-          sy = (imgH - sh) / 2;
-        }
-        targetCtx.drawImage(src, sx, sy, sw, sh, 0, 0, WIDTH, HEIGHT);
+      if (imgItem.canvas) {
+        targetCtx.drawImage(imgItem.canvas, 0, 0, WIDTH, HEIGHT);
+        targetCtx.restore();
+        return;
       }
+
+      const imgW = imgItem.naturalWidth || imgItem.width;
+      const imgH = imgItem.naturalHeight || imgItem.height;
+      if (!imgW || !imgH) {
+        targetCtx.restore();
+        return;
+      }
+
+      const canvasRatio = WIDTH / HEIGHT;
+      const imgRatio = imgW / imgH;
+      let sx = 0, sy = 0, sw = imgW, sh = imgH;
+
+      if (imgRatio > canvasRatio) {
+        sw = imgH * canvasRatio;
+        sx = (imgW - sw) / 2;
+      } else {
+        sh = imgW / canvasRatio;
+        sy = (imgH - sh) / 2;
+      }
+
+      targetCtx.drawImage(imgItem, sx, sy, sw, sh, 0, 0, WIDTH, HEIGHT);
       targetCtx.restore();
     }
 
@@ -1626,14 +1605,13 @@
       return result;
     }
 
-    // ===== 2배 고해상도 글자 캐시 생성 (위로 올라갈 때 깨짐/떨림 방지) =====
+    // ===== 고해상도 글자 캐시 생성 (모바일 캔버스 최대 높이 3800px 안전 제한 포함) =====
     function ensureTextCache(bodyText, nameText) {
       const key = `${bodyText}||${nameText}||${textFontSizePx}||${document.fonts ? document.fonts.status : ''}`;
       if (textCacheKey === key && textCacheCanvas) return;
 
       const maxTextW = WIDTH - 104;
       const lineH = Math.round(textFontSizePx * 1.85);
-      const scale = 2; // 2x 슈퍼샘플링
 
       const measureCanvas = document.createElement('canvas');
       const mCtx = measureCanvas.getContext('2d');
@@ -1658,13 +1636,11 @@
       const padY = 48;
       const logicalW = WIDTH;
       const logicalH = lines.length * lineH + padY * 2;
-      // 모바일(특히 iOS Safari) 캔버스 최대 텍스처 높이(4096px) 초과로 인한 크래시/깨짐 방지
-      const safeScale = (logicalH * scale > 3800) ? 1 : scale;
-      const clampedLogicalH = Math.min(logicalH, Math.floor(3800 / safeScale));
+      const safeScale = Math.min(2, Math.max(1, Math.floor((3800 / logicalH) * 10) / 10));
 
       const off = document.createElement('canvas');
-      off.width = logicalW * safeScale;
-      off.height = clampedLogicalH * safeScale;
+      off.width = Math.round(logicalW * safeScale);
+      off.height = Math.round(logicalH * safeScale);
       const oCtx = off.getContext('2d');
       oCtx.scale(safeScale, safeScale);
       oCtx.textAlign = 'center';
@@ -1678,12 +1654,11 @@
         const fSize = item.isName ? Math.round(textFontSizePx * 0.92) : textFontSizePx;
         oCtx.font = `700 ${fSize}px "BusanDandiMyeongjo", "Noto Serif KR", serif`;
 
-        // 부드러운 검정 그림자 + 1pt 외곽선
         oCtx.shadowColor = 'rgba(0, 0, 0, 0.72)';
         oCtx.shadowBlur = 10;
         oCtx.shadowOffsetX = 0;
         oCtx.shadowOffsetY = 3;
-        oCtx.lineWidth = Math.max(1.8, textFontSizePx * 0.055);
+        oCtx.lineWidth = 2.6;
         oCtx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
         oCtx.strokeText(item.text, logicalW / 2, y);
 
@@ -1694,32 +1669,28 @@
 
       textCacheCanvas = off;
       textCacheWidth = logicalW;
-      textCacheHeight = clampedLogicalH;
+      textCacheHeight = logicalH;
       textCacheKey = key;
     }
 
-    // ===== 편지 상승 애니메이션 그리기 (상/하단 부드러운 그라데이션 페이드 + 시작 1.5초 서서히 등장) =====
+    // ===== 편지 상승 애니메이션 그리기 (시작 1.5초 부드러운 페이드인 포함) =====
     function drawLetterText(targetCtx, tSec) {
       if (!savedTextBody.trim() && !savedTextName.trim()) return;
       ensureTextCache(savedTextBody, savedTextName);
       if (!textCacheCanvas) return;
 
-      const startY = HEIGHT * TEXT_START_Y_RATIO; // 화면 5등분 중 아래 2등분 지점 (60%)
+      const startY = HEIGHT * TEXT_START_Y_RATIO;
       const topLimitY = HEIGHT * 0.10;
       const bottomLimitY = HEIGHT * 0.90;
 
       const travelDist = (startY - topLimitY) + textCacheHeight + 80;
-      const cycleSec = Math.max(5, travelDist / Math.max(10, textScrollSpeed));
+      const cycleSec = Math.max(5, travelDist / Math.max(12, textScrollSpeed));
       const localT = tSec % cycleSec;
       const drawY = startY - localT * textScrollSpeed;
 
-      // 글자가 처음 올라올 때 갑자기 튀어나오지 않도록 1.5초 동안 부드럽게 페이드인
-      const TEXT_FADE_IN_SEC = 1.5;
-      let fadeInAlpha = 1;
-      if (localT < TEXT_FADE_IN_SEC) {
-        const p = Math.max(0, Math.min(1, localT / TEXT_FADE_IN_SEC));
-        fadeInAlpha = p * p * (3 - 2 * p);
-      }
+      // 처음 등장 및 반복 시작 시 1.5초 동안 서서히 나타남
+      const fadeInRatio = Math.max(0, Math.min(1, localT / 1.5));
+      const smoothFadeIn = fadeInRatio * fadeInRatio * (3 - 2 * fadeInRatio);
 
       textLayerCtx.clearRect(0, 0, WIDTH, HEIGHT);
       textLayerCtx.save();
@@ -1731,7 +1702,6 @@
         0, drawY, textCacheWidth, textCacheHeight
       );
 
-      // 상단/하단 부드러운 알파 마스크 적용
       textLayerCtx.globalCompositeOperation = 'destination-in';
       const maskGrad = textLayerCtx.createLinearGradient(0, topLimitY, 0, bottomLimitY);
       maskGrad.addColorStop(0.0, 'rgba(0,0,0,0)');
@@ -1743,14 +1713,13 @@
       textLayerCtx.restore();
 
       targetCtx.save();
-      targetCtx.globalAlpha = fadeInAlpha;
+      targetCtx.globalAlpha = smoothFadeIn;
       targetCtx.drawImage(textLayerCanvas, 0, 0);
       targetCtx.restore();
     }
 
-    // ===== 결정론적 씬 렌더링 (다중 사진 4초 + 1.5초 크로스페이드, 눈/반짝이, 안부글) =====
+    // ===== 결정론적 씬 렌더링 =====
     function drawSceneAtTime(targetCtx, tSec) {
-      // 1) 배경 사진 렌더링
       if (selectedImages.length === 0) {
         if (defaultBgCanvas) {
           targetCtx.drawImage(defaultBgCanvas, 0, 0, WIDTH, HEIGHT);
@@ -1770,7 +1739,6 @@
 
         drawCoverImage(targetCtx, selectedImages[curIdx], 1);
 
-        // 마지막 1.5초 동안 다음 사진으로 부드럽게 페이드 전환
         const fadeStart = PHOTO_SLIDE_SEC - PHOTO_FADE_SEC;
         if (slideT > fadeStart) {
           const fadeProgress = Math.max(0, Math.min(1, (slideT - fadeStart) / PHOTO_FADE_SEC));
@@ -1779,13 +1747,11 @@
         }
       }
 
-      // 사용자 사진 첨부 시 글자 가독성을 위해 전체를 은은하게 어둡게(28%) 처리
       if (selectedImages.length > 0) {
         targetCtx.fillStyle = 'rgba(0, 0, 0, 0.28)';
         targetCtx.fillRect(0, 0, WIDTH, HEIGHT);
       }
 
-      // 2) 눈 효과
       if (snowEnabled) {
         targetCtx.save();
         for (let i = 0; i < snowflakes.length; i++) {
@@ -1800,7 +1766,6 @@
         targetCtx.restore();
       }
 
-      // 3) 은은하게 흩날리는 반짝이 효과
       if (sparkleEnabled) {
         targetCtx.save();
         targetCtx.globalCompositeOperation = 'lighter';
@@ -1839,7 +1804,6 @@
         targetCtx.restore();
       }
 
-      // 4) 안부글 편지 애니메이션
       drawLetterText(targetCtx, tSec);
     }
 
@@ -1857,7 +1821,16 @@
       requestAnimationFrame(animateLoop);
     }
 
-    // ===== 기본 4곡 오디오 버퍼 생성 (시작·끝 1.5초 페이드 적용) =====
+    // ===== 공용 AudioContext 싱글톤 (iOS Safari 생성 개수 제한 해결) =====
+    function getSharedAudioContext() {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!liveAudioCtx || liveAudioCtx.state === 'closed') {
+        liveAudioCtx = new AudioCtx();
+      }
+      return liveAudioCtx;
+    }
+
+    // ===== 기본 4곡 오디오 버퍼 생성 (시작·끝 1.5초 부드러운 곡선 페이드 적용) =====
     function applyFadeToAudioBuffer(buffer, fadeSec = AUDIO_FADE_SEC) {
       const sr = buffer.sampleRate;
       const total = buffer.length;
@@ -1865,11 +1838,17 @@
 
       for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
         const data = buffer.getChannelData(ch);
+        // 모바일 스피커 찢어짐(클리핑) 방지를 위해 전체 음량을 살짝 여유(92%) 있게 정리
+        for (let i = 0; i < total; i++) {
+          data[i] *= 0.92;
+        }
+        // 직선 대신 부드러운 S자 코사인 곡선 페이드 적용 (시작·끝 잡음 제거)
         for (let i = 0; i < fadeSamples; i++) {
-          const gainIn = i / fadeSamples;
-          data[i] *= gainIn;
+          const ratio = i / fadeSamples;
+          const smoothGain = 0.5 * (1 - Math.cos(Math.PI * ratio));
+          data[i] *= smoothGain;
           const outIdx = total - 1 - i;
-          data[outIdx] *= gainIn;
+          data[outIdx] *= smoothGain;
         }
       }
       return buffer;
@@ -1883,29 +1862,31 @@
       const track = BUILTIN_TRACKS[trackIdx];
       const audioCtx = getSharedAudioContext();
 
-      // music 폴더의 실제 MP3 파일 불러오기 (로컬 미리보기 등 파일 미존재 시 기본 멜로디로 자동 폴백)
+      // 1) music 폴더의 실제 MP3 파일 우선 로드
       if (track.url) {
         try {
           const res = await fetch(track.url);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const arr = await res.arrayBuffer();
-          const decoded = await audioCtx.decodeAudioData(arr.slice(0));
-          applyFadeToAudioBuffer(decoded, AUDIO_FADE_SEC);
-          track.duration = decoded.duration;
-          builtinBufferCache.set(trackIdx, decoded);
-          return decoded;
-        } catch (fetchErr) {
-          console.warn(`음악 파일(${track.url}) 불러오기 실패, 기본 멜로디로 대체합니다:`, fetchErr);
+          if (res.ok) {
+            const arr = await res.arrayBuffer();
+            const decoded = await audioCtx.decodeAudioData(arr.slice(0));
+            applyFadeToAudioBuffer(decoded, AUDIO_FADE_SEC);
+            track.duration = decoded.duration;
+            builtinBufferCache.set(trackIdx, decoded);
+            return decoded;
+          }
+        } catch (err) {
+          console.warn('MP3 파일 로드 실패(로컬 테스트 폴백 멜로디 사용):', track.url, err);
         }
       }
 
-      // 따뜻한 오르골/피아노 풍 멜로디 합성 (폴백용)
+      // 2) MP3가 아직 없는 미리보기 환경용 폴백 오르골 멜로디
       const sampleRate = 44100;
       const duration = track.duration || 20;
       const totalSamples = Math.floor(sampleRate * duration);
       const buffer = audioCtx.createBuffer(2, totalSamples, sampleRate);
       const left = buffer.getChannelData(0);
       const right = buffer.getChannelData(1);
+
       const notes = track.notes;
       const stepSec = duration / notes.length;
 
@@ -1951,13 +1932,31 @@
 
     function stopLiveAudio() {
       audioPlayRequestId++;
-      if (liveAudioSource) {
+      const prevSource = liveAudioSource;
+      const prevGain = liveGainNode;
+      liveAudioSource = null;
+      liveGainNode = null;
+
+      if (prevSource) {
         try {
-          liveAudioSource.onended = null;
-          liveAudioSource.stop();
-          liveAudioSource.disconnect();
+          prevSource.onended = null;
+          // 소리를 뚝 끊지 않고 0.06초 동안 부드럽게 줄인 뒤 정지 (끝부분 '틱/지직' 소리 방지)
+          if (prevGain && liveAudioCtx && liveAudioCtx.state === 'running') {
+            const now = liveAudioCtx.currentTime;
+            prevGain.gain.cancelScheduledValues(now);
+            prevGain.gain.setValueAtTime(Math.max(0.0001, prevGain.gain.value), now);
+            prevGain.gain.linearRampToValueAtTime(0.0001, now + 0.06);
+            prevSource.stop(now + 0.07);
+            setTimeout(() => {
+              try { prevSource.disconnect(); } catch (_) {}
+              try { prevGain.disconnect(); } catch (_) {}
+            }, 100);
+          } else {
+            prevSource.stop();
+            prevSource.disconnect();
+            if (prevGain) prevGain.disconnect();
+          }
         } catch (_) {}
-        liveAudioSource = null;
       }
       isPreviewAudioPlaying = false;
       playingDraftKey = '';
@@ -1987,14 +1986,23 @@
       if (myReqId !== audioPlayRequestId) return false;
 
       const source = audioCtx.createBufferSource();
+      const gainNode = audioCtx.createGain();
       source.buffer = buffer;
       source.loop = loop;
-      source.connect(audioCtx.destination);
+
+      // 모바일 오디오 칩이 깨어날 0.04초 여유를 두고 0.08초 동안 부드럽게 볼륨 올림 (시작 '지직' 소리 방지)
+      const startAt = audioCtx.currentTime + 0.04;
+      gainNode.gain.setValueAtTime(0.0001, startAt);
+      gainNode.gain.linearRampToValueAtTime(1.0, startAt + 0.08);
+
+      source.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
       source.onended = () => {
         if (liveAudioSource === source && !loop) stopLiveAudio();
       };
-      source.start(0);
+      source.start(startAt);
       liveAudioSource = source;
+      liveGainNode = gainNode;
       isPreviewAudioPlaying = true;
       if (useDraft) {
         playingDraftKey = draftMusicMode === 'builtin' ? `builtin:${draftBuiltinIndex}` : (draftMusicMode === 'custom' ? 'custom' : '');
@@ -3096,23 +3104,34 @@
     // ===== 완료 화면: 공유하기 & 처음으로 =====
     btnShareVideo.addEventListener('click', async () => {
       if (!lastExportBlob) return;
-      try {
-        const mimeType = lastExportExt === 'mp4' ? 'video/mp4' : 'video/webm';
-        const file = new File([lastExportBlob], lastExportFileName, { type: mimeType });
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: '프레임 공방',
-            text: '따뜻한 마음을 담아 영상을 보냅니다.'
-          });
-          return;
+
+      const mimeType = lastExportExt === 'mp4' ? 'video/mp4' : 'video/webm';
+      // 모바일 공유 시트 호환성을 위해 영문/숫자 파일명 사용 (한글 파일명 시 일부 기기에서 공유 거부 방지)
+      const safeShareName = lastExportFileName.replace(/^프레임공방_/, 'frame_studio_');
+      const shareFile = new File([lastExportBlob], safeShareName, { type: mimeType });
+
+      if (typeof navigator.share === 'function') {
+        try {
+          // files만 단독 전달하는 것이 안드로이드 크롬·삼성 인터넷·아이폰 사파리에서 공유 시트 성공률이 가장 높음
+          if (!navigator.canShare || navigator.canShare({ files: [shareFile] })) {
+            await navigator.share({ files: [shareFile] });
+            return;
+          }
+        } catch (err) {
+          // 사용자가 공유 창을 직접 닫은 경우 조용히 종료
+          if (err && err.name === 'AbortError') return;
+          console.warn('파일 공유 실패:', err);
         }
-      } catch (err) {
-        if (err && err.name === 'AbortError') return;
-        console.warn('공유 실패:', err);
       }
-      if (lastExportUrl) triggerDownload(lastExportUrl, lastExportFileName);
-      showToast('저장된 영상을 카톡이나 문자에서 첨부해 보내주세요!', '💬');
+
+      // 공유 시트를 지원하지 않는 환경(일부 인앱 브라우저 등)에서도 다시 다운로드 팝업을 띄우지 않고 안내만 표시
+      const isInApp = /KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line/i.test(navigator.userAgent);
+      showToast(
+        isInApp
+          ? '카톡 안에서는 공유창이 막혀 있어요. 이미 저장된 영상을 갤러리에서 보내주세요!'
+          : '이미 갤러리에 저장되어 있어요! 카톡·문자에서 동영상을 골라 보내주세요.',
+        '💬'
+      );
     });
 
     btnGoHome.addEventListener('click', () => {
