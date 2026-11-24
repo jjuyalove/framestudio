@@ -34,8 +34,28 @@
       user-select: none;
     }
 
+    /* iOS Safari에서 입력창 터치·커서 이동·복사/붙여넣기 정상 동작 보장 */
+    input, textarea {
+      -webkit-user-select: text;
+      user-select: text;
+    }
+
     .font-dandi {
       font-family: 'BusanDandiMyeongjo', 'Noto Serif KR', 'Batang', serif;
+    }
+
+    /* 스마트폰 9:16 메인 프레임 (구형 브라우저 100vh 폴백 + 최신 100dvh) */
+    .phone-stage {
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      max-width: 480px;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+      background-color: #F4F5F7;
+      box-shadow: 0 18px 60px rgba(15, 23, 42, 0.18);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
     }
 
     /* 스마트폰 9:16 메인 프레임 (PC에서는 중앙에 스마트폰 비율로 표시) */
@@ -877,8 +897,8 @@
         <h2 class="text-2xl font-black text-[#3A3D42]"><span class="bean-underline">영상 완성!</span></h2>
       </div>
 
-      <div class="flex-1 min-h-0 my-3.5 flex items-center justify-center bg-slate-950 rounded-[28px] overflow-hidden shadow-lg border-4 border-white">
-        <video id="completeVideo" controls playsinline class="h-full w-auto max-w-full object-contain"></video>
+      <div class="flex-1 min-h-0 my-3.5 flex items-center justify-center bg-white rounded-[28px] p-2 overflow-hidden shadow-md border-2 border-slate-100">
+        <video id="completeVideo" controls playsinline class="h-full w-auto max-w-full object-contain rounded-[20px] shadow-sm bg-white"></video>
       </div>
 
       <div class="space-y-3 shrink-0">
@@ -907,11 +927,11 @@
      * 프레임 공방 (FRAME STUDIO) - 시니어 친화 모바일 숏폼 만들기 웹앱
      * - 스마트폰 9:16 한 화면 구성 (첫 화면 배경 = 실시간 미리보기, 4개 플로팅 버튼 + 미리보기 버튼)
      * - 다중 사진: 1장 고정 / 2장 이상 4초씩 재생 + 1.5초 크로스페이드 전환, 음악 길이만큼 반복, 무조건 채움(Cover)
-     * - 갤러리 관리: 썸네일 X 삭제, 터치/마우스 드래그 순서 변경, 기존 사진 유지하며 추가
-     * - 문구: 부산 단디 명조체, 2배 슈퍼샘플링 캐시, 미리보기에서 글자 크기·속도·내용 실시간 바로 수정 가능
+     * - 갤러리 관리: 썸네일 X 삭제, 터치/마우스 드래그 순서 변경, 기존 사진 유지하며 추가, 720x1280 메모리 최적화
+     * - 문구: 부산 단디 명조체, 2배 슈퍼샘플링 캐시, 시작 1.5초 페이드인, 미리보기에서 크기·속도·내용 바로 수정
      * - 음악: 기본 4곡(music 폴더 MP3 연결) + 내 음악 가져오기 + 음악 없음, 시작/끝 1.5초 페이드, 적용 즉시 재생 + 소리 켜기/끄기
      * - 효과: 눈 / 반짝이 원터치 ON/OFF (천천히, 적당한 양)
-     * - 저장: WebCodecs + mp4-muxer 초고속 MP4 추출 (+ MediaRecorder 자동 폴백), 완료 후 공유 & 처음으로
+     * - 저장: 3단계 자동 안전망 (HW 고속 MP4 -> SW 고속 MP4 -> MediaRecorder 안전 모드)
      */
 
     const canvas = document.getElementById('sceneCanvas');
@@ -931,8 +951,8 @@
     const SPARKLE_COUNT = 26;
 
     // 미리보기에서 실시간 조절 가능한 글자 크기 & 프레임 속도
-    let textFontSizePx = 48;          // 28 ~ 64px (4px 단위)
-    let textScrollSpeed = 42;         // 18 ~ 66px/s (6 단위)
+    let textFontSizePx = 48;          // 32 ~ 64px (8px 단위 5단계)
+    let textScrollSpeed = 42;         // 24 ~ 60px/s (9 단위 5단계)
 
     // 글자 깨짐·떨림 방지를 위한 2배 고해상도 텍스트 캐시 및 페이드 마스크 레이어
     let textCacheCanvas = null;
@@ -1061,13 +1081,13 @@
       {
         name: '따뜻한 겨울',
         duration: 20,
-        url: './music/Warmth.mp3',
+        url: './music/travel.mp3',
         notes: [261.63, 329.63, 392, 523.25, 493.88, 392, 329.63, 293.66, 349.23, 440, 523.25, 440, 392, 329.63, 349.23, 392, 440, 493.88, 523.25, 392]
       },
       {
         name: '즐거운 여행',
         duration: 20,
-        url: './music/travel.mp3',
+        url: './music/Warmth.mp3',
         notes: [523.25, 493.88, 440, 392, 440, 523.25, 440, 392, 329.63, 392, 440, 493.88, 523.25, 587.33, 523.25, 493.88, 440, 392, 329.63, 261.63]
       },
       {
@@ -1121,7 +1141,17 @@
     let playingDraftKey = ''; // 음악 선택 화면에서 현재 재생 중인 곡 키 ('builtin:0' | 'custom' | '')
     let homeSoundMuted = false;
     let activeBgAudioKey = '';
+    let audioPlayRequestId = 0; // 음악 버튼 연타 시 두 곡 겹침 방지용 토큰
     const builtinBufferCache = new Map();
+
+    // 스마트폰(특히 iOS Safari)의 AudioContext 생성 개수 제한 초과 방지용 싱글톤
+    function getSharedAudioContext() {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!liveAudioCtx || liveAudioCtx.state === 'closed') {
+        liveAudioCtx = new AudioCtx();
+      }
+      return liveAudioCtx;
+    }
 
     // 애니메이션 및 내보내기 상태
     let animStartTime = performance.now();
@@ -1543,26 +1573,32 @@
     }
 
     // ===== 9:16 채움(Cover) 그리기 =====
-    function drawCoverImage(targetCtx, img, alpha = 1) {
-      const imgW = img.naturalWidth || img.width;
-      const imgH = img.naturalHeight || img.height;
+    function drawCoverImage(targetCtx, imgItem, alpha = 1) {
+      if (!imgItem) return;
+      const src = imgItem.canvas || imgItem;
+      const imgW = src.naturalWidth || src.width;
+      const imgH = src.naturalHeight || src.height;
       if (!imgW || !imgH) return;
-
-      const canvasRatio = WIDTH / HEIGHT;
-      const imgRatio = imgW / imgH;
-      let sx = 0, sy = 0, sw = imgW, sh = imgH;
-
-      if (imgRatio > canvasRatio) {
-        sw = imgH * canvasRatio;
-        sx = (imgW - sw) / 2;
-      } else {
-        sh = imgW / canvasRatio;
-        sy = (imgH - sh) / 2;
-      }
 
       targetCtx.save();
       targetCtx.globalAlpha = alpha;
-      targetCtx.drawImage(img, sx, sy, sw, sh, 0, 0, WIDTH, HEIGHT);
+      // 이미 720x1280으로 최적화된 캔버스면 바로 고속 복사
+      if (imgW === WIDTH && imgH === HEIGHT) {
+        targetCtx.drawImage(src, 0, 0, WIDTH, HEIGHT);
+      } else {
+        const canvasRatio = WIDTH / HEIGHT;
+        const imgRatio = imgW / imgH;
+        let sx = 0, sy = 0, sw = imgW, sh = imgH;
+
+        if (imgRatio > canvasRatio) {
+          sw = imgH * canvasRatio;
+          sx = (imgW - sw) / 2;
+        } else {
+          sh = imgW / canvasRatio;
+          sy = (imgH - sh) / 2;
+        }
+        targetCtx.drawImage(src, sx, sy, sw, sh, 0, 0, WIDTH, HEIGHT);
+      }
       targetCtx.restore();
     }
 
@@ -1622,12 +1658,15 @@
       const padY = 48;
       const logicalW = WIDTH;
       const logicalH = lines.length * lineH + padY * 2;
+      // 모바일(특히 iOS Safari) 캔버스 최대 텍스처 높이(4096px) 초과로 인한 크래시/깨짐 방지
+      const safeScale = (logicalH * scale > 3800) ? 1 : scale;
+      const clampedLogicalH = Math.min(logicalH, Math.floor(3800 / safeScale));
 
       const off = document.createElement('canvas');
-      off.width = logicalW * scale;
-      off.height = logicalH * scale;
+      off.width = logicalW * safeScale;
+      off.height = clampedLogicalH * safeScale;
       const oCtx = off.getContext('2d');
-      oCtx.scale(scale, scale);
+      oCtx.scale(safeScale, safeScale);
       oCtx.textAlign = 'center';
       oCtx.textBaseline = 'middle';
       oCtx.lineJoin = 'round';
@@ -1655,11 +1694,11 @@
 
       textCacheCanvas = off;
       textCacheWidth = logicalW;
-      textCacheHeight = logicalH;
+      textCacheHeight = clampedLogicalH;
       textCacheKey = key;
     }
 
-    // ===== 편지 상승 애니메이션 그리기 (상/하단 부드러운 그라데이션 페이드) =====
+    // ===== 편지 상승 애니메이션 그리기 (상/하단 부드러운 그라데이션 페이드 + 시작 1.5초 서서히 등장) =====
     function drawLetterText(targetCtx, tSec) {
       if (!savedTextBody.trim() && !savedTextName.trim()) return;
       ensureTextCache(savedTextBody, savedTextName);
@@ -1673,6 +1712,14 @@
       const cycleSec = Math.max(5, travelDist / Math.max(10, textScrollSpeed));
       const localT = tSec % cycleSec;
       const drawY = startY - localT * textScrollSpeed;
+
+      // 글자가 처음 올라올 때 갑자기 튀어나오지 않도록 1.5초 동안 부드럽게 페이드인
+      const TEXT_FADE_IN_SEC = 1.5;
+      let fadeInAlpha = 1;
+      if (localT < TEXT_FADE_IN_SEC) {
+        const p = Math.max(0, Math.min(1, localT / TEXT_FADE_IN_SEC));
+        fadeInAlpha = p * p * (3 - 2 * p);
+      }
 
       textLayerCtx.clearRect(0, 0, WIDTH, HEIGHT);
       textLayerCtx.save();
@@ -1695,7 +1742,10 @@
       textLayerCtx.fillRect(0, topLimitY, WIDTH, bottomLimitY - topLimitY);
       textLayerCtx.restore();
 
+      targetCtx.save();
+      targetCtx.globalAlpha = fadeInAlpha;
       targetCtx.drawImage(textLayerCanvas, 0, 0);
+      targetCtx.restore();
     }
 
     // ===== 결정론적 씬 렌더링 (다중 사진 4초 + 1.5초 크로스페이드, 눈/반짝이, 안부글) =====
@@ -1831,63 +1881,58 @@
       }
 
       const track = BUILTIN_TRACKS[trackIdx];
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      const tmpCtx = new AudioCtx();
+      const audioCtx = getSharedAudioContext();
 
-      try {
-        // music 폴더의 실제 MP3 파일 불러오기 (로컬 미리보기 등 파일 미존재 시 기본 멜로디로 자동 폴백)
-        if (track.url) {
-          try {
-            const res = await fetch(track.url);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const arr = await res.arrayBuffer();
-            const decoded = await tmpCtx.decodeAudioData(arr);
-            applyFadeToAudioBuffer(decoded, AUDIO_FADE_SEC);
-            track.duration = decoded.duration;
-            builtinBufferCache.set(trackIdx, decoded);
-            return decoded;
-          } catch (fetchErr) {
-            console.warn(`음악 파일(${track.url}) 불러오기 실패, 기본 멜로디로 대체합니다:`, fetchErr);
-          }
+      // music 폴더의 실제 MP3 파일 불러오기 (로컬 미리보기 등 파일 미존재 시 기본 멜로디로 자동 폴백)
+      if (track.url) {
+        try {
+          const res = await fetch(track.url);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const arr = await res.arrayBuffer();
+          const decoded = await audioCtx.decodeAudioData(arr.slice(0));
+          applyFadeToAudioBuffer(decoded, AUDIO_FADE_SEC);
+          track.duration = decoded.duration;
+          builtinBufferCache.set(trackIdx, decoded);
+          return decoded;
+        } catch (fetchErr) {
+          console.warn(`음악 파일(${track.url}) 불러오기 실패, 기본 멜로디로 대체합니다:`, fetchErr);
         }
-
-        // 따뜻한 오르골/피아노 풍 멜로디 합성 (폴백용)
-        const sampleRate = 44100;
-        const duration = track.duration || 20;
-        const totalSamples = Math.floor(sampleRate * duration);
-        const buffer = tmpCtx.createBuffer(2, totalSamples, sampleRate);
-        const left = buffer.getChannelData(0);
-        const right = buffer.getChannelData(1);
-        const notes = track.notes;
-        const stepSec = duration / notes.length;
-
-        for (let n = 0; n < notes.length; n++) {
-          const freq = notes[n];
-          const startSample = Math.floor(n * stepSec * sampleRate);
-          const noteSamples = Math.floor(stepSec * 1.45 * sampleRate);
-
-          for (let i = 0; i < noteSamples; i++) {
-            const idx = startSample + i;
-            if (idx >= totalSamples) break;
-            const t = i / sampleRate;
-            const env = Math.min(1, t / 0.03) * Math.exp(-t * 2.1);
-            const tone =
-              Math.sin(2 * Math.PI * freq * t) * 0.55 +
-              Math.sin(2 * Math.PI * freq * 2 * t) * 0.16 +
-              Math.sin(2 * Math.PI * (freq * 0.5) * t) * 0.18;
-
-            const sample = tone * env * 0.24;
-            left[idx] += sample * 0.96;
-            right[idx] += sample * 1.04;
-          }
-        }
-
-        applyFadeToAudioBuffer(buffer, AUDIO_FADE_SEC);
-        builtinBufferCache.set(trackIdx, buffer);
-        return buffer;
-      } finally {
-        tmpCtx.close().catch(() => {});
       }
+
+      // 따뜻한 오르골/피아노 풍 멜로디 합성 (폴백용)
+      const sampleRate = 44100;
+      const duration = track.duration || 20;
+      const totalSamples = Math.floor(sampleRate * duration);
+      const buffer = audioCtx.createBuffer(2, totalSamples, sampleRate);
+      const left = buffer.getChannelData(0);
+      const right = buffer.getChannelData(1);
+      const notes = track.notes;
+      const stepSec = duration / notes.length;
+
+      for (let n = 0; n < notes.length; n++) {
+        const freq = notes[n];
+        const startSample = Math.floor(n * stepSec * sampleRate);
+        const noteSamples = Math.floor(stepSec * 1.45 * sampleRate);
+
+        for (let i = 0; i < noteSamples; i++) {
+          const idx = startSample + i;
+          if (idx >= totalSamples) break;
+          const t = i / sampleRate;
+          const env = Math.min(1, t / 0.03) * Math.exp(-t * 2.1);
+          const tone =
+            Math.sin(2 * Math.PI * freq * t) * 0.55 +
+            Math.sin(2 * Math.PI * freq * 2 * t) * 0.16 +
+            Math.sin(2 * Math.PI * (freq * 0.5) * t) * 0.18;
+
+          const sample = tone * env * 0.24;
+          left[idx] += sample * 0.96;
+          right[idx] += sample * 1.04;
+        }
+      }
+
+      applyFadeToAudioBuffer(buffer, AUDIO_FADE_SEC);
+      builtinBufferCache.set(trackIdx, buffer);
+      return buffer;
     }
 
     async function getActiveAudioBuffer(useDraft = false) {
@@ -1905,13 +1950,14 @@
     }
 
     function stopLiveAudio() {
+      audioPlayRequestId++;
       if (liveAudioSource) {
-        try { liveAudioSource.stop(); } catch (_) {}
+        try {
+          liveAudioSource.onended = null;
+          liveAudioSource.stop();
+          liveAudioSource.disconnect();
+        } catch (_) {}
         liveAudioSource = null;
-      }
-      if (liveAudioCtx) {
-        liveAudioCtx.close().catch(() => {});
-        liveAudioCtx = null;
       }
       isPreviewAudioPlaying = false;
       playingDraftKey = '';
@@ -1923,20 +1969,29 @@
 
     async function startLiveAudio(useDraft = false, loop = true) {
       stopLiveAudio();
-      const buffer = await getActiveAudioBuffer(useDraft);
-      if (!buffer) return false;
+      const myReqId = ++audioPlayRequestId;
 
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      liveAudioCtx = new AudioCtx();
-      if (liveAudioCtx.state === 'suspended') {
-        await liveAudioCtx.resume().catch(() => {});
+      // iOS Safari 중요: 비동기 fetch 전에 유저 터치 직후 동기적으로 AudioContext 잠금 해제
+      const audioCtx = getSharedAudioContext();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
       }
-      const source = liveAudioCtx.createBufferSource();
+
+      const buffer = await getActiveAudioBuffer(useDraft);
+      // 로딩 도중 다른 곡을 눌렀거나 정지했으면 중복 재생 방지
+      if (!buffer || myReqId !== audioPlayRequestId) return false;
+
+      if (audioCtx.state === 'suspended') {
+        await audioCtx.resume().catch(() => {});
+      }
+      if (myReqId !== audioPlayRequestId) return false;
+
+      const source = audioCtx.createBufferSource();
       source.buffer = buffer;
       source.loop = loop;
-      source.connect(liveAudioCtx.destination);
+      source.connect(audioCtx.destination);
       source.onended = () => {
-        if (!loop) stopLiveAudio();
+        if (liveAudioSource === source && !loop) stopLiveAudio();
       };
       source.start(0);
       liveAudioSource = source;
@@ -2000,7 +2055,7 @@
         card.dataset.index = String(idx);
 
         const imgEl = document.createElement('img');
-        imgEl.src = img.src;
+        imgEl.src = img.thumbUrl || img.src;
         imgEl.alt = `선택한 사진 ${idx + 1}`;
         imgEl.draggable = false;
         imgEl.className = 'w-full h-full object-cover pointer-events-none';
@@ -2022,7 +2077,7 @@
           showToast('사진을 지웠어요.', '🗑️');
         });
 
-        // 포인터 기반 드래그 순서 변경
+        // 포인터 기반 드래그 순서 변경 (스마트폰 터치 & PC 마우스 모두 지원)
         card.addEventListener('pointerdown', (ev) => {
           if (ev.target === delBtn) return;
           dragFromIndex = idx;
@@ -2071,20 +2126,67 @@
       });
     }
 
+    // 스마트폰 고화질 사진(12~48MP) OOM 크래시 방지: 불러오는 즉시 720x1280 Cover 캔버스 + 썸네일로 경량화
+    function optimizeLoadedImage(img) {
+      const imgW = img.naturalWidth || img.width;
+      const imgH = img.naturalHeight || img.height;
+      const off = document.createElement('canvas');
+      off.width = WIDTH;
+      off.height = HEIGHT;
+      const oCtx = off.getContext('2d', { alpha: false });
+      oCtx.imageSmoothingEnabled = true;
+      oCtx.imageSmoothingQuality = 'high';
+
+      const canvasRatio = WIDTH / HEIGHT;
+      const imgRatio = imgW / imgH;
+      let sx = 0, sy = 0, sw = imgW, sh = imgH;
+      if (imgRatio > canvasRatio) {
+        sw = imgH * canvasRatio;
+        sx = (imgW - sw) / 2;
+      } else {
+        sh = imgW / canvasRatio;
+        sy = (imgH - sh) / 2;
+      }
+      oCtx.drawImage(img, sx, sy, sw, sh, 0, 0, WIDTH, HEIGHT);
+
+      // 갤러리 그리드용 초경량 썸네일 생성
+      const thumbCanvas = document.createElement('canvas');
+      thumbCanvas.width = 216;
+      thumbCanvas.height = 288;
+      const tCtx = thumbCanvas.getContext('2d', { alpha: false });
+      tCtx.drawImage(off, 0, 0, WIDTH, HEIGHT, 0, 0, 216, 288);
+      const thumbUrl = thumbCanvas.toDataURL('image/jpeg', 0.78);
+
+      return { canvas: off, thumbUrl };
+    }
+
     function loadImageFile(file) {
       return new Promise((resolve) => {
-        // 1차: ObjectURL로 빠르게 로드 (고화질 모바일 사진 메모리 절약)
         try {
           const objUrl = URL.createObjectURL(file);
           const img = new Image();
-          img.onload = () => resolve(img);
+          img.onload = () => {
+            try {
+              const optimized = optimizeLoadedImage(img);
+              URL.revokeObjectURL(objUrl);
+              resolve(optimized);
+            } catch (_) {
+              URL.revokeObjectURL(objUrl);
+              resolve(null);
+            }
+          };
           img.onerror = () => {
             URL.revokeObjectURL(objUrl);
-            // 2차 폴백: FileReader(DataURL)로 재시도
             const reader = new FileReader();
             reader.onload = (ev) => {
               const fallbackImg = new Image();
-              fallbackImg.onload = () => resolve(fallbackImg);
+              fallbackImg.onload = () => {
+                try {
+                  resolve(optimizeLoadedImage(fallbackImg));
+                } catch (_) {
+                  resolve(null);
+                }
+              };
               fallbackImg.onerror = () => resolve(null);
               fallbackImg.src = ev.target.result;
             };
@@ -2096,7 +2198,13 @@
           const reader = new FileReader();
           reader.onload = (ev) => {
             const img = new Image();
-            img.onload = () => resolve(img);
+            img.onload = () => {
+              try {
+                resolve(optimizeLoadedImage(img));
+              } catch (_) {
+                resolve(null);
+              }
+            };
             img.onerror = () => resolve(null);
             img.src = ev.target.result;
           };
@@ -2119,10 +2227,24 @@
       const files = Array.from(inputEl.files || []);
       if (files.length === 0) return;
 
-      showToast('사진을 불러오고 있어요...', '📷');
+      const MAX_PHOTOS = 20;
+      const currentCount = currentView === 'gallery' ? draftImages.length : selectedImages.length;
+      const remaining = Math.max(0, MAX_PHOTOS - currentCount);
+      if (remaining === 0) {
+        inputEl.value = '';
+        showToast(`사진은 최대 ${MAX_PHOTOS}장까지 넣을 수 있어요.`, 'ℹ️');
+        return;
+      }
+      const filesToLoad = files.slice(0, remaining);
+      if (files.length > remaining) {
+        showToast(`최대 ${MAX_PHOTOS}장까지만 순서대로 불러와요.`, 'ℹ️');
+      } else {
+        showToast('사진을 불러오고 있어요...', '📷');
+      }
+
       try {
         const loaded = [];
-        for (const f of files) {
+        for (const f of filesToLoad) {
           const img = await loadImageFile(f);
           if (img) loaded.push(img);
         }
@@ -2312,7 +2434,6 @@
         const idx = Number(btn.dataset.track);
         const key = `builtin:${idx}`;
 
-        // 이미 재생 중인 같은 곡을 다시 누르면 멈춤
         if (isPreviewAudioPlaying && playingDraftKey === key) {
           stopLiveAudio();
           return;
@@ -2329,7 +2450,6 @@
       if (e.target.closest('#btnChangeCustomAudio') || e.target === customAudioInput) return;
       if (!draftCustomAudioBuffer) return;
 
-      // 이미 재생 중인 내 음악을 다시 누르면 멈춤
       if (isPreviewAudioPlaying && playingDraftKey === 'custom') {
         stopLiveAudio();
         return;
@@ -2358,10 +2478,8 @@
       showToast('음악을 불러오고 있어요...', '🎵');
       try {
         const arr = await file.arrayBuffer();
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        const tmpCtx = new AudioCtx();
-        const decoded = await tmpCtx.decodeAudioData(arr.slice(0));
-        await tmpCtx.close();
+        const audioCtx = getSharedAudioContext();
+        const decoded = await audioCtx.decodeAudioData(arr.slice(0));
 
         applyFadeToAudioBuffer(decoded, AUDIO_FADE_SEC);
         draftMusicMode = 'custom';
@@ -2522,29 +2640,94 @@
       if (detail) savingDetailText.textContent = detail;
     }
 
-    function triggerDownload(blob, fileName) {
+    // 모바일 대용량 MP4 다운로드 안정화 (재사용 URL 사용으로 조기 파기 방지)
+    function triggerDownload(url, fileName) {
       try {
-        const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = fileName;
+        a.rel = 'noopener';
         document.body.appendChild(a);
         a.click();
         setTimeout(() => {
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        }, 1500);
+          if (a.parentNode) a.parentNode.removeChild(a);
+        }, 1000);
       } catch (_) {}
     }
 
-    async function exportWithWebCodecs() {
-      const durationSec = getVideoDurationSec();
+    // Promise 타임아웃 유틸 (모바일 인코더/폰트 무한 대기 방지)
+    function withTimeout(promise, ms, errMsg = '작업 시간이 초과되었습니다.') {
+      return Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error(errMsg)), ms))
+      ]);
+    }
+
+    // 모바일 AudioEncoder(AAC) 호환성을 위해 44100Hz 스테레오 AudioBuffer로 안전 정규화
+    async function normalizeAudioBufferForAAC(audioBuffer, targetDurationSec) {
+      const targetSampleRate = 44100;
+      const targetChannels = 2;
+      const safeDur = Math.min(audioBuffer.duration || targetDurationSec, targetDurationSec);
+      const targetLength = Math.max(1024, Math.floor(safeDur * targetSampleRate));
+
+      if (
+        audioBuffer.sampleRate === targetSampleRate &&
+        audioBuffer.numberOfChannels === targetChannels &&
+        audioBuffer.length >= targetLength
+      ) {
+        return audioBuffer;
+      }
+
+      const OfflineCtx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+      if (!OfflineCtx) return audioBuffer;
+
+      try {
+        const offlineCtx = new OfflineCtx(targetChannels, targetLength, targetSampleRate);
+        const src = offlineCtx.createBufferSource();
+        src.buffer = audioBuffer;
+        src.connect(offlineCtx.destination);
+        src.start(0);
+        return await offlineCtx.startRendering();
+      } catch (err) {
+        console.warn('오디오 정규화 건너뜀:', err);
+        return audioBuffer;
+      }
+    }
+
+    async function findSupportedVideoConfig(preferSoftware = false) {
+      const candidateCodecs = ['avc1.4d002a', 'avc1.640028', 'avc1.420028', 'avc1.4d0028', 'avc1.42001f'];
+      const hwMode = preferSoftware ? 'prefer-software' : 'no-preference';
+
+      for (const codec of candidateCodecs) {
+        const config = {
+          codec,
+          width: WIDTH,
+          height: HEIGHT,
+          bitrate: 2_400_000,
+          framerate: FPS,
+          hardwareAcceleration: hwMode,
+          avc: { format: 'avc' }
+        };
+        try {
+          const sup = await VideoEncoder.isConfigSupported(config);
+          if (sup && sup.supported) return config;
+        } catch (_) {}
+      }
+      return null;
+    }
+
+    async function exportWithWebCodecs(preferSoftware = false) {
+      const rawAudioBuffer = await getActiveAudioBuffer(false);
+      const durationSec = rawAudioBuffer ? rawAudioBuffer.duration : getVideoDurationSec();
       const totalFrames = Math.max(1, Math.round(durationSec * FPS));
-      const audioBuffer = await getActiveAudioBuffer(false);
+
+      let audioBuffer = null;
       let canEncodeAudio = false;
 
-      if (audioBuffer && typeof AudioEncoder !== 'undefined') {
+      if (rawAudioBuffer && typeof AudioEncoder !== 'undefined' && typeof AudioData !== 'undefined') {
         try {
+          setSavingProgress(2, '배경 음악 준비 중...');
+          audioBuffer = await normalizeAudioBufferForAAC(rawAudioBuffer, durationSec);
           const support = await AudioEncoder.isConfigSupported({
             codec: 'mp4a.40.2',
             sampleRate: audioBuffer.sampleRate,
@@ -2552,27 +2735,19 @@
             bitrate: 128000
           });
           canEncodeAudio = Boolean(support && support.supported);
-        } catch (_) {
+        } catch (err) {
+          console.warn('AAC 오디오 인코더 미지원:', err);
           canEncodeAudio = false;
         }
       }
 
-      const candidateCodecs = ['avc1.42001f', 'avc1.4d002a', 'avc1.640028'];
-      let chosenCodec = null;
-      for (const codec of candidateCodecs) {
-        const sup = await VideoEncoder.isConfigSupported({
-          codec,
-          width: WIDTH,
-          height: HEIGHT,
-          bitrate: 3_000_000,
-          framerate: FPS
-        });
-        if (sup && sup.supported) {
-          chosenCodec = codec;
-          break;
-        }
+      // 음악이 있는데 AAC 인코더가 미지원이면 무음 MP4 대신 안전 폴백으로 전환
+      if (rawAudioBuffer && !canEncodeAudio) {
+        throw new Error('AudioEncoder AAC unsupported');
       }
-      if (!chosenCodec) throw new Error('VideoEncoder unsupported');
+
+      const videoConfig = await findSupportedVideoConfig(preferSoftware);
+      if (!videoConfig) throw new Error('VideoEncoder unsupported');
 
       const muxerOptions = {
         target: new Mp4Muxer.ArrayBufferTarget(),
@@ -2594,45 +2769,63 @@
         output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
         error: (e) => { encErr = e; }
       });
-      videoEncoder.configure({
-        codec: chosenCodec,
-        width: WIDTH,
-        height: HEIGHT,
-        bitrate: 3_000_000,
-        framerate: FPS
-      });
+      videoEncoder.configure(videoConfig);
 
       const offCanvas = document.createElement('canvas');
       offCanvas.width = WIDTH;
       offCanvas.height = HEIGHT;
       const offCtx = offCanvas.getContext('2d', { alpha: false });
 
+      const frameDurationUs = Math.round(1_000_000 / FPS);
+
       for (let i = 0; i < totalFrames; i++) {
         if (exportCancelled || encErr) break;
+
+        // 인코더 대기열 과부하 방지 (백프레셔 + 최대 15초 멈춤 감지)
+        let waitMs = 0;
+        while (videoEncoder.encodeQueueSize > 3 && !exportCancelled && !encErr) {
+          await new Promise((r) => setTimeout(r, 10));
+          waitMs += 10;
+          if (waitMs > 15000) {
+            encErr = new Error('VideoEncoder queue stalled');
+            break;
+          }
+        }
+        if (exportCancelled || encErr || videoEncoder.state !== 'configured') break;
 
         drawSceneAtTime(offCtx, i / FPS);
         const frame = new VideoFrame(offCanvas, {
           timestamp: Math.round((i * 1_000_000) / FPS),
-          duration: Math.round(1_000_000 / FPS)
+          duration: frameDurationUs
         });
-        videoEncoder.encode(frame, { keyFrame: i % (FPS * 2) === 0 });
-        frame.close();
+        try {
+          videoEncoder.encode(frame, { keyFrame: i % (FPS * 2) === 0 });
+        } finally {
+          frame.close();
+        }
 
-        if (videoEncoder.encodeQueueSize > 8 || i % 10 === 0) {
-          const pct = canEncodeAudio ? (i / totalFrames) * 85 : (i / totalFrames) * 95;
+        if (i % 10 === 0 || i === totalFrames - 1) {
+          const pct = canEncodeAudio ? 3 + ((i + 1) / totalFrames) * 82 : 3 + ((i + 1) / totalFrames) * 92;
           setSavingProgress(pct, `화면 만드는 중 (${i + 1}/${totalFrames})`);
           await new Promise((r) => setTimeout(r, 0));
         }
       }
 
       if (exportCancelled) {
-        videoEncoder.close();
+        try { videoEncoder.close(); } catch (_) {}
         return null;
       }
-      if (encErr) throw encErr;
+      if (encErr) {
+        try { videoEncoder.close(); } catch (_) {}
+        throw encErr;
+      }
 
-      await videoEncoder.flush();
-      videoEncoder.close();
+      setSavingProgress(canEncodeAudio ? 86 : 96, '영상 화면 정리하는 중...');
+      try {
+        await withTimeout(videoEncoder.flush(), 20000, 'VideoEncoder flush timeout');
+      } finally {
+        try { videoEncoder.close(); } catch (_) {}
+      }
 
       if (canEncodeAudio && audioBuffer && !exportCancelled) {
         setSavingProgress(88, '배경 음악 합치는 중...');
@@ -2652,10 +2845,26 @@
           bitrate: 128000
         });
 
-        const chunkSamples = 4096;
+        // AAC 표준 프레임(1024 샘플)의 2배수로 안정적 인코딩
+        const chunkSamples = 2048;
         for (let offset = 0; offset < totalSamples; offset += chunkSamples) {
-          if (exportCancelled || aErr) break;
+          if (exportCancelled || aErr || audioEncoder.state !== 'configured') break;
+
           const frames = Math.min(chunkSamples, totalSamples - offset);
+          // 마지막 극소량 잔여 샘플(<128)은 일부 모바일 AAC 인코더 오류를 유발하므로 깔끔히 종료
+          if (frames < 128) break;
+
+          let waitMs = 0;
+          while (audioEncoder.encodeQueueSize > 8 && !exportCancelled && !aErr) {
+            await new Promise((r) => setTimeout(r, 5));
+            waitMs += 5;
+            if (waitMs > 10000) {
+              aErr = new Error('AudioEncoder queue stalled');
+              break;
+            }
+          }
+          if (exportCancelled || aErr || audioEncoder.state !== 'configured') break;
+
           const planar = new Float32Array(frames * numCh);
           for (let ch = 0; ch < numCh; ch++) {
             const src = audioBuffer.getChannelData(ch);
@@ -2670,64 +2879,99 @@
             timestamp: Math.round((offset / sampleRate) * 1_000_000),
             data: planar
           });
-          audioEncoder.encode(audioData);
-          audioData.close();
+          try {
+            audioEncoder.encode(audioData);
+          } finally {
+            audioData.close();
+          }
 
-          if (offset % (chunkSamples * 25) === 0) {
+          if (offset % (chunkSamples * 30) === 0) {
             setSavingProgress(88 + (offset / totalSamples) * 10, '배경 음악 합치는 중...');
             await new Promise((r) => setTimeout(r, 0));
           }
         }
 
-        if (aErr) throw aErr;
-        await audioEncoder.flush();
-        audioEncoder.close();
+        if (aErr) {
+          try { audioEncoder.close(); } catch (_) {}
+          throw aErr;
+        }
+        try {
+          await withTimeout(audioEncoder.flush(), 15000, 'AudioEncoder flush timeout');
+        } finally {
+          try { audioEncoder.close(); } catch (_) {}
+        }
       }
 
       if (exportCancelled) return null;
       setSavingProgress(99, 'MP4 파일 마무리 중...');
+      await new Promise((r) => setTimeout(r, 20));
       muxer.finalize();
+      const outBlob = new Blob([muxer.target.buffer], { type: 'video/mp4' });
+      if (outBlob.size < 1024) {
+        throw new Error('Generated MP4 is empty');
+      }
       return {
-        blob: new Blob([muxer.target.buffer], { type: 'video/mp4' }),
+        blob: outBlob,
         ext: 'mp4'
       };
     }
 
     async function exportWithMediaRecorderFallback() {
-      const durationSec = getVideoDurationSec();
-      const stream = canvas.captureStream(FPS);
+      if (typeof MediaRecorder === 'undefined') {
+        throw new Error('MediaRecorder unsupported');
+      }
+
       const audioBuffer = await getActiveAudioBuffer(false);
-      let recAudioCtx = null;
+      const durationSec = audioBuffer ? audioBuffer.duration : getVideoDurationSec();
+      const stream = canvas.captureStream(FPS);
       let recSource = null;
+      let recDest = null;
 
       if (audioBuffer) {
         try {
-          const AudioCtx = window.AudioContext || window.webkitAudioContext;
-          recAudioCtx = new AudioCtx();
-          const dest = recAudioCtx.createMediaStreamDestination();
-          recSource = recAudioCtx.createBufferSource();
+          const audioCtx = getSharedAudioContext();
+          if (audioCtx.state === 'suspended') {
+            await audioCtx.resume().catch(() => {});
+          }
+          recDest = audioCtx.createMediaStreamDestination();
+          recSource = audioCtx.createBufferSource();
           recSource.buffer = audioBuffer;
-          recSource.connect(dest);
-          dest.stream.getAudioTracks().forEach((t) => stream.addTrack(t));
-        } catch (_) {}
+          recSource.connect(recDest);
+          recDest.stream.getAudioTracks().forEach((t) => stream.addTrack(t));
+        } catch (err) {
+          console.warn('폴백 오디오 결합 실패:', err);
+        }
       }
 
-      const mimeTypes = ['video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
-      const chosenMime = mimeTypes.find((m) => MediaRecorder.isTypeSupported(m)) || '';
-      const recorder = new MediaRecorder(stream, chosenMime ? { mimeType: chosenMime } : undefined);
+      const mimeTypes = [
+        'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+        'video/mp4',
+        'video/webm;codecs=vp9,opus',
+        'video/webm;codecs=vp8,opus',
+        'video/webm'
+      ];
+      const chosenMime = mimeTypes.find((m) => {
+        try { return MediaRecorder.isTypeSupported(m); } catch (_) { return false; }
+      }) || '';
+
+      const recorder = new MediaRecorder(
+        stream,
+        chosenMime ? { mimeType: chosenMime, videoBitsPerSecond: 2_400_000 } : undefined
+      );
       const chunks = [];
       recorder.ondataavailable = (e) => {
         if (e.data && e.data.size > 0) chunks.push(e.data);
       };
 
-      const donePromise = new Promise((resolve) => {
+      const donePromise = new Promise((resolve, reject) => {
+        recorder.onerror = (ev) => reject(ev.error || new Error('MediaRecorder error'));
         recorder.onstop = () => {
           const ext = chosenMime.includes('mp4') ? 'mp4' : 'webm';
           resolve({ blob: new Blob(chunks, { type: chosenMime || 'video/webm' }), ext });
         };
       });
 
-      recorder.start(200);
+      recorder.start(250);
       if (recSource) recSource.start(0);
 
       const startMs = performance.now();
@@ -2736,16 +2980,24 @@
         const elapsed = (performance.now() - startMs) / 1000;
         if (elapsed >= durationSec) break;
         drawSceneAtTime(ctx, elapsed);
-        setSavingProgress((elapsed / durationSec) * 98, `${formatTime(elapsed)} / ${formatTime(durationSec)}`);
+        setSavingProgress((elapsed / durationSec) * 98, `안전 저장 중 (${formatTime(elapsed)} / ${formatTime(durationSec)})`);
         await new Promise((r) => setTimeout(r, 1000 / FPS));
       }
 
-      if (recSource) { try { recSource.stop(); } catch (_) {} }
-      if (recAudioCtx) recAudioCtx.close().catch(() => {});
-      if (recorder.state !== 'inactive') recorder.stop();
+      if (recSource) {
+        try { recSource.stop(); recSource.disconnect(); } catch (_) {}
+      }
+      if (recorder.state !== 'inactive') {
+        try { recorder.stop(); } catch (_) {}
+      }
+      stream.getTracks().forEach((t) => { try { t.stop(); } catch (_) {} });
 
       if (exportCancelled) return null;
-      return await donePromise;
+      const fallbackResult = await donePromise;
+      if (!fallbackResult || !fallbackResult.blob || fallbackResult.blob.size < 1024) {
+        throw new Error('Fallback recording is empty');
+      }
+      return fallbackResult;
     }
 
     async function startExport() {
@@ -2754,12 +3006,22 @@
       exportCancelled = false;
       stopLiveAudio();
 
+      // 저장 도중 스마트폰 화면 자동 꺼짐 방지 (WakeLock)
+      let wakeLock = null;
+      if (navigator.wakeLock && navigator.wakeLock.request) {
+        try { wakeLock = await navigator.wakeLock.request('screen'); } catch (_) {}
+      }
+
       setSavingProgress(0, '영상 준비 중...');
       showView('saving');
 
       try {
+        // 외부 폰트 로딩 최대 2초만 대기 (폰트 서버 장애 시 무한 대기 방지)
         if (document.fonts && document.fonts.ready) {
-          await document.fonts.ready;
+          await Promise.race([
+            document.fonts.ready,
+            new Promise((r) => setTimeout(r, 2000))
+          ]);
         }
         textCacheKey = '';
 
@@ -2768,11 +3030,22 @@
 
         if (supportsFastMP4) {
           try {
-            result = await exportWithWebCodecs();
-          } catch (err) {
-            console.warn('고속 인코딩 실패, 안전 모드로 전환:', err);
+            // 1차 시도: 기본(하드웨어 가속 우선) 고속 MP4 인코딩
+            result = await exportWithWebCodecs(false);
+          } catch (hwErr) {
+            console.warn('1차 고속 인코딩 실패, 소프트웨어 인코더로 재시도:', hwErr);
             if (!exportCancelled) {
-              result = await exportWithMediaRecorderFallback();
+              try {
+                // 2차 시도: 소프트웨어 인코더로 고속 MP4 재시도 (삼성/안드로이드 기종별 HW 버그 우회)
+                setSavingProgress(0, '안정 모드로 다시 만들고 있어요...');
+                result = await exportWithWebCodecs(true);
+              } catch (swErr) {
+                console.warn('2차 소프트웨어 인코딩 실패, 안전 녹화 모드로 전환:', swErr);
+                if (!exportCancelled) {
+                  setSavingProgress(0, '안전 모드로 저장하고 있어요...');
+                  result = await exportWithMediaRecorderFallback();
+                }
+              }
             }
           }
         } else {
@@ -2790,7 +3063,8 @@
           lastExportUrl = URL.createObjectURL(result.blob);
 
           completeVideo.src = lastExportUrl;
-          triggerDownload(result.blob, lastExportFileName);
+          completeVideo.load();
+          triggerDownload(lastExportUrl, lastExportFileName);
           showView('complete');
         } else if (exportCancelled) {
           showView('preview');
@@ -2799,9 +3073,18 @@
       } catch (err) {
         console.error('영상 추출 오류:', err);
         showView('preview');
-        showToast('영상 저장 중 오류가 났어요. 다시 눌러주세요.', '⚠️');
+        const isInApp = /KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line/i.test(navigator.userAgent);
+        showToast(
+          isInApp
+            ? "카카오톡/인앱에서는 저장이 막힐 수 있어요. 오른쪽 위 ⋮ 눌러 '다른 브라우저로 열기'를 해주세요!"
+            : '영상 저장 중 오류가 났어요. 다시 한 번 눌러주세요.',
+          '⚠️'
+        );
       } finally {
         isExporting = false;
+        if (wakeLock) {
+          try { await wakeLock.release(); } catch (_) {}
+        }
       }
     }
 
@@ -2828,7 +3111,7 @@
         if (err && err.name === 'AbortError') return;
         console.warn('공유 실패:', err);
       }
-      triggerDownload(lastExportBlob, lastExportFileName);
+      if (lastExportUrl) triggerDownload(lastExportUrl, lastExportFileName);
       showToast('저장된 영상을 카톡이나 문자에서 첨부해 보내주세요!', '💬');
     });
 
@@ -2846,6 +3129,13 @@
     closeInAppBanner.addEventListener('click', () => {
       inAppBanner.classList.add('hidden');
       inAppBanner.classList.remove('flex');
+    });
+
+    // 스마트폰에서 홈 화면 전환·전화 수신 시 배경 음악 즉시 정지
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && !isExporting) {
+        stopLiveAudio();
+      }
     });
 
     // ===== 초기화 및 시작 =====
