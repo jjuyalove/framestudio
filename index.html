@@ -1,0 +1,2567 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>프레임 공방 - 내 사진으로 만드는 쉬운 영상</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 초고속 브라우저 내 MP4 바로 생성 라이브러리 -->
+  <script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/build/mp4-muxer.min.js"></script>
+  <style>
+    /* 부산 단디 명조체 (눈누 공식 CDN) */
+    @font-face {
+      font-family: 'BusanDandiMyeongjo';
+      src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/2610132210@l-2/l/부산단디명조M.woff2') format('woff2');
+      font-weight: 500;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'BusanDandiMyeongjo';
+      src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/2610132210@l-2/l/부산단디명조B.woff2') format('woff2');
+      font-weight: 700;
+      font-display: swap;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #ECEEF2;
+      color: #3A3D42;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior: none;
+      user-select: none;
+    }
+
+    .font-dandi {
+      font-family: 'BusanDandiMyeongjo', 'Noto Serif KR', 'Batang', serif;
+    }
+
+    /* 스마트폰 9:16 메인 프레임 (PC에서는 중앙에 스마트폰 비율로 표시) */
+    .phone-stage {
+      width: 100%;
+      height: 100dvh;
+      max-width: 480px;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+      background-color: #F4F5F7;
+      box-shadow: 0 18px 60px rgba(15, 23, 42, 0.18);
+    }
+
+    /* Bean 스타일 손그림 노란 밑줄 */
+    .bean-underline {
+      position: relative;
+      display: inline-block;
+      z-index: 1;
+    }
+    .bean-underline::after {
+      content: '';
+      position: absolute;
+      left: -4px;
+      right: -4px;
+      bottom: 1px;
+      height: 8px;
+      background: #FBC246;
+      border-radius: 999px;
+      z-index: -1;
+      transform: rotate(-1.2deg);
+    }
+
+    /* 상단 Bean 플로팅 헤더 카드 */
+    .bean-header-pill {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1.5px solid rgba(255, 255, 255, 0.98);
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+    }
+
+    /* 첫 화면 4개 플로팅 타일 카드 (4개 모두 동일한 따뜻한 배경 + 노란 테두리 통일) */
+    .floating-card {
+      background: rgba(255, 253, 246, 0.96);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 2.5px solid #FBC246;
+      box-shadow: 0 10px 26px rgba(245, 158, 11, 0.18), 0 2px 6px rgba(15, 23, 42, 0.06);
+      transition: transform 0.14s ease, background-color 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease;
+    }
+    .floating-card:active {
+      transform: scale(0.96);
+    }
+    .floating-card.has-value {
+      background: rgba(255, 253, 246, 0.98);
+      border-color: #FBC246;
+      box-shadow: 0 10px 26px rgba(245, 158, 11, 0.24), 0 2px 6px rgba(15, 23, 42, 0.06);
+    }
+
+    /* 서브 페이지 선택 버튼 (Bean 화이트 카드 스타일) */
+    .select-chip {
+      transition: all 0.15s ease;
+      border: 2.5px solid transparent;
+      background: #FFFFFF;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+    }
+    .select-chip.selected {
+      background: #FFFBEB;
+      border-color: #FBC246;
+      color: #92400E;
+      box-shadow: 0 6px 18px rgba(251, 194, 70, 0.28);
+    }
+
+    /* Bean 캐릭터 부드러운 둥실 모션 */
+    @keyframes beanFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+    }
+    .animate-bean-float {
+      animation: beanFloat 2.4s ease-in-out infinite;
+    }
+
+    /* 부드러운 스크롤 */
+    .smooth-scroll {
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* 갤러리 썸네일 드래그 정렬 스타일 */
+    .gallery-thumb {
+      touch-action: none;
+      transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
+    }
+    .gallery-thumb.is-dragging {
+      opacity: 0.35;
+      transform: scale(0.95);
+    }
+    .gallery-thumb.is-drag-over {
+      box-shadow: 0 0 0 4px #F59E0B;
+      transform: scale(1.03);
+    }
+
+    /* 추천 문구 원터치 카드 */
+    .preset-choice-card {
+      background: #FFFFFF;
+      border: 2.5px solid #E5E7EB;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+      transition: transform 0.14s ease, border-color 0.14s ease, background-color 0.14s ease;
+    }
+    .preset-choice-card:active {
+      transform: scale(0.98);
+      border-color: #F59E0B;
+      background: #FFFBEB;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 공용 복슬복슬 폼폼 캐릭터 5종 SVG 심볼 (display:none 금지 -> 색상/그라데이션 정상 렌더링 보장) -->
+  <svg width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden;pointer-events:none;" aria-hidden="true">
+    <defs>
+      <!-- 복슬복슬 폼폼 질감 필터 -->
+      <filter id="pom-fuzz" x="-20%" y="-20%" width="140%" height="140%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.24" numOctaves="2" seed="7" result="noise"/>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="4.6" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+
+      <!-- 노랑 (타이틀/저장) -->
+      <radialGradient id="grad-pom-yellow" cx="42%" cy="38%" r="62%">
+        <stop offset="0%" stop-color="#FDE047"/>
+        <stop offset="72%" stop-color="#FACC15"/>
+        <stop offset="100%" stop-color="#F59E0B"/>
+      </radialGradient>
+      <!-- 주황 (1. 갤러리) -->
+      <radialGradient id="grad-pom-orange" cx="42%" cy="38%" r="62%">
+        <stop offset="0%" stop-color="#FDBA74"/>
+        <stop offset="72%" stop-color="#FB923C"/>
+        <stop offset="100%" stop-color="#F97316"/>
+      </radialGradient>
+      <!-- 핑크 (2. 문구) -->
+      <radialGradient id="grad-pom-pink" cx="42%" cy="38%" r="62%">
+        <stop offset="0%" stop-color="#FBCFE8"/>
+        <stop offset="70%" stop-color="#FDA4AF"/>
+        <stop offset="100%" stop-color="#FB7185"/>
+      </radialGradient>
+      <!-- 파랑 (3. 음악) -->
+      <radialGradient id="grad-pom-blue" cx="42%" cy="38%" r="62%">
+        <stop offset="0%" stop-color="#93C5FD"/>
+        <stop offset="72%" stop-color="#60A5FA"/>
+        <stop offset="100%" stop-color="#3B82F6"/>
+      </radialGradient>
+      <!-- 초록 (4. 효과) -->
+      <radialGradient id="grad-pom-green" cx="42%" cy="38%" r="62%">
+        <stop offset="0%" stop-color="#BEF264"/>
+        <stop offset="72%" stop-color="#84CC16"/>
+        <stop offset="100%" stop-color="#65A30D"/>
+      </radialGradient>
+
+      <!-- 0. 노란 슬레이트 캐릭터 (상단 타이틀 & 저장 화면용) -->
+      <symbol id="char-clapper" viewBox="0 0 120 120">
+        <!-- 바닥 그림자 -->
+        <ellipse cx="56" cy="108" rx="28" ry="6" fill="#E2E8F0"/>
+        <!-- 다리 -->
+        <path d="M46 90 Q46 102 38 104" stroke="#3F342F" stroke-width="4" stroke-linecap="round" fill="none"/>
+        <path d="M66 90 Q66 102 74 104" stroke="#3F342F" stroke-width="4" stroke-linecap="round" fill="none"/>
+        <!-- 반짝 선 -->
+        <path d="M18 28 L27 32 M25 18 L32 25 M36 13 L39 22" stroke="#F59E0B" stroke-width="3.6" stroke-linecap="round"/>
+        <!-- 왼팔 -->
+        <path d="M28 68 Q16 64 15 52" stroke="#3F342F" stroke-width="3.8" stroke-linecap="round" fill="none"/>
+        <circle cx="15" cy="51" r="4.5" fill="#3F342F"/>
+        <!-- 노란 복슬 몸통 (단색 베이스 + 복슬 외곽) -->
+        <circle cx="56" cy="60" r="32" fill="#FACC15" opacity="0.45" filter="url(#pom-fuzz)"/>
+        <circle cx="56" cy="60" r="30.5" fill="url(#grad-pom-yellow)" filter="url(#pom-fuzz)"/>
+        <!-- 표정 (윙크 + 웃음) -->
+        <circle cx="48" cy="55" r="3.6" fill="#3F342F"/>
+        <path d="M68 51 L61 54.5 L68 58" stroke="#3F342F" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M51 63 Q57 62 63 63 C62 72, 52 72, 51 63 Z" fill="#3F342F"/>
+        <path d="M53.5 68.5 Q57 66 60.5 68.5 Q57 71.5 53.5 68.5 Z" fill="#EF6C66"/>
+        <!-- 슬레이트(클래퍼보드) -->
+        <g transform="translate(68, 52)">
+          <rect x="0" y="13" width="34" height="24" rx="4" fill="#3F342F"/>
+          <polygon points="14,19 14,31 24,25" fill="#FFFFFF"/>
+          <g transform="rotate(-16 2 13)">
+            <rect x="0" y="4" width="34" height="9" rx="2.5" fill="#3F342F"/>
+            <path d="M6 4 L11 13 M15 4 L20 13 M24 4 L29 13" stroke="#FFFFFF" stroke-width="3.2"/>
+          </g>
+        </g>
+        <!-- 오른손 -->
+        <circle cx="76" cy="88" r="4.5" fill="#3F342F"/>
+      </symbol>
+
+      <!-- 1. 주황 카메라 캐릭터 (1. 갤러리) -->
+      <symbol id="char-gallery" viewBox="0 0 120 120">
+        <ellipse cx="56" cy="108" rx="28" ry="6" fill="#E2E8F0"/>
+        <path d="M46 90 Q46 102 38 104" stroke="#3F342F" stroke-width="4" stroke-linecap="round" fill="none"/>
+        <path d="M66 90 Q66 102 74 104" stroke="#3F342F" stroke-width="4" stroke-linecap="round" fill="none"/>
+        <!-- 반짝 선 -->
+        <path d="M84 19 L89 12 M90 27 L98 22 M93 36 L102 34" stroke="#F59E0B" stroke-width="3.6" stroke-linecap="round"/>
+        <!-- 주황 복슬 몸통 -->
+        <circle cx="55" cy="60" r="32" fill="#FB923C" opacity="0.45" filter="url(#pom-fuzz)"/>
+        <circle cx="55" cy="60" r="30.5" fill="url(#grad-pom-orange)" filter="url(#pom-fuzz)"/>
+        <!-- 표정 -->
+        <circle cx="48" cy="54" r="3.6" fill="#3F342F"/>
+        <circle cx="65" cy="52" r="3.6" fill="#3F342F"/>
+        <path d="M53 60 Q58.5 59 64 60 C63 69, 54 69, 53 60 Z" fill="#3F342F"/>
+        <path d="M55.5 65.5 Q58.5 63.5 61.5 65.5 Q58.5 68 55.5 65.5 Z" fill="#EF6C66"/>
+        <!-- 카메라 -->
+        <g transform="translate(61, 61) rotate(-5)">
+          <rect x="0" y="6" width="38" height="27" rx="6" fill="#3F342F"/>
+          <path d="M10 6 L14 1 H24 L28 6 Z" fill="#3F342F"/>
+          <circle cx="20" cy="19.5" r="9.5" fill="#FFFFFF"/>
+          <circle cx="20" cy="19.5" r="6.5" fill="#60A5FA"/>
+          <circle cx="17.5" cy="17" r="2" fill="#FFFFFF"/>
+          <circle cx="31" cy="12" r="2.2" fill="#FFFFFF"/>
+        </g>
+        <!-- 양팔 -->
+        <path d="M40 76 Q48 83 59 80" stroke="#3F342F" stroke-width="3.8" stroke-linecap="round" fill="none"/>
+        <circle cx="60" cy="80" r="4.5" fill="#3F342F"/>
+        <circle cx="98" cy="76" r="4.2" fill="#3F342F"/>
+      </symbol>
+
+      <!-- 2. 핑크 하트 캐릭터 (2. 문구) -->
+      <symbol id="char-text" viewBox="0 0 120 120">
+        <ellipse cx="56" cy="108" rx="28" ry="6" fill="#E2E8F0"/>
+        <path d="M46 90 Q46 102 38 104" stroke="#3F342F" stroke-width="4" stroke-linecap="round" fill="none"/>
+        <path d="M66 90 Q66 102 74 104" stroke="#3F342F" stroke-width="4" stroke-linecap="round" fill="none"/>
+        <!-- 떠다니는 하트 2개 -->
+        <path d="M84 31 C84 31, 72 22, 72 15 C72 11.2, 75 8.5, 78.5 8.5 C81 8.5, 83 10, 84 12 C85 10, 87 8.5, 89.5 8.5 C93 8.5, 96 11.2, 96 15 C96 22, 84 31, 84 31 Z" fill="#FB7185" stroke="#E11D48" stroke-width="1.5"/>
+        <path d="M97 44 C97 44, 89.5 38.5, 89.5 34 C89.5 31.6, 91.4 30, 93.6 30 C95.2 30, 96.4 31, 97 32.2 C97.6 31, 98.8 30, 100.4 30 C102.6 30, 104.5 31.6, 104.5 34 C104.5 38.5, 97 44, 97 44 Z" fill="#F43F5E"/>
+        <!-- 양팔 만세 -->
+        <path d="M30 70 Q18 68 16 58" stroke="#3F342F" stroke-width="3.8" stroke-linecap="round" fill="none"/>
+        <circle cx="16" cy="57" r="4.5" fill="#3F342F"/>
+        <path d="M82 68 Q94 64 96 52" stroke="#3F342F" stroke-width="3.8" stroke-linecap="round" fill="none"/>
+        <circle cx="96" cy="51" r="4.5" fill="#3F342F"/>
+        <!-- 핑크 복슬 몸통 -->
+        <circle cx="56" cy="60" r="32" fill="#FDA4AF" opacity="0.45" filter="url(#pom-fuzz)"/>
+        <circle cx="56" cy="60" r="30.5" fill="url(#grad-pom-pink)" filter="url(#pom-fuzz)"/>
+        <!-- 행복한 눈웃음 -->
+        <path d="M40 54 Q46 46 52 54" stroke="#3F342F" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+        <path d="M62 52 Q68 44 74 52" stroke="#3F342F" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+        <path d="M51 60 Q58 59 65 60 C64 71, 52 71, 51 60 Z" fill="#3F342F"/>
+        <path d="M54 66.5 Q58 63.5 62 66.5 Q58 70 54 66.5 Z" fill="#F472B6"/>
+      </symbol>
+
+      <!-- 3. 파란 헤드폰 캐릭터 (3. 음악) -->
+      <symbol id="char-music" viewBox="0 0 120 120">
+        <ellipse cx="56" cy="108" rx="28" ry="6" fill="#E2E8F0"/>
+        <path d="M46 90 Q46 102 38 104" stroke="#3F342F" stroke-width="4" stroke-linecap="round" fill="none"/>
+        <path d="M66 90 Q66 102 74 104" stroke="#3F342F" stroke-width="4" stroke-linecap="round" fill="none"/>
+        <!-- 음표 -->
+        <path d="M92 31 V16 L106 13 V27" stroke="#3F342F" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <circle cx="89" cy="31" r="3.6" fill="#3F342F"/>
+        <circle cx="103" cy="27" r="3.6" fill="#3F342F"/>
+        <path d="M106 46 V34 L112 37" stroke="#3F342F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <circle cx="103.5" cy="46" r="3.2" fill="#3F342F"/>
+        <!-- 헤드폰 밴드 -->
+        <path d="M24 58 C24 22, 88 22, 88 58" stroke="#3F342F" stroke-width="5" stroke-linecap="round" fill="none"/>
+        <!-- 파란 복슬 몸통 -->
+        <circle cx="56" cy="62" r="31" fill="#60A5FA" opacity="0.45" filter="url(#pom-fuzz)"/>
+        <circle cx="56" cy="62" r="29.5" fill="url(#grad-pom-blue)" filter="url(#pom-fuzz)"/>
+        <!-- 헤드폰 이어컵 -->
+        <ellipse cx="24" cy="61" rx="7" ry="13" transform="rotate(-8 24 61)" fill="#3F342F"/>
+        <ellipse cx="27" cy="61" rx="3.5" ry="10" transform="rotate(-8 27 61)" fill="#FFFFFF"/>
+        <ellipse cx="88" cy="61" rx="7" ry="13" transform="rotate(8 88 61)" fill="#3F342F"/>
+        <ellipse cx="85" cy="61" rx="3.5" ry="10" transform="rotate(8 85 61)" fill="#FFFFFF"/>
+        <!-- 평온하게 감은 눈과 미소 -->
+        <path d="M42 58 Q46 64 50 58" stroke="#3F342F" stroke-width="3.4" stroke-linecap="round" fill="none"/>
+        <path d="M62 58 Q66 64 70 58" stroke="#3F342F" stroke-width="3.4" stroke-linecap="round" fill="none"/>
+        <path d="M51 67 Q56 73 61 67" stroke="#3F342F" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+        <!-- 양팔 -->
+        <path d="M27 77 Q26 86 35 86" stroke="#3F342F" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+        <path d="M85 77 Q86 86 77 86" stroke="#3F342F" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+      </symbol>
+
+      <!-- 4. 초록 반짝이 캐릭터 (4. 효과) -->
+      <symbol id="char-effect" viewBox="0 0 120 120">
+        <ellipse cx="56" cy="108" rx="28" ry="6" fill="#E2E8F0"/>
+        <path d="M46 90 Q46 102 38 104" stroke="#3F342F" stroke-width="4" stroke-linecap="round" fill="none"/>
+        <path d="M66 90 Q66 102 74 104" stroke="#3F342F" stroke-width="4" stroke-linecap="round" fill="none"/>
+        <!-- 반짝이 별빛 3개 -->
+        <path d="M90 14 L93 22 L101 25 L93 28 L90 36 L87 28 L79 25 L87 22 Z" fill="#FDE047" stroke="#F59E0B" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M101 35 L103 40 L108 42 L103 44 L101 49 L99 44 L94 42 L99 40 Z" fill="#FDE047" stroke="#F59E0B" stroke-width="1.4" stroke-linejoin="round"/>
+        <path d="M23 20 L25 26 L31 28 L25 30 L23 36 L21 30 L15 28 L21 26 Z" fill="#7DD3FC" stroke="#0284C7" stroke-width="1.4" stroke-linejoin="round"/>
+        <!-- 양팔 -->
+        <path d="M30 70 Q18 66 17 55" stroke="#3F342F" stroke-width="3.8" stroke-linecap="round" fill="none"/>
+        <circle cx="17" cy="54" r="4.5" fill="#3F342F"/>
+        <path d="M82 70 Q94 66 95 55" stroke="#3F342F" stroke-width="3.8" stroke-linecap="round" fill="none"/>
+        <circle cx="95" cy="54" r="4.5" fill="#3F342F"/>
+        <!-- 초록 복슬 몸통 -->
+        <circle cx="56" cy="60" r="32" fill="#84CC16" opacity="0.45" filter="url(#pom-fuzz)"/>
+        <circle cx="56" cy="60" r="30.5" fill="url(#grad-pom-green)" filter="url(#pom-fuzz)"/>
+        <!-- 표정 -->
+        <circle cx="46" cy="54" r="3.6" fill="#3F342F"/>
+        <circle cx="66" cy="54" r="3.6" fill="#3F342F"/>
+        <ellipse cx="38" cy="61" rx="3.8" ry="2.2" fill="#FB7185" opacity="0.55"/>
+        <ellipse cx="74" cy="61" rx="3.8" ry="2.2" fill="#FB7185" opacity="0.55"/>
+        <path d="M50 61 Q56 60 62 61 C61 71, 51 71, 50 61 Z" fill="#3F342F"/>
+        <path d="M52.5 67 Q56 64.5 59.5 67 Q56 70 52.5 67 Z" fill="#EF6C66"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- 상단 토스트 알림 (alert 미사용) -->
+  <div id="toastBox" class="fixed top-4 left-1/2 -translate-x-1/2 z-[70] hidden items-center gap-2 bg-[#3A3D42]/95 text-white text-base font-extrabold px-5 py-3 rounded-2xl shadow-2xl max-w-[90vw] backdrop-blur-md">
+    <span id="toastIcon" class="text-xl">✨</span>
+    <span id="toastMessage">안내</span>
+  </div>
+
+  <!-- 스마트폰 기준 메인 무대 -->
+  <div class="phone-stage">
+
+    <!-- 공용 실시간 9:16 캔버스 (고해상도 720x1280) -->
+    <canvas id="sceneCanvas" width="720" height="1280"
+      class="absolute inset-0 w-full h-full object-cover block z-0"></canvas>
+
+    <!-- 숨겨진 파일 선택기 (갤러리 다중 사진 / 내 음악) -->
+    <input type="file" id="galleryInput" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/*" multiple class="hidden" />
+    <input type="file" id="customAudioInput" accept="audio/*" class="hidden" />
+
+    <!-- =========================================================
+         화면 1: 첫 화면 (뒤에 미리보기 재생 + 4개 화이트 카드 + 미리보기 버튼)
+         ========================================================= -->
+    <div id="view-home" class="relative z-10 w-full h-full flex flex-col justify-between p-4 sm:p-5 bg-gradient-to-b from-black/15 via-transparent to-black/30">
+
+      <!-- 상단 인앱 브라우저 안내 + Bean 스타일 타이틀 배너 -->
+      <div class="space-y-2.5">
+        <div id="inAppBanner" class="hidden bg-[#F59E0B] text-white text-xs font-extrabold px-3.5 py-2 rounded-2xl items-center justify-between gap-2 shadow-md">
+          <span>저장이 안 되면 ⋮ 눌러 '다른 브라우저로 열기'</span>
+          <button type="button" id="closeInAppBanner" class="bg-black/20 px-2.5 py-0.5 rounded-lg shrink-0">닫기</button>
+        </div>
+
+        <div class="bean-header-pill relative rounded-3xl px-4 py-3.5 flex items-center justify-center">
+          <div class="flex items-center justify-center gap-3 min-w-0">
+            <svg class="w-[72px] h-[72px] sm:w-20 sm:h-20 shrink-0" aria-hidden="true"><use href="#char-clapper" /></svg>
+            <div class="min-w-0 text-center">
+              <p class="text-xs sm:text-sm font-extrabold text-slate-500 leading-tight mb-0.5 truncate">디강이와 함께하는 쉬운 영상 만들기</p>
+              <h1 class="text-[28px] sm:text-[32px] font-black text-[#3A3D42] leading-tight tracking-tight truncate">
+                <span class="bean-underline">프레임</span> 공방
+              </h1>
+              <p class="text-[11px] sm:text-xs font-black text-amber-600/90 tracking-[0.22em] mt-0.5 truncate">F R A M E　S T U D I O</p>
+            </div>
+          </div>
+
+          <!-- 음악 소리 켜기/끄기 버튼 (음악 적용 시 우측 상단 표시) -->
+          <button type="button" id="btnToggleHomeSound"
+            class="hidden absolute top-2.5 right-2.5 items-center gap-1 px-2.5 py-1.5 rounded-2xl bg-[#FFF8E1] text-[#B45309] border border-[#FDE68A] active:scale-95 text-xs font-black transition shadow-sm"
+            aria-label="음악 소리 끄기 또는 켜기">
+            <span id="homeSoundIcon" class="text-sm">🔊</span>
+            <span id="homeSoundLabel">켜짐</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 중앙~하단: Bean 화이트 2x2 카드 그리드 + 하단 큰 미리보기 버튼 -->
+      <div class="space-y-3 pb-0.5">
+        <div class="grid grid-cols-2 gap-3">
+          <!-- 1. 갤러리 -->
+          <button type="button" id="btnOpenGallery"
+            class="floating-card rounded-[26px] py-3.5 px-2.5 flex flex-col items-center justify-center gap-1.5 text-center">
+            <svg class="w-20 h-20 sm:w-[88px] sm:h-[88px]" aria-hidden="true"><use href="#char-gallery" /></svg>
+            <span class="text-[25px] sm:text-[28px] font-black text-[#3A3D42] leading-tight tracking-tight">1. 갤러리</span>
+            <span id="badgeGallery" class="text-sm font-extrabold text-[#3B82F6] bg-[#EFF6FF] px-3 py-0.5 rounded-full">사진 선택</span>
+          </button>
+
+          <!-- 2. 문구 -->
+          <button type="button" id="btnOpenText"
+            class="floating-card rounded-[26px] py-3.5 px-2.5 flex flex-col items-center justify-center gap-1.5 text-center">
+            <svg class="w-20 h-20 sm:w-[88px] sm:h-[88px]" aria-hidden="true"><use href="#char-text" /></svg>
+            <span class="text-[25px] sm:text-[28px] font-black text-[#3A3D42] leading-tight tracking-tight">2. 문구</span>
+            <span id="badgeText" class="text-sm font-extrabold text-[#E11D48] bg-[#FFF1F2] px-3 py-0.5 rounded-full">글 없음</span>
+          </button>
+
+          <!-- 3. 음악 -->
+          <button type="button" id="btnOpenMusic"
+            class="floating-card rounded-[26px] py-3.5 px-2.5 flex flex-col items-center justify-center gap-1.5 text-center">
+            <svg class="w-20 h-20 sm:w-[88px] sm:h-[88px]" aria-hidden="true"><use href="#char-music" /></svg>
+            <span class="text-[25px] sm:text-[28px] font-black text-[#3A3D42] leading-tight tracking-tight">3. 음악</span>
+            <span id="badgeMusic" class="text-sm font-extrabold text-[#B45309] bg-[#FFFBEB] px-3 py-0.5 rounded-full">음악 없음</span>
+          </button>
+
+          <!-- 4. 효과 -->
+          <button type="button" id="btnOpenEffect"
+            class="floating-card rounded-[26px] py-3.5 px-2.5 flex flex-col items-center justify-center gap-1.5 text-center">
+            <svg class="w-20 h-20 sm:w-[88px] sm:h-[88px]" aria-hidden="true"><use href="#char-effect" /></svg>
+            <span class="text-[25px] sm:text-[28px] font-black text-[#3A3D42] leading-tight tracking-tight">4. 효과</span>
+            <span id="badgeEffect" class="text-sm font-extrabold text-[#047857] bg-[#ECFDF5] px-3 py-0.5 rounded-full">눈·반짝이</span>
+          </button>
+        </div>
+
+        <!-- 하단 큰 미리보기 버튼 -->
+        <button type="button" id="btnOpenPreview"
+          class="w-full py-4 px-5 rounded-[26px] bg-gradient-to-r from-[#FBC246] via-[#F59E0B] to-[#F97316] active:scale-[0.98] text-white text-[26px] font-black shadow-xl shadow-amber-600/30 border-2 border-white/80 flex items-center justify-center gap-2.5 transition">
+          <span>▶️</span>
+          <span>미리보기</span>
+        </button>
+
+        <!-- 하단 브랜드 문구 & 제작자 표기 -->
+        <div class="text-center pt-0.5 space-y-0.5 select-none">
+          <p class="text-sm sm:text-base font-extrabold text-white/95 drop-shadow-[0_1px_4px_rgba(0,0,0,0.65)]">
+            사진으로 나만의 영상 한 편
+          </p>
+          <p class="text-xs font-bold text-amber-200/95 tracking-wide drop-shadow-[0_1px_4px_rgba(0,0,0,0.65)]">
+            디강쭈야 제작
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         화면 1-2: 선택한 사진 확인 / 삭제(X) / 드래그 순서 변경 페이지
+         ========================================================= -->
+    <div id="view-gallery" class="hidden absolute inset-0 z-20 bg-[#F4F5F7] flex-col h-full">
+      <header class="shrink-0 bg-white px-4 py-3.5 border-b border-slate-200/70 flex items-center justify-between">
+        <button type="button" id="btnGalleryBack" class="px-3.5 py-2 rounded-2xl bg-[#F4F5F7] text-[#3A3D42] text-base font-black">
+          ◀ 뒤로
+        </button>
+        <h2 class="text-2xl font-black text-[#3A3D42]"><span class="bean-underline">1. 갤러리</span></h2>
+        <span id="galleryCountLabel" class="px-3 py-1.5 rounded-2xl bg-[#FFF8E1] text-[#B45309] text-sm font-black">0장</span>
+      </header>
+
+      <div class="smooth-scroll flex-1 min-h-0 overflow-y-auto p-4 space-y-3">
+        <!-- 주황 카메라 캐릭터 안내 배너 -->
+        <div class="bg-white rounded-3xl px-4 py-3 shadow-sm border border-slate-100 flex items-center gap-3">
+          <svg class="w-16 h-16 shrink-0" aria-hidden="true"><use href="#char-gallery" /></svg>
+          <div class="text-left space-y-0.5">
+            <p class="text-base font-black text-[#3A3D42] leading-snug">
+              사진을 <span class="text-[#F59E0B]">꾹 눌러 옮기면</span> 순서가 바뀌어요!
+            </p>
+            <p class="text-xs font-bold text-slate-400">
+              오른쪽 위 ✕를 누르면 사진을 지울 수 있어요
+            </p>
+          </div>
+        </div>
+
+        <!-- 선택된 사진 썸네일 그리드 -->
+        <div id="galleryGrid" class="grid grid-cols-3 gap-3 pb-2"></div>
+
+        <!-- 사진이 모두 삭제되었을 때 안내 -->
+        <div id="galleryEmptyNotice" class="hidden bg-white rounded-3xl p-8 text-center space-y-2 shadow-sm">
+          <p class="text-3xl">🖼️</p>
+          <p class="text-base font-black text-[#3A3D42]">선택된 사진이 없어요</p>
+          <p class="text-sm font-bold text-slate-400">아래 '사진 추가하기'를 눌러 골라주세요</p>
+        </div>
+      </div>
+
+      <!-- 하단 사진 추가하기 + 확인 버튼 -->
+      <footer class="shrink-0 p-4 bg-white border-t border-slate-200/70 grid grid-cols-2 gap-3">
+        <button type="button" id="btnGalleryRepick"
+          class="py-4 px-3 rounded-3xl bg-[#EFF6FF] border-2 border-[#BFDBFE] active:scale-[0.98] text-[#1D4ED8] text-lg font-black">
+          ➕ 사진 추가하기
+        </button>
+        <button type="button" id="btnGalleryConfirm"
+          class="py-4 px-3 rounded-3xl bg-gradient-to-r from-[#FBC246] to-[#F59E0B] active:scale-[0.98] text-white text-xl font-black shadow-lg shadow-amber-500/25">
+          확인
+        </button>
+      </footer>
+    </div>
+
+    <!-- =========================================================
+         화면 2: 문구 선택 페이지
+         ========================================================= -->
+    <div id="view-text" class="hidden absolute inset-0 z-20 bg-[#F4F5F7] flex-col h-full">
+      <header class="shrink-0 bg-white px-4 py-3.5 border-b border-slate-200/70 flex items-center justify-between">
+        <button type="button" id="btnTextBack" class="px-3.5 py-2 rounded-2xl bg-[#F4F5F7] text-[#3A3D42] text-base font-black">
+          ◀ 뒤로
+        </button>
+        <h2 class="text-2xl font-black text-[#3A3D42]"><span class="bean-underline">2. 문구</span></h2>
+        <button type="button" id="btnTextClear" class="px-3.5 py-2 rounded-2xl bg-[#FFF1F2] text-[#E11D48] text-sm font-black">
+          글 지우기
+        </button>
+      </header>
+
+      <div class="smooth-scroll flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
+        <!-- 핑크 하트 캐릭터 안내 배너 -->
+        <div class="bg-white rounded-3xl px-4 py-3 shadow-sm border border-slate-100 flex items-center gap-3">
+          <svg class="w-16 h-16 shrink-0" aria-hidden="true"><use href="#char-text" /></svg>
+          <div class="text-left space-y-0.5">
+            <p class="text-base font-black text-[#3A3D42] leading-snug">
+              마음에 드는 <span class="text-[#E11D48]">안부 문구</span>를 골라보세요!
+            </p>
+            <p class="text-xs font-bold text-slate-400">
+              주제를 눌러 문구를 터치하면 바로 적용돼요
+            </p>
+          </div>
+        </div>
+
+        <!-- 상단 가운데: 직접쓰기 버튼 -->
+        <div class="flex justify-center">
+          <button type="button" data-preset="custom"
+            class="text-preset-btn select-chip w-full max-w-[240px] py-3.5 px-5 rounded-3xl text-lg font-black text-[#3A3D42] flex items-center justify-center gap-2">
+            <span>✏️</span>
+            <span>직접쓰기</span>
+          </button>
+        </div>
+
+        <!-- 아래 6개 버튼 -->
+        <div class="grid grid-cols-3 gap-2.5">
+          <button type="button" data-preset="winter" class="text-preset-btn select-chip py-3.5 px-2 rounded-3xl text-base font-black text-[#3A3D42]">❄️ 겨울</button>
+          <button type="button" data-preset="christmas" class="text-preset-btn select-chip py-3.5 px-2 rounded-3xl text-base font-black text-[#3A3D42]">🎄 성탄절</button>
+          <button type="button" data-preset="greeting" class="text-preset-btn select-chip py-3.5 px-2 rounded-3xl text-base font-black text-[#3A3D42]">💌 안부</button>
+          <button type="button" data-preset="health" class="text-preset-btn select-chip py-3.5 px-2 rounded-3xl text-base font-black text-[#3A3D42]">🍵 건강</button>
+          <button type="button" data-preset="yearend" class="text-preset-btn select-chip py-3.5 px-2 rounded-3xl text-base font-black text-[#3A3D42]">🌟 연말</button>
+          <button type="button" data-preset="newyear" class="text-preset-btn select-chip py-3.5 px-2 rounded-3xl text-base font-black text-[#3A3D42]">🌅 새해</button>
+        </div>
+
+        <!-- 이름 입력 공간 (선택 사항) -->
+        <div class="bg-white p-3.5 rounded-3xl border-2 border-transparent focus-within:border-[#FBC246] space-y-1 shadow-sm">
+          <div class="flex items-center justify-between px-1">
+            <label for="textNameInput" class="text-base font-black text-[#3A3D42]">이름</label>
+            <span class="text-xs font-bold text-slate-400">(안써도 괜찮아요)</span>
+          </div>
+          <input type="text" id="textNameInput"
+            class="w-full px-1 py-1 outline-none text-lg font-dandi text-[#3A3D42] bg-transparent"
+            placeholder="예> 이주영 드림" />
+        </div>
+
+        <!-- 카테고리 선택 시 표시되는 추천 문구 3종 (터치하면 바로 적용) -->
+        <div id="presetChoicesSection" class="hidden space-y-2.5">
+          <div class="flex items-center justify-between px-1">
+            <p id="presetChoicesTitle" class="text-base font-black text-[#3A3D42]">추천 문구 3가지</p>
+            <span class="text-xs font-extrabold text-[#B45309] bg-[#FFF8E1] px-2.5 py-1 rounded-full">누르면 바로 적용</span>
+          </div>
+          <div id="presetChoicesList" class="space-y-3"></div>
+        </div>
+
+        <!-- 직접쓰기 입력 공간 -->
+        <div id="directWriteSection" class="space-y-1.5">
+          <textarea id="textBodyInput" rows="6"
+            class="w-full p-4 rounded-3xl bg-white border-2 border-transparent focus:border-[#FBC246] outline-none text-lg leading-relaxed font-dandi text-[#3A3D42] resize-none shadow-sm"
+            placeholder="위 버튼을 눌러 추천 문구를 고르거나&#10;직접 안부글을 적어주세요.&#10;(비워두면 글자 없이 영상만 나와요)"></textarea>
+        </div>
+      </div>
+
+      <!-- 하단 확인 버튼 -->
+      <footer id="textConfirmFooter" class="shrink-0 p-4 bg-white border-t border-slate-200/70">
+        <button type="button" id="btnTextConfirm"
+          class="w-full py-4 rounded-3xl bg-gradient-to-r from-[#FBC246] to-[#F59E0B] active:scale-[0.98] text-white text-xl font-black shadow-lg shadow-amber-500/25">
+          확인
+        </button>
+      </footer>
+    </div>
+
+    <!-- =========================================================
+         화면 3: 음악 선택 페이지
+         ========================================================= -->
+    <div id="view-music" class="hidden absolute inset-0 z-20 bg-[#F4F5F7] flex-col h-full">
+      <header class="shrink-0 bg-white px-4 py-3.5 border-b border-slate-200/70 flex items-center justify-between">
+        <button type="button" id="btnMusicBack" class="px-3.5 py-2 rounded-2xl bg-[#F4F5F7] text-[#3A3D42] text-base font-black">
+          ◀ 뒤로
+        </button>
+        <h2 class="text-2xl font-black text-[#3A3D42]"><span class="bean-underline">3. 음악</span></h2>
+        <div class="w-14"></div>
+      </header>
+
+      <div class="smooth-scroll flex-1 min-h-0 overflow-y-auto p-4 space-y-3">
+        <!-- 파란 헤드폰 캐릭터 안내 배너 -->
+        <div class="bg-white rounded-3xl px-4 py-3 shadow-sm border border-slate-100 flex items-center gap-3">
+          <svg class="w-16 h-16 shrink-0" aria-hidden="true"><use href="#char-music" /></svg>
+          <div class="text-left space-y-0.5">
+            <p class="text-base font-black text-[#3A3D42] leading-snug">
+              어울리는 <span class="text-[#F59E0B]">음악</span>을 골라보세요!
+            </p>
+            <p class="text-xs font-bold text-slate-400">
+              아래에서 미리듣기 후 확인을 눌러주세요
+            </p>
+          </div>
+        </div>
+
+        <!-- 4곡 기본 음악 -->
+        <div class="grid grid-cols-1 gap-2.5">
+          <button type="button" data-track="0" class="music-track-btn select-chip p-4 rounded-3xl flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="w-10 h-10 rounded-2xl bg-[#EFF6FF] flex items-center justify-center text-xl">🎄</span>
+              <span class="text-lg font-black text-[#3A3D42]">성탄절 캐롤</span>
+            </div>
+            <span class="track-len text-sm font-bold text-slate-400">음악 1</span>
+          </button>
+
+          <button type="button" data-track="1" class="music-track-btn select-chip p-4 rounded-3xl flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="w-10 h-10 rounded-2xl bg-[#FFFBEB] flex items-center justify-center text-xl">☕</span>
+              <span class="text-lg font-black text-[#3A3D42]">따뜻한 겨울</span>
+            </div>
+            <span class="track-len text-sm font-bold text-slate-400">음악 2</span>
+          </button>
+
+          <button type="button" data-track="2" class="music-track-btn select-chip p-4 rounded-3xl flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="w-10 h-10 rounded-2xl bg-[#ECFDF5] flex items-center justify-center text-xl">✈️</span>
+              <span class="text-lg font-black text-[#3A3D42]">즐거운 여행</span>
+            </div>
+            <span class="track-len text-sm font-bold text-slate-400">음악 3</span>
+          </button>
+
+          <button type="button" data-track="3" class="music-track-btn select-chip p-4 rounded-3xl flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="w-10 h-10 rounded-2xl bg-[#FFF1F2] flex items-center justify-center text-xl">🌅</span>
+              <span class="text-lg font-black text-[#3A3D42]">희망찬 새해</span>
+            </div>
+            <span class="track-len text-sm font-bold text-slate-400">음악 4</span>
+          </button>
+        </div>
+
+        <!-- 내 음악 가져오기 -->
+        <button type="button" id="btnPickCustomAudio"
+          class="select-chip w-full p-4 rounded-3xl bg-[#EFF6FF] flex items-center justify-between">
+          <div class="flex items-center gap-3 min-w-0">
+            <span class="w-10 h-10 rounded-2xl bg-white flex items-center justify-center text-xl shrink-0">📂</span>
+            <span id="customAudioName" class="text-lg font-black text-[#1E40AF] truncate">내 음악 가져오기</span>
+          </div>
+          <span id="customAudioLen" class="text-sm font-bold text-[#3B82F6] shrink-0">파일 열기</span>
+        </button>
+
+        <!-- 음악 없음 -->
+        <button type="button" id="btnNoMusic"
+          class="select-chip selected w-full p-4 rounded-3xl flex items-center justify-center gap-2 text-lg font-black text-[#3A3D42]">
+          <span>🔇</span>
+          <span>음악 없음</span>
+        </button>
+
+        <!-- 선택한 음악 미리듣기 -->
+        <button type="button" id="btnPreviewAudio"
+          class="w-full py-3.5 px-4 rounded-3xl bg-[#3A3D42] text-white text-base font-black flex items-center justify-center gap-2 shadow-sm">
+          <span id="previewAudioIcon">🔊</span>
+          <span id="previewAudioLabel">선택한 음악 미리듣기</span>
+        </button>
+      </div>
+
+      <footer class="shrink-0 p-4 bg-white border-t border-slate-200/70">
+        <button type="button" id="btnMusicConfirm"
+          class="w-full py-4 rounded-3xl bg-gradient-to-r from-[#FBC246] to-[#F59E0B] active:scale-[0.98] text-white text-xl font-black shadow-lg shadow-amber-500/25">
+          확인
+        </button>
+      </footer>
+    </div>
+
+    <!-- =========================================================
+         화면 4: 효과 선택 플로팅 패널
+         ========================================================= -->
+    <div id="view-effect" class="hidden absolute inset-0 z-20 flex-col justify-end p-4 bg-black/20">
+      <div class="bg-[#F4F5F7]/95 backdrop-blur-md rounded-[30px] p-5 shadow-2xl space-y-4 border-2 border-white">
+        <div class="bg-white rounded-3xl px-4 py-3 shadow-sm border border-slate-100 flex items-center gap-3">
+          <svg class="w-16 h-16 shrink-0" aria-hidden="true"><use href="#char-effect" /></svg>
+          <div class="text-left space-y-0.5">
+            <h2 class="text-2xl font-black text-[#3A3D42]"><span class="bean-underline">4. 효과</span></h2>
+            <p class="text-xs font-bold text-slate-500">누르면 바로 켜지고, 다시 누르면 꺼져요!</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <button type="button" id="btnToggleSnow"
+            class="select-chip py-5 px-3 rounded-3xl flex flex-col items-center justify-center gap-2">
+            <span class="text-4xl">❄️</span>
+            <span class="text-xl font-black text-[#3A3D42]">눈</span>
+            <span id="snowStateBadge" class="text-sm font-black px-3.5 py-1 rounded-full bg-slate-200 text-slate-600">꺼짐</span>
+          </button>
+
+          <button type="button" id="btnToggleSparkle"
+            class="select-chip py-5 px-3 rounded-3xl flex flex-col items-center justify-center gap-2">
+            <span class="text-4xl">✨</span>
+            <span class="text-xl font-black text-[#3A3D42]">반짝이</span>
+            <span id="sparkleStateBadge" class="text-sm font-black px-3.5 py-1 rounded-full bg-slate-200 text-slate-600">꺼짐</span>
+          </button>
+        </div>
+
+        <button type="button" id="btnEffectConfirm"
+          class="w-full py-4 rounded-3xl bg-gradient-to-r from-[#FBC246] to-[#F59E0B] active:scale-[0.98] text-white text-xl font-black shadow-lg shadow-amber-500/25">
+          확인
+        </button>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         화면 5: 크게 미리보기 페이지 + 아래 [동영상 추출하기 (갤러리 저장)]
+         ========================================================= -->
+    <div id="view-preview" class="hidden absolute inset-0 z-30 flex-col justify-between p-4 bg-gradient-to-b from-black/45 via-transparent to-black/70">
+      <div class="flex items-center justify-between gap-2">
+        <button type="button" id="btnPreviewBack"
+          class="px-4 py-2.5 rounded-2xl bg-white/90 backdrop-blur-md text-[#3A3D42] text-base font-black shadow-md">
+          ◀ 돌아가기
+        </button>
+        <div class="flex items-center gap-2">
+          <button type="button" id="btnTogglePreviewSound"
+            class="hidden items-center gap-1 px-3 py-2 rounded-2xl bg-white/90 backdrop-blur-md text-[#3A3D42] text-sm font-black shadow-md active:scale-95 transition"
+            aria-label="미리보기 음악 소리 끄기 또는 켜기">
+            <span id="previewSoundIcon">🔊</span>
+          </button>
+          <div id="previewTimerBadge" class="px-4 py-2 rounded-2xl bg-[#3A3D42]/80 backdrop-blur-md text-[#FBC246] text-base font-black">
+            00:00 / 00:15
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-2.5 pb-1">
+        <button type="button" id="btnStartExport"
+          class="w-full py-5 px-4 rounded-[26px] bg-gradient-to-r from-[#FBC246] via-[#F59E0B] to-[#F97316] active:scale-[0.98] text-white text-xl sm:text-2xl font-black shadow-2xl border-2 border-white/80 flex items-center justify-center gap-2">
+          <span>📥</span>
+          <span>동영상 추출하기 (갤러리 저장)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         화면 6: 저장 진행 화면
+         ========================================================= -->
+    <div id="view-saving" class="hidden absolute inset-0 z-40 bg-[#F4F5F7] flex-col items-center justify-center p-6 text-center">
+      <div class="w-full max-w-sm bg-white rounded-[32px] p-6 shadow-xl space-y-5">
+        <div class="flex justify-center">
+          <svg class="w-28 h-28 animate-bean-float" aria-hidden="true"><use href="#char-clapper" /></svg>
+        </div>
+
+        <div class="space-y-2.5">
+          <h2 class="text-2xl font-black text-[#3A3D42]"><span class="bean-underline">영상을 저장</span>하고 있어요</h2>
+          <p class="text-base font-extrabold text-[#92400E] leading-snug bg-[#FFFBEB] p-4 rounded-2xl border-2 border-[#FDE68A]">
+            저장이 끝날 때까지<br />이 화면을 닫지 말고<br />잠시만 기다려 주세요!
+          </p>
+        </div>
+
+        <div class="space-y-2">
+          <div id="savingPercentBig" class="text-4xl font-black text-[#F59E0B]">0%</div>
+          <div class="w-full h-5 bg-[#F4F5F7] rounded-full overflow-hidden p-1">
+            <div id="savingBar" class="h-full bg-gradient-to-r from-[#FBC246] to-[#F97316] rounded-full transition-all duration-150" style="width: 0%"></div>
+          </div>
+          <p id="savingDetailText" class="text-sm font-bold text-slate-500">준비하고 있어요...</p>
+        </div>
+
+        <button type="button" id="btnCancelExport"
+          class="w-full py-3.5 rounded-2xl bg-[#F4F5F7] hover:bg-slate-200 text-[#3A3D42] text-lg font-black">
+          취소하기
+        </button>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         화면 7: 저장 완료 화면 (갤러리에 저장되었습니다 -> 공유하기 -> 처음으로)
+         ========================================================= -->
+    <div id="view-complete" class="hidden absolute inset-0 z-50 bg-[#F4F5F7] flex-col p-5 justify-between">
+      <div class="flex items-center justify-center gap-2 pt-1">
+        <svg class="w-12 h-12 shrink-0" aria-hidden="true"><use href="#char-text" /></svg>
+        <h2 class="text-2xl font-black text-[#3A3D42]"><span class="bean-underline">영상 완성!</span></h2>
+      </div>
+
+      <div class="flex-1 min-h-0 my-3.5 flex items-center justify-center bg-slate-950 rounded-[28px] overflow-hidden shadow-lg border-4 border-white">
+        <video id="completeVideo" controls playsinline class="h-full w-auto max-w-full object-contain"></video>
+      </div>
+
+      <div class="space-y-3 shrink-0">
+        <div class="w-full py-3 px-4 rounded-3xl bg-white border-2 border-[#6EE7B7] text-center shadow-sm">
+          <p class="text-xl font-black text-[#047857]">✅ 갤러리에 저장되었습니다.</p>
+        </div>
+
+        <button type="button" id="btnShareVideo"
+          class="w-full py-4 rounded-3xl bg-[#FEE500] active:scale-[0.98] text-[#191919] text-xl font-black shadow-md flex items-center justify-center gap-2">
+          <span>💬</span>
+          <span>공유하기 (카톡·문자)</span>
+        </button>
+
+        <button type="button" id="btnGoHome"
+          class="w-full py-4 rounded-3xl bg-[#3A3D42] active:scale-[0.98] text-white text-xl font-black flex items-center justify-center gap-2">
+          <span>🏠</span>
+          <span>처음으로</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    /**
+     * 프레임 공방 (FRAME STUDIO) - 시니어 친화 모바일 숏폼 만들기 웹앱
+     * - 스마트폰 9:16 한 화면 구성 (첫 화면 배경 = 실시간 미리보기, 4개 플로팅 버튼 + 미리보기 버튼)
+     * - 다중 사진: 1장 고정 / 2장 이상 4초씩 재생 + 1.5초 크로스페이드 전환, 음악 길이만큼 반복, 무조건 채움(Cover)
+     * - 갤러리 관리: 썸네일 X 삭제, 터치/마우스 드래그 순서 변경, 기존 사진 유지하며 추가
+     * - 문구: 부산 단디 명조체, 40pt 기준, 2배 슈퍼샘플링 캐시로 깨짐·떨림 없는 부드러운 상승 애니메이션
+     * - 음악: 기본 4곡 + 내 음악 가져오기 + 음악 없음, 시작/끝 1.5초 페이드인·페이드아웃, 적용 즉시 재생 + 소리 켜기/끄기
+     * - 효과: 눈 / 반짝이 원터치 ON/OFF (천천히, 적당한 양)
+     * - 저장: WebCodecs + mp4-muxer 초고속 MP4 추출 (+ MediaRecorder 자동 폴백), 완료 후 공유 & 처음으로
+     */
+
+    const canvas = document.getElementById('sceneCanvas');
+    const ctx = canvas.getContext('2d', { alpha: false });
+    const WIDTH = canvas.width;   // 720
+    const HEIGHT = canvas.height; // 1280
+    const FPS = 30;
+
+    // ===== 기획서 고정 상수 =====
+    const PHOTO_SLIDE_SEC = 4.0;      // 2장 이상일 때 사진 1장당 재생 길이 (4초)
+    const PHOTO_FADE_SEC = 1.5;       // 사진 전환 페이드 길이 (1.5초)
+    const AUDIO_FADE_SEC = 1.5;       // 음악 시작/끝 페이드 길이 (1.5초)
+    const DEFAULT_NO_AUDIO_SEC = 15;  // 음악 없을 때 기본 영상 길이 (15초)
+
+    const TEXT_FONT_SIZE_PX = 48;     // 720x1280 캔버스 기준 40pt에 해당하는 또렷한 크기
+    const TEXT_START_Y_RATIO = 0.60;  // 화면 5등분 중 아래 2등분 지점 (위에서 60%)
+    const TEXT_SCROLL_SPEED = 42;     // 느리게, 그렇다고 너무 느리지 않은 속도 (px/s)
+
+    const SNOW_COUNT = 55;            // 조금과 보통 사이 (복잡해 보이지 않게)
+    const SPARKLE_COUNT = 26;         // 은은하고 적당한 양
+
+    // 글자 깨짐·떨림 방지를 위한 2배 고해상도 텍스트 캐시 및 페이드 마스크 레이어
+    let textCacheCanvas = null;
+    let textCacheWidth = 0;
+    let textCacheHeight = 0;
+    let textCacheKey = '';
+    const textLayerCanvas = document.createElement('canvas');
+    textLayerCanvas.width = WIDTH;
+    textLayerCanvas.height = HEIGHT;
+    const textLayerCtx = textLayerCanvas.getContext('2d');
+
+    // ===== 6개 주제별 추천 안부 문구 (각 3종, 자연스러운 줄바꿈 적용) =====
+    const TEXT_PRESET_CATEGORIES = {
+      winter: {
+        label: '❄️ 겨울 문구',
+        items: [
+          {
+            title: '포근한 겨울 인사',
+            body: '하얀 눈이 소복이 내리는\n포근한 겨울이 찾아왔습니다.\n\n추운 날씨에 옷 따뜻하게 입으시고\n언제나 평안하고 행복한\n겨울 보내시길 바랍니다.'
+          },
+          {
+            title: '따뜻한 차 한 잔의 여유',
+            body: '찬 바람이 옷깃을 여미게 하는\n겨울날입니다.\n\n따끈한 차 한 잔과 함께\n마음까지 훈훈하게 녹이는\n포근한 하루 보내세요.'
+          },
+          {
+            title: '눈꽃처럼 고운 겨울',
+            body: '새하얀 눈꽃처럼\n당신의 겨울날도 맑고 곱게\n피어나길 바랍니다.\n\n추운 계절이지만 마음만은\n늘 봄날처럼 따뜻하세요.'
+          }
+        ]
+      },
+      christmas: {
+        label: '🎄 성탄절 문구',
+        items: [
+          {
+            title: '트리 불빛처럼 빛나는 성탄',
+            body: '반짝이는 트리 불빛처럼\n당신의 겨울에도 기쁨과 축복이\n가득하시길 바랍니다.\n\n소중한 가족과 함께\n따뜻한 성탄절 보내세요.\n메리 크리스마스!'
+          },
+          {
+            title: '사랑과 평안의 성탄 인사',
+            body: '기쁘고 거룩한 성탄절입니다.\n\n가정에 웃음꽃이 활짝 피고\n사랑과 평안이 넘치는\n행복한 성탄절 되시길\n두 손 모아 기원합니다.'
+          },
+          {
+            title: '행복한 선물 같은 하루',
+            body: '올 한 해 고마웠던 마음을 담아\n따뜻한 성탄 인사 전합니다.\n\n오늘 하루가 선물처럼\n행복하고 포근한 시간 되세요.\n메리 크리스마스!'
+          }
+        ]
+      },
+      greeting: {
+        label: '💌 안부 문구',
+        items: [
+          {
+            title: '문득 떠올라 전하는 안부',
+            body: '문득 안부가 궁금해져\n따뜻한 마음 담아 인사 전합니다.\n\n요즘 잘 지내고 계신가요?\n추운 계절이지만 마음만은\n늘 봄날처럼 포근하시길 바랍니다.'
+          },
+          {
+            title: '반가운 얼굴을 떠올리며',
+            body: '바쁘게 지나가는 일상 속에서\n문득 반가운 얼굴이 떠올랐습니다.\n\n언제나 웃을 일 가득하시고\n조만간 따뜻한 차 한 잔\n함께 나누면 좋겠습니다.'
+          },
+          {
+            title: '오늘도 평안한 하루',
+            body: '잘 지내고 계시지요?\n\n별일 없이 평안하고\n소소한 웃음이 가득한\n오늘 하루가 되시길\n진심으로 응원합니다.'
+          }
+        ]
+      },
+      health: {
+        label: '🍵 건강 문구',
+        items: [
+          {
+            title: '감기 조심·건강 기원',
+            body: '날씨가 부쩍 쌀쌀해졌습니다.\n\n식사 잘 챙겨 드시고\n따끈한 차 한 잔으로\n마음까지 녹이는 하루 되세요.\n\n언제나 건강이 최고입니다.\n감기 조심하세요!'
+          },
+          {
+            title: '늘 활기차고 건강하게',
+            body: '건강보다 소중한 보물은\n세상에 없다고 합니다.\n\n무리하지 마시고 푹 쉬시며\n올겨울도 활기차고 건강하게\n지내시길 기원합니다.'
+          },
+          {
+            title: '따뜻한 옷차림 당부',
+            body: '아침저녁으로 바람이\n제법 차가워졌습니다.\n\n외출하실 때 목도리와 외투\n꼭 따뜻하게 챙겨 입으시고\n늘 건강하고 평안하세요.'
+          }
+        ]
+      },
+      yearend: {
+        label: '🌟 연말 문구',
+        items: [
+          {
+            title: '수고 많으셨던 한 해',
+            body: '올 한 해도 참 수고 많으셨습니다.\n\n함께 웃고 나눈 소중한 시간들\n오래오래 기억하겠습니다.\n\n남은 한 해 따뜻하게 마무리하시고\n행복한 연말 보내세요.'
+          },
+          {
+            title: '감사한 마음을 담아',
+            body: '저물어가는 한 해를 돌아보니\n고마운 일들이 참 많았습니다.\n\n늘 곁에서 힘이 되어 주셔서\n진심으로 감사드립니다.\n\n포근하고 뜻깊은 연말 되세요.'
+          },
+          {
+            title: '아쉬움은 보내고 기쁨만',
+            body: '힘들었던 일들은\n가는 해와 함께 훌훌 털어버리고,\n\n좋은 기억과 감사한 마음만\n가득 남는 따뜻한 연말\n보내시길 바랍니다.'
+          }
+        ]
+      },
+      newyear: {
+        label: '🌅 새해 문구',
+        items: [
+          {
+            title: '희망찬 새해 축복',
+            body: '희망찬 새해가 밝았습니다.\n\n새해에는 소망하시는 모든 일이\n술술 잘 풀리시길 기원합니다.\n\n가정에 웃음과 건강이\n가득한 한 해 되세요.\n새해 복 많이 받으세요!'
+          },
+          {
+            title: '건강과 행복의 새해',
+            body: '새해에는 더욱 건강하시고\n매일매일 웃음꽃 피는\n행복한 날들만 가득하세요.\n\n올해에도 변함없는 사랑과\n기쁨이 함께하길 빕니다.\n새해 복 많이 받으세요!'
+          },
+          {
+            title: '복이 굴러들어오는 새해',
+            body: '반짝이는 새해 아침입니다.\n\n올 한 해 원하시는 일마다\n좋은 소식이 가득하시고\n가정에 평안과 복이\n넘쳐나길 기원합니다.'
+          }
+        ]
+      }
+    };
+
+    // ===== 기본 음악 4곡 (music 폴더 내 MP3 파일 연결 — 대소문자 정확히 일치) =====
+    const BUILTIN_TRACKS = [
+      {
+        name: '성탄절 캐롤',
+        duration: 20,
+        url: './music/xmas.mp3',
+        notes: [392, 440, 392, 329.63, 392, 440, 392, 329.63, 587.33, 587.33, 493.88, 523.25, 523.25, 392, 440, 440, 523.25, 493.88, 440, 392]
+      },
+      {
+        name: '따뜻한 겨울',
+        duration: 20,
+        url: './music/Warmth.mp3',
+        notes: [261.63, 329.63, 392, 523.25, 493.88, 392, 329.63, 293.66, 349.23, 440, 523.25, 440, 392, 329.63, 349.23, 392, 440, 493.88, 523.25, 392]
+      },
+      {
+        name: '즐거운 여행',
+        duration: 20,
+        url: './music/travel.mp3',
+        notes: [523.25, 493.88, 440, 392, 440, 523.25, 440, 392, 329.63, 392, 440, 493.88, 523.25, 587.33, 523.25, 493.88, 440, 392, 329.63, 261.63]
+      },
+      {
+        name: '희망찬 새해',
+        duration: 20,
+        url: './music/newyear.mp3',
+        notes: [329.63, 392, 440, 493.88, 440, 392, 329.63, 293.66, 329.63, 392, 440, 493.88, 440, 392, 440, 392, 329.63, 293.66, 261.63, 261.63]
+      }
+    ];
+
+    // ===== 앱 상태 =====
+    let currentView = 'home'; // 'home' | 'gallery' | 'text' | 'music' | 'effect' | 'preview' | 'saving' | 'complete'
+    let defaultBgCanvas = null;
+    let selectedImages = [];  // 적용된 Image 객체 배열
+    let draftImages = [];     // 갤러리 확인 페이지에서 편집 중인 Image 객체 배열
+
+    // 문구 상태 (확인 시 저장)
+    let savedTextPreset = '';
+    let savedTextBody = '';
+    let savedTextName = '';
+    let draftTextPreset = '';
+
+    // 음악 상태 (확인 시 저장)
+    let savedMusicMode = 'none';     // 'none' | 'builtin' | 'custom'
+    let savedBuiltinIndex = -1;
+    let savedCustomAudioFile = null;
+    let savedCustomAudioBuffer = null;
+    let savedCustomAudioName = '';
+    let savedCustomAudioDuration = 0;
+
+    // 음악 페이지 임시 선택 상태
+    let draftMusicMode = 'none';
+    let draftBuiltinIndex = -1;
+    let draftCustomAudioFile = null;
+    let draftCustomAudioBuffer = null;
+    let draftCustomAudioName = '';
+    let draftCustomAudioDuration = 0;
+
+    // 효과 상태 (기본 ON: 눈, 반짝이)
+    let snowEnabled = true;
+    let sparkleEnabled = true;
+
+    // 파티클
+    const snowflakes = [];
+    const sparkles = [];
+
+    // 오디오 미리듣기 / 백그라운드 재생 제어
+    let liveAudioCtx = null;
+    let liveAudioSource = null;
+    let isPreviewAudioPlaying = false;
+    let homeSoundMuted = false;          // 상단 소리 켜기/끄기 상태
+    let activeBgAudioKey = '';           // 현재 백그라운드 재생 중인 음악 식별키
+    const builtinBufferCache = new Map();
+
+    // 애니메이션 및 내보내기 상태
+    let animStartTime = performance.now();
+    let isExporting = false;
+    let exportCancelled = false;
+    let lastExportBlob = null;
+    let lastExportExt = 'mp4';
+    let lastExportUrl = null;
+    let lastExportFileName = '프레임공방.mp4';
+
+    // ===== DOM 요소 참조 =====
+    const toastBox = document.getElementById('toastBox');
+    const toastIcon = document.getElementById('toastIcon');
+    const toastMessage = document.getElementById('toastMessage');
+
+    const viewHome = document.getElementById('view-home');
+    const viewGallery = document.getElementById('view-gallery');
+    const viewText = document.getElementById('view-text');
+    const viewMusic = document.getElementById('view-music');
+    const viewEffect = document.getElementById('view-effect');
+    const viewPreview = document.getElementById('view-preview');
+    const viewSaving = document.getElementById('view-saving');
+    const viewComplete = document.getElementById('view-complete');
+
+    const inAppBanner = document.getElementById('inAppBanner');
+    const closeInAppBanner = document.getElementById('closeInAppBanner');
+
+    const btnToggleHomeSound = document.getElementById('btnToggleHomeSound');
+    const homeSoundIcon = document.getElementById('homeSoundIcon');
+    const homeSoundLabel = document.getElementById('homeSoundLabel');
+    const btnTogglePreviewSound = document.getElementById('btnTogglePreviewSound');
+    const previewSoundIcon = document.getElementById('previewSoundIcon');
+
+    const galleryInput = document.getElementById('galleryInput');
+    const customAudioInput = document.getElementById('customAudioInput');
+
+    const btnOpenGallery = document.getElementById('btnOpenGallery');
+    const btnOpenText = document.getElementById('btnOpenText');
+    const btnOpenMusic = document.getElementById('btnOpenMusic');
+    const btnOpenEffect = document.getElementById('btnOpenEffect');
+    const btnOpenPreview = document.getElementById('btnOpenPreview');
+
+    const badgeGallery = document.getElementById('badgeGallery');
+    const badgeText = document.getElementById('badgeText');
+    const badgeMusic = document.getElementById('badgeMusic');
+    const badgeEffect = document.getElementById('badgeEffect');
+
+    const btnGalleryBack = document.getElementById('btnGalleryBack');
+    const galleryCountLabel = document.getElementById('galleryCountLabel');
+    const galleryGrid = document.getElementById('galleryGrid');
+    const galleryEmptyNotice = document.getElementById('galleryEmptyNotice');
+    const btnGalleryRepick = document.getElementById('btnGalleryRepick');
+    const btnGalleryConfirm = document.getElementById('btnGalleryConfirm');
+
+    const btnTextBack = document.getElementById('btnTextBack');
+    const btnTextClear = document.getElementById('btnTextClear');
+    const textBodyInput = document.getElementById('textBodyInput');
+    const textNameInput = document.getElementById('textNameInput');
+    const btnTextConfirm = document.getElementById('btnTextConfirm');
+    const textPresetBtns = document.querySelectorAll('.text-preset-btn');
+    const presetChoicesSection = document.getElementById('presetChoicesSection');
+    const presetChoicesTitle = document.getElementById('presetChoicesTitle');
+    const presetChoicesList = document.getElementById('presetChoicesList');
+    const directWriteSection = document.getElementById('directWriteSection');
+    const textConfirmFooter = document.getElementById('textConfirmFooter');
+
+    const btnMusicBack = document.getElementById('btnMusicBack');
+    const musicTrackBtns = document.querySelectorAll('.music-track-btn');
+    const btnPickCustomAudio = document.getElementById('btnPickCustomAudio');
+    const customAudioNameEl = document.getElementById('customAudioName');
+    const customAudioLenEl = document.getElementById('customAudioLen');
+    const btnNoMusic = document.getElementById('btnNoMusic');
+    const btnPreviewAudio = document.getElementById('btnPreviewAudio');
+    const previewAudioIcon = document.getElementById('previewAudioIcon');
+    const previewAudioLabel = document.getElementById('previewAudioLabel');
+    const btnMusicConfirm = document.getElementById('btnMusicConfirm');
+
+    const btnToggleSnow = document.getElementById('btnToggleSnow');
+    const btnToggleSparkle = document.getElementById('btnToggleSparkle');
+    const snowStateBadge = document.getElementById('snowStateBadge');
+    const sparkleStateBadge = document.getElementById('sparkleStateBadge');
+    const btnEffectConfirm = document.getElementById('btnEffectConfirm');
+
+    const btnPreviewBack = document.getElementById('btnPreviewBack');
+    const previewTimerBadge = document.getElementById('previewTimerBadge');
+    const btnStartExport = document.getElementById('btnStartExport');
+
+    const savingPercentBig = document.getElementById('savingPercentBig');
+    const savingBar = document.getElementById('savingBar');
+    const savingDetailText = document.getElementById('savingDetailText');
+    const btnCancelExport = document.getElementById('btnCancelExport');
+
+    const completeVideo = document.getElementById('completeVideo');
+    const btnShareVideo = document.getElementById('btnShareVideo');
+    const btnGoHome = document.getElementById('btnGoHome');
+
+    // ===== 유틸리티 =====
+    let toastTimer = null;
+    function showToast(msg, icon = '✨') {
+      toastIcon.textContent = icon;
+      toastMessage.textContent = msg;
+      toastBox.classList.remove('hidden');
+      toastBox.classList.add('flex');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toastBox.classList.add('hidden');
+        toastBox.classList.remove('flex');
+      }, 2400);
+    }
+
+    function formatTime(sec) {
+      const s = Math.max(0, Math.floor(sec));
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return `${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`;
+    }
+
+    function createSeededRandom(seed) {
+      let s = seed >>> 0;
+      return function () {
+        s = (s * 1664525 + 1013904223) >>> 0;
+        return s / 4294967296;
+      };
+    }
+
+    // 최종 영상 길이 계산
+    function getVideoDurationSec() {
+      if (savedMusicMode === 'builtin' && savedBuiltinIndex >= 0) {
+        return BUILTIN_TRACKS[savedBuiltinIndex].duration;
+      }
+      if (savedMusicMode === 'custom' && savedCustomAudioDuration > 1) {
+        return savedCustomAudioDuration;
+      }
+      if (selectedImages.length >= 2) {
+        return Math.max(DEFAULT_NO_AUDIO_SEC, selectedImages.length * PHOTO_SLIDE_SEC);
+      }
+      return DEFAULT_NO_AUDIO_SEC;
+    }
+
+    // ===== 화면 전환 관리 =====
+    function showView(viewName) {
+      currentView = viewName;
+      const views = {
+        home: viewHome,
+        gallery: viewGallery,
+        text: viewText,
+        music: viewMusic,
+        effect: viewEffect,
+        preview: viewPreview,
+        saving: viewSaving,
+        complete: viewComplete
+      };
+      Object.entries(views).forEach(([key, el]) => {
+        if (!el) return;
+        if (key === viewName) {
+          el.classList.remove('hidden');
+          el.classList.add('flex');
+        } else {
+          el.classList.add('hidden');
+          el.classList.remove('flex');
+        }
+      });
+
+      if (viewName === 'home' || viewName === 'effect') {
+        refreshHomeBadges();
+        syncBackgroundMusicPlayback();
+      } else if (viewName === 'preview') {
+        animStartTime = performance.now();
+        refreshSoundToggleUI();
+        syncBackgroundMusicPlayback(true);
+      } else {
+        stopLiveAudio();
+      }
+    }
+
+    function getSavedMusicKey() {
+      if (savedMusicMode === 'builtin' && savedBuiltinIndex >= 0) return `builtin:${savedBuiltinIndex}`;
+      if (savedMusicMode === 'custom' && savedCustomAudioBuffer) return `custom:${savedCustomAudioName}:${savedCustomAudioDuration}`;
+      return 'none';
+    }
+
+    function refreshSoundToggleUI() {
+      const hasMusic = savedMusicMode !== 'none';
+      if (!hasMusic) {
+        btnToggleHomeSound.classList.add('hidden');
+        btnToggleHomeSound.classList.remove('flex');
+        btnTogglePreviewSound.classList.add('hidden');
+        btnTogglePreviewSound.classList.remove('flex');
+        return;
+      }
+
+      btnToggleHomeSound.classList.remove('hidden');
+      btnToggleHomeSound.classList.add('flex');
+      btnTogglePreviewSound.classList.remove('hidden');
+      btnTogglePreviewSound.classList.add('flex');
+
+      if (homeSoundMuted) {
+        homeSoundIcon.textContent = '🔇';
+        homeSoundLabel.textContent = '꺼짐';
+        btnToggleHomeSound.classList.remove('bg-[#FFF8E1]', 'text-[#B45309]', 'border-[#FDE68A]');
+        btnToggleHomeSound.classList.add('bg-slate-100', 'text-slate-500', 'border-slate-200');
+        previewSoundIcon.textContent = '🔇';
+      } else {
+        homeSoundIcon.textContent = '🔊';
+        homeSoundLabel.textContent = '켜짐';
+        btnToggleHomeSound.classList.add('bg-[#FFF8E1]', 'text-[#B45309]', 'border-[#FDE68A]');
+        btnToggleHomeSound.classList.remove('bg-slate-100', 'text-slate-500', 'border-slate-200');
+        previewSoundIcon.textContent = '🔊';
+      }
+    }
+
+    function refreshHomeBadges() {
+      refreshSoundToggleUI();
+
+      // 1. 갤러리
+      if (selectedImages.length === 0) {
+        badgeGallery.textContent = '사진 선택';
+        btnOpenGallery.classList.remove('has-value');
+      } else {
+        badgeGallery.textContent = `${selectedImages.length}장 선택됨`;
+        btnOpenGallery.classList.add('has-value');
+      }
+
+      // 2. 문구
+      const hasText = Boolean(savedTextBody.trim() || savedTextName.trim());
+      if (!hasText) {
+        badgeText.textContent = '글 없음';
+        btnOpenText.classList.remove('has-value');
+      } else {
+        const presetNames = {
+          winter: '겨울 문구',
+          christmas: '성탄절 문구',
+          greeting: '안부 문구',
+          health: '건강 문구',
+          yearend: '연말 문구',
+          newyear: '새해 문구',
+          custom: '직접 쓴 글'
+        };
+        badgeText.textContent = presetNames[savedTextPreset] || '문구 적용됨';
+        btnOpenText.classList.add('has-value');
+      }
+
+      // 3. 음악
+      if (savedMusicMode === 'none') {
+        badgeMusic.textContent = '음악 없음';
+        btnOpenMusic.classList.remove('has-value');
+      } else if (savedMusicMode === 'builtin' && savedBuiltinIndex >= 0) {
+        badgeMusic.textContent = BUILTIN_TRACKS[savedBuiltinIndex].name.replace(/ \(기본 \d\)/, '');
+        btnOpenMusic.classList.add('has-value');
+      } else {
+        badgeMusic.textContent = savedCustomAudioName || '내 음악';
+        btnOpenMusic.classList.add('has-value');
+      }
+
+      // 4. 효과
+      if (snowEnabled && sparkleEnabled) {
+        badgeEffect.textContent = '눈 · 반짝이';
+        btnOpenEffect.classList.add('has-value');
+      } else if (snowEnabled) {
+        badgeEffect.textContent = '눈 켜짐';
+        btnOpenEffect.classList.add('has-value');
+      } else if (sparkleEnabled) {
+        badgeEffect.textContent = '반짝이 켜짐';
+        btnOpenEffect.classList.add('has-value');
+      } else {
+        badgeEffect.textContent = '효과 꺼짐';
+        btnOpenEffect.classList.remove('has-value');
+      }
+    }
+
+    // ===== 기본 겨울 밤하늘 배경 (사진 미선택 시) =====
+    function buildDefaultBackground() {
+      const off = document.createElement('canvas');
+      off.width = WIDTH;
+      off.height = HEIGHT;
+      const g = off.getContext('2d');
+
+      const sky = g.createLinearGradient(0, 0, 0, HEIGHT);
+      sky.addColorStop(0, '#0F1C3A');
+      sky.addColorStop(0.5, '#1E3A6E');
+      sky.addColorStop(0.85, '#3A5A8C');
+      sky.addColorStop(1, '#1E293B');
+      g.fillStyle = sky;
+      g.fillRect(0, 0, WIDTH, HEIGHT);
+
+      // 달빛
+      const moonGrad = g.createRadialGradient(WIDTH * 0.78, HEIGHT * 0.18, 8, WIDTH * 0.78, HEIGHT * 0.18, 120);
+      moonGrad.addColorStop(0, 'rgba(254, 249, 195, 0.95)');
+      moonGrad.addColorStop(0.3, 'rgba(254, 240, 138, 0.35)');
+      moonGrad.addColorStop(1, 'rgba(254, 240, 138, 0)');
+      g.fillStyle = moonGrad;
+      g.beginPath();
+      g.arc(WIDTH * 0.78, HEIGHT * 0.18, 120, 0, Math.PI * 2);
+      g.fill();
+
+      // 멀리 보이는 겨울 산과 숲 실루엣
+      const rnd = createSeededRandom(2026);
+      g.fillStyle = 'rgba(15, 23, 42, 0.45)';
+      g.beginPath();
+      g.moveTo(0, HEIGHT * 0.78);
+      for (let x = 0; x <= WIDTH; x += 24) {
+        const y = HEIGHT * 0.72 - Math.sin(x * 0.015) * 45 - rnd() * 25;
+        g.lineTo(x, y);
+      }
+      g.lineTo(WIDTH, HEIGHT);
+      g.lineTo(0, HEIGHT);
+      g.closePath();
+      g.fill();
+
+      // 눈 쌓인 언덕
+      const hill = g.createLinearGradient(0, HEIGHT * 0.80, 0, HEIGHT);
+      hill.addColorStop(0, '#CBD5E1');
+      hill.addColorStop(1, '#94A3B8');
+      g.fillStyle = hill;
+      g.beginPath();
+      g.moveTo(0, HEIGHT * 0.84);
+      g.quadraticCurveTo(WIDTH * 0.35, HEIGHT * 0.78, WIDTH, HEIGHT * 0.86);
+      g.lineTo(WIDTH, HEIGHT);
+      g.lineTo(0, HEIGHT);
+      g.closePath();
+      g.fill();
+
+      defaultBgCanvas = off;
+    }
+
+    // ===== 파티클 초기화 (천천히, 복잡하지 않게) =====
+    function initParticles() {
+      const rndSnow = createSeededRandom(7701);
+      snowflakes.length = 0;
+      for (let i = 0; i < SNOW_COUNT; i++) {
+        snowflakes.push({
+          x0: rndSnow() * WIDTH,
+          y0: rndSnow() * HEIGHT,
+          r: 2.0 + rndSnow() * 3.8,
+          speedY: 22 + rndSnow() * 32,
+          swayAmp: 10 + rndSnow() * 24,
+          swayFreq: 0.45 + rndSnow() * 0.75,
+          phase: rndSnow() * Math.PI * 2,
+          alpha: 0.45 + rndSnow() * 0.45
+        });
+      }
+
+      const rndSpark = createSeededRandom(8802);
+      const colors = [
+        { r: 255, g: 255, b: 255 },
+        { r: 254, g: 243, b: 199 },
+        { r: 224, g: 242, b: 254 }
+      ];
+      sparkles.length = 0;
+      for (let i = 0; i < SPARKLE_COUNT; i++) {
+        sparkles.push({
+          x0: rndSpark() * WIDTH,
+          y0: rndSpark() * HEIGHT,
+          size: 4 + rndSpark() * 6.5,
+          speedY: 12 + rndSpark() * 20,
+          swayAmp: 8 + rndSpark() * 18,
+          swayFreq: 0.35 + rndSpark() * 0.6,
+          twinkleFreq: 0.9 + rndSpark() * 1.4,
+          phase: rndSpark() * Math.PI * 2,
+          color: colors[i % colors.length]
+        });
+      }
+    }
+
+    // ===== 9:16 채움(Cover) 그리기 =====
+    function drawCoverImage(targetCtx, img, alpha = 1) {
+      const imgW = img.naturalWidth || img.width;
+      const imgH = img.naturalHeight || img.height;
+      if (!imgW || !imgH) return;
+
+      const canvasRatio = WIDTH / HEIGHT;
+      const imgRatio = imgW / imgH;
+      let sx = 0, sy = 0, sw = imgW, sh = imgH;
+
+      if (imgRatio > canvasRatio) {
+        sw = imgH * canvasRatio;
+        sx = (imgW - sw) / 2;
+      } else {
+        sh = imgW / canvasRatio;
+        sy = (imgH - sh) / 2;
+      }
+
+      targetCtx.save();
+      targetCtx.globalAlpha = alpha;
+      targetCtx.drawImage(img, sx, sy, sw, sh, 0, 0, WIDTH, HEIGHT);
+      targetCtx.restore();
+    }
+
+    // ===== 한글 자동 줄바꿈 =====
+    function wrapTextLines(targetCtx, text, maxWidth) {
+      const result = [];
+      const paragraphs = (text || '').replace(/\r/g, '').split('\n');
+      for (const para of paragraphs) {
+        if (para.trim() === '') {
+          result.push('');
+          continue;
+        }
+        let line = '';
+        for (const ch of para) {
+          const testLine = line + ch;
+          if (targetCtx.measureText(testLine).width > maxWidth && line.length > 0) {
+            result.push(line);
+            line = ch;
+          } else {
+            line = testLine;
+          }
+        }
+        if (line) result.push(line);
+      }
+      return result;
+    }
+
+    // ===== 2배 고해상도 글자 캐시 생성 (위로 올라갈 때 깨짐/떨림 방지) =====
+    function ensureTextCache(bodyText, nameText) {
+      const key = `${bodyText}||${nameText}||${document.fonts ? document.fonts.status : ''}`;
+      if (textCacheKey === key && textCacheCanvas) return;
+
+      const maxTextW = WIDTH - 104;
+      const lineH = Math.round(TEXT_FONT_SIZE_PX * 1.85);
+      const scale = 2; // 2x 슈퍼샘플링
+
+      const measureCanvas = document.createElement('canvas');
+      const mCtx = measureCanvas.getContext('2d');
+      mCtx.font = `700 ${TEXT_FONT_SIZE_PX}px "BusanDandiMyeongjo", "Noto Serif KR", serif`;
+
+      const lines = [];
+      if (bodyText.trim()) {
+        const bodyLines = wrapTextLines(mCtx, bodyText, maxTextW);
+        for (const l of bodyLines) lines.push({ text: l, isName: false });
+      }
+      if (nameText.trim()) {
+        if (lines.length > 0) lines.push({ text: '', isName: false });
+        lines.push({ text: nameText.trim(), isName: true });
+      }
+
+      if (lines.length === 0) {
+        textCacheCanvas = null;
+        textCacheKey = key;
+        return;
+      }
+
+      const padY = 48;
+      const logicalW = WIDTH;
+      const logicalH = lines.length * lineH + padY * 2;
+
+      const off = document.createElement('canvas');
+      off.width = logicalW * scale;
+      off.height = logicalH * scale;
+      const oCtx = off.getContext('2d');
+      oCtx.scale(scale, scale);
+      oCtx.textAlign = 'center';
+      oCtx.textBaseline = 'middle';
+      oCtx.lineJoin = 'round';
+      oCtx.miterLimit = 2;
+
+      lines.forEach((item, idx) => {
+        if (!item.text) return;
+        const y = padY + idx * lineH + lineH / 2;
+        const fSize = item.isName ? Math.round(TEXT_FONT_SIZE_PX * 0.92) : TEXT_FONT_SIZE_PX;
+        oCtx.font = `700 ${fSize}px "BusanDandiMyeongjo", "Noto Serif KR", serif`;
+
+        // 부드러운 검정 그림자 + 1pt 외곽선
+        oCtx.shadowColor = 'rgba(0, 0, 0, 0.72)';
+        oCtx.shadowBlur = 10;
+        oCtx.shadowOffsetX = 0;
+        oCtx.shadowOffsetY = 3;
+        oCtx.lineWidth = 2.6;
+        oCtx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
+        oCtx.strokeText(item.text, logicalW / 2, y);
+
+        oCtx.shadowColor = 'transparent';
+        oCtx.fillStyle = '#FFFFFF';
+        oCtx.fillText(item.text, logicalW / 2, y);
+      });
+
+      textCacheCanvas = off;
+      textCacheWidth = logicalW;
+      textCacheHeight = logicalH;
+      textCacheKey = key;
+    }
+
+    // ===== 편지 상승 애니메이션 그리기 (상/하단 부드러운 그라데이션 페이드) =====
+    function drawLetterText(targetCtx, tSec) {
+      if (!savedTextBody.trim() && !savedTextName.trim()) return;
+      ensureTextCache(savedTextBody, savedTextName);
+      if (!textCacheCanvas) return;
+
+      const startY = HEIGHT * TEXT_START_Y_RATIO; // 화면 5등분 중 아래 2등분 지점 (60%)
+      const topLimitY = HEIGHT * 0.10;
+      const bottomLimitY = HEIGHT * 0.90;
+
+      const travelDist = (startY - topLimitY) + textCacheHeight + 80;
+      const cycleSec = Math.max(5, travelDist / TEXT_SCROLL_SPEED);
+      const localT = tSec % cycleSec;
+      const drawY = startY - localT * TEXT_SCROLL_SPEED;
+
+      textLayerCtx.clearRect(0, 0, WIDTH, HEIGHT);
+      textLayerCtx.save();
+      textLayerCtx.imageSmoothingEnabled = true;
+      textLayerCtx.imageSmoothingQuality = 'high';
+      textLayerCtx.drawImage(
+        textCacheCanvas,
+        0, 0, textCacheCanvas.width, textCacheCanvas.height,
+        0, drawY, textCacheWidth, textCacheHeight
+      );
+
+      // 상단/하단 부드러운 알파 마스크 적용
+      textLayerCtx.globalCompositeOperation = 'destination-in';
+      const maskGrad = textLayerCtx.createLinearGradient(0, topLimitY, 0, bottomLimitY);
+      maskGrad.addColorStop(0.0, 'rgba(0,0,0,0)');
+      maskGrad.addColorStop(0.14, 'rgba(0,0,0,1)');
+      maskGrad.addColorStop(0.86, 'rgba(0,0,0,1)');
+      maskGrad.addColorStop(1.0, 'rgba(0,0,0,0)');
+      textLayerCtx.fillStyle = maskGrad;
+      textLayerCtx.fillRect(0, topLimitY, WIDTH, bottomLimitY - topLimitY);
+      textLayerCtx.restore();
+
+      targetCtx.drawImage(textLayerCanvas, 0, 0);
+    }
+
+    // ===== 결정론적 씬 렌더링 (다중 사진 4초 + 1.5초 크로스페이드, 눈/반짝이, 안부글) =====
+    function drawSceneAtTime(targetCtx, tSec) {
+      // 1) 배경 사진 렌더링
+      if (selectedImages.length === 0) {
+        if (defaultBgCanvas) {
+          targetCtx.drawImage(defaultBgCanvas, 0, 0, WIDTH, HEIGHT);
+        } else {
+          targetCtx.fillStyle = '#0F172A';
+          targetCtx.fillRect(0, 0, WIDTH, HEIGHT);
+        }
+      } else if (selectedImages.length === 1) {
+        drawCoverImage(targetCtx, selectedImages[0], 1);
+      } else {
+        const count = selectedImages.length;
+        const totalCycle = count * PHOTO_SLIDE_SEC;
+        const cycleT = ((tSec % totalCycle) + totalCycle) % totalCycle;
+        const curIdx = Math.floor(cycleT / PHOTO_SLIDE_SEC) % count;
+        const nextIdx = (curIdx + 1) % count;
+        const slideT = cycleT - curIdx * PHOTO_SLIDE_SEC;
+
+        drawCoverImage(targetCtx, selectedImages[curIdx], 1);
+
+        // 마지막 1.5초 동안 다음 사진으로 부드럽게 페이드 전환
+        const fadeStart = PHOTO_SLIDE_SEC - PHOTO_FADE_SEC;
+        if (slideT > fadeStart) {
+          const fadeProgress = Math.max(0, Math.min(1, (slideT - fadeStart) / PHOTO_FADE_SEC));
+          const smoothFade = fadeProgress * fadeProgress * (3 - 2 * fadeProgress);
+          drawCoverImage(targetCtx, selectedImages[nextIdx], smoothFade);
+        }
+      }
+
+      // 사용자 사진 첨부 시 글자 가독성을 위해 전체를 은은하게 어둡게(28%) 처리
+      if (selectedImages.length > 0) {
+        targetCtx.fillStyle = 'rgba(0, 0, 0, 0.28)';
+        targetCtx.fillRect(0, 0, WIDTH, HEIGHT);
+      }
+
+      // 2) 눈 효과
+      if (snowEnabled) {
+        targetCtx.save();
+        for (let i = 0; i < snowflakes.length; i++) {
+          const f = snowflakes[i];
+          const y = (f.y0 + tSec * f.speedY) % (HEIGHT + 24) - 12;
+          const x = ((f.x0 + Math.sin(tSec * f.swayFreq + f.phase) * f.swayAmp) % WIDTH + WIDTH) % WIDTH;
+          targetCtx.fillStyle = `rgba(255, 255, 255, ${f.alpha})`;
+          targetCtx.beginPath();
+          targetCtx.arc(x, y, f.r, 0, Math.PI * 2);
+          targetCtx.fill();
+        }
+        targetCtx.restore();
+      }
+
+      // 3) 은은하게 흩날리는 반짝이 효과
+      if (sparkleEnabled) {
+        targetCtx.save();
+        targetCtx.globalCompositeOperation = 'lighter';
+        for (let i = 0; i < sparkles.length; i++) {
+          const sp = sparkles[i];
+          const y = (sp.y0 + tSec * sp.speedY) % (HEIGHT + 36) - 18;
+          const x = ((sp.x0 + Math.sin(tSec * sp.swayFreq + sp.phase) * sp.swayAmp) % WIDTH + WIDTH) % WIDTH;
+          const pulse = 0.5 + 0.5 * Math.sin(tSec * sp.twinkleFreq + sp.phase);
+          const alpha = Math.pow(pulse, 1.8) * 0.72;
+          if (alpha < 0.03) continue;
+
+          const { r, g, b } = sp.color;
+          const rad = sp.size * (0.85 + pulse * 0.55);
+
+          const grad = targetCtx.createRadialGradient(x, y, 0, x, y, rad * 2.2);
+          grad.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alpha})`);
+          grad.addColorStop(0.45, `rgba(${r}, ${g}, ${b}, ${alpha * 0.32})`);
+          grad.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+          targetCtx.fillStyle = grad;
+          targetCtx.beginPath();
+          targetCtx.arc(x, y, rad * 2.2, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          if (pulse > 0.58) {
+            const starLen = rad * 1.35;
+            targetCtx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${alpha * 0.85})`;
+            targetCtx.lineWidth = 1.4;
+            targetCtx.beginPath();
+            targetCtx.moveTo(x - starLen, y);
+            targetCtx.lineTo(x + starLen, y);
+            targetCtx.moveTo(x, y - starLen);
+            targetCtx.lineTo(x, y + starLen);
+            targetCtx.stroke();
+          }
+        }
+        targetCtx.restore();
+      }
+
+      // 4) 안부글 편지 애니메이션
+      drawLetterText(targetCtx, tSec);
+    }
+
+    // ===== 실시간 캔버스 애니메이션 루프 =====
+    function animateLoop(now) {
+      if (!isExporting) {
+        const totalDur = getVideoDurationSec();
+        const elapsed = ((now - animStartTime) / 1000) % totalDur;
+        drawSceneAtTime(ctx, elapsed);
+
+        if (currentView === 'preview') {
+          previewTimerBadge.textContent = `${formatTime(elapsed)} / ${formatTime(totalDur)}`;
+        }
+      }
+      requestAnimationFrame(animateLoop);
+    }
+
+    // ===== 기본 4곡 오디오 버퍼 생성 (시작·끝 1.5초 페이드 적용) =====
+    function applyFadeToAudioBuffer(buffer, fadeSec = AUDIO_FADE_SEC) {
+      const sr = buffer.sampleRate;
+      const total = buffer.length;
+      const fadeSamples = Math.min(Math.floor(fadeSec * sr), Math.floor(total / 2));
+
+      for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+        const data = buffer.getChannelData(ch);
+        for (let i = 0; i < fadeSamples; i++) {
+          const gainIn = i / fadeSamples;
+          data[i] *= gainIn;
+          const outIdx = total - 1 - i;
+          data[outIdx] *= gainIn;
+        }
+      }
+      return buffer;
+    }
+
+    async function getBuiltinAudioBuffer(trackIdx) {
+      if (builtinBufferCache.has(trackIdx)) {
+        return builtinBufferCache.get(trackIdx);
+      }
+
+      const track = BUILTIN_TRACKS[trackIdx];
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const tmpCtx = new AudioCtx();
+
+      try {
+        // music 폴더의 실제 MP3 파일 불러오기 (로컬 미리보기 등 파일 미존재 시 기본 멜로디로 자동 폴백)
+        if (track.url) {
+          try {
+            const res = await fetch(track.url);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const arr = await res.arrayBuffer();
+            const decoded = await tmpCtx.decodeAudioData(arr);
+            applyFadeToAudioBuffer(decoded, AUDIO_FADE_SEC);
+            track.duration = decoded.duration;
+            const lenEl = document.querySelector(`.music-track-btn[data-track="${trackIdx}"] .track-len`);
+            if (lenEl) lenEl.textContent = formatTime(decoded.duration);
+            builtinBufferCache.set(trackIdx, decoded);
+            return decoded;
+          } catch (fetchErr) {
+            console.warn(`음악 파일(${track.url}) 불러오기 실패, 기본 멜로디로 대체합니다:`, fetchErr);
+          }
+        }
+
+        // 따뜻한 오르골/피아노 풍 멜로디 합성 (폴백용)
+        const stepSec = duration / notes.length;
+
+        for (let n = 0; n < notes.length; n++) {
+          const freq = notes[n];
+          const startSample = Math.floor(n * stepSec * sampleRate);
+          const noteSamples = Math.floor(stepSec * 1.45 * sampleRate);
+
+          for (let i = 0; i < noteSamples; i++) {
+            const idx = startSample + i;
+            if (idx >= totalSamples) break;
+            const t = i / sampleRate;
+            const env = Math.min(1, t / 0.03) * Math.exp(-t * 2.1);
+            const tone =
+              Math.sin(2 * Math.PI * freq * t) * 0.55 +
+              Math.sin(2 * Math.PI * freq * 2 * t) * 0.16 +
+              Math.sin(2 * Math.PI * (freq * 0.5) * t) * 0.18;
+
+            const sample = tone * env * 0.24;
+            left[idx] += sample * 0.96;
+            right[idx] += sample * 1.04;
+          }
+        }
+
+        applyFadeToAudioBuffer(buffer, AUDIO_FADE_SEC);
+        builtinBufferCache.set(trackIdx, buffer);
+        return buffer;
+      } finally {
+        tmpCtx.close().catch(() => {});
+      }
+    }
+
+    async function getActiveAudioBuffer(useDraft = false) {
+      const mode = useDraft ? draftMusicMode : savedMusicMode;
+      const bIdx = useDraft ? draftBuiltinIndex : savedBuiltinIndex;
+      const cBuf = useDraft ? draftCustomAudioBuffer : savedCustomAudioBuffer;
+
+      if (mode === 'builtin' && bIdx >= 0) {
+        return await getBuiltinAudioBuffer(bIdx);
+      }
+      if (mode === 'custom' && cBuf) {
+        return cBuf;
+      }
+      return null;
+    }
+
+    function stopLiveAudio() {
+      if (liveAudioSource) {
+        try { liveAudioSource.stop(); } catch (_) {}
+        liveAudioSource = null;
+      }
+      if (liveAudioCtx) {
+        liveAudioCtx.close().catch(() => {});
+        liveAudioCtx = null;
+      }
+      isPreviewAudioPlaying = false;
+      activeBgAudioKey = '';
+      previewAudioIcon.textContent = '🔊';
+      previewAudioLabel.textContent = '선택한 음악 미리듣기';
+    }
+
+    async function startLiveAudio(useDraft = false, loop = true) {
+      stopLiveAudio();
+      const buffer = await getActiveAudioBuffer(useDraft);
+      if (!buffer) return false;
+
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      liveAudioCtx = new AudioCtx();
+      if (liveAudioCtx.state === 'suspended') {
+        await liveAudioCtx.resume().catch(() => {});
+      }
+      const source = liveAudioCtx.createBufferSource();
+      source.buffer = buffer;
+      source.loop = loop;
+      source.connect(liveAudioCtx.destination);
+      source.onended = () => {
+        if (!loop) stopLiveAudio();
+      };
+      source.start(0);
+      liveAudioSource = source;
+      isPreviewAudioPlaying = true;
+      if (!useDraft) {
+        activeBgAudioKey = getSavedMusicKey();
+      }
+      return true;
+    }
+
+    // 첫 화면 / 효과 화면 / 미리보기 화면에서 적용된 음악 자동 재생 동기화
+    async function syncBackgroundMusicPlayback(forceRestart = false) {
+      const key = getSavedMusicKey();
+      if (key === 'none' || homeSoundMuted) {
+        stopLiveAudio();
+        return;
+      }
+      if (!forceRestart && isPreviewAudioPlaying && activeBgAudioKey === key) {
+        return;
+      }
+      try {
+        await startLiveAudio(false, true);
+      } catch (_) {}
+    }
+
+    function toggleHomeSoundMute() {
+      if (savedMusicMode === 'none') return;
+      homeSoundMuted = !homeSoundMuted;
+      refreshSoundToggleUI();
+      if (homeSoundMuted) {
+        stopLiveAudio();
+        showToast('음악 소리를 껐어요.', '🔇');
+      } else {
+        syncBackgroundMusicPlayback(true);
+        showToast('음악 소리를 켰어요.', '🔊');
+      }
+    }
+
+    btnToggleHomeSound.addEventListener('click', toggleHomeSoundMute);
+    btnTogglePreviewSound.addEventListener('click', toggleHomeSoundMute);
+
+    // ===== 1. 갤러리 사진 선택 / 삭제(X) / 드래그 순서 변경 / 사진 추가 =====
+    let dragFromIndex = -1;
+
+    function renderGalleryGrid() {
+      galleryCountLabel.textContent = `${draftImages.length}장`;
+      galleryGrid.innerHTML = '';
+
+      if (draftImages.length === 0) {
+        galleryEmptyNotice.classList.remove('hidden');
+        return;
+      }
+      galleryEmptyNotice.classList.add('hidden');
+
+      draftImages.forEach((img, idx) => {
+        const card = document.createElement('div');
+        card.className = 'gallery-thumb relative aspect-[3/4] rounded-2xl overflow-hidden bg-slate-200 shadow-md border-2 border-white select-none cursor-grab';
+        card.dataset.index = String(idx);
+
+        const imgEl = document.createElement('img');
+        imgEl.src = img.src;
+        imgEl.alt = `선택한 사진 ${idx + 1}`;
+        imgEl.draggable = false;
+        imgEl.className = 'w-full h-full object-cover pointer-events-none';
+
+        const numBadge = document.createElement('span');
+        numBadge.className = 'absolute bottom-1.5 left-1.5 px-2 py-0.5 rounded-lg bg-black/65 text-white text-xs font-black pointer-events-none';
+        numBadge.textContent = `${idx + 1}`;
+
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'absolute top-1.5 right-1.5 w-8 h-8 rounded-full bg-black/70 active:scale-90 text-white text-sm font-black flex items-center justify-center shadow';
+        delBtn.textContent = '✕';
+        delBtn.setAttribute('aria-label', `${idx + 1}번 사진 삭제`);
+        delBtn.addEventListener('pointerdown', (ev) => ev.stopPropagation());
+        delBtn.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          draftImages.splice(idx, 1);
+          renderGalleryGrid();
+          showToast('사진을 지웠어요.', '🗑️');
+        });
+
+        // 포인터 기반 드래그 순서 변경 (스마트폰 터치 & PC 마우스 모두 지원)
+        card.addEventListener('pointerdown', (ev) => {
+          if (ev.target === delBtn) return;
+          dragFromIndex = idx;
+          card.classList.add('is-dragging');
+          if (card.setPointerCapture) {
+            try { card.setPointerCapture(ev.pointerId); } catch (_) {}
+          }
+        });
+
+        card.addEventListener('pointermove', (ev) => {
+          if (dragFromIndex < 0) return;
+          const elUnder = document.elementFromPoint(ev.clientX, ev.clientY);
+          const targetCard = elUnder ? elUnder.closest('.gallery-thumb') : null;
+          galleryGrid.querySelectorAll('.gallery-thumb').forEach((c) => c.classList.remove('is-drag-over'));
+          if (targetCard && Number(targetCard.dataset.index) !== dragFromIndex) {
+            targetCard.classList.add('is-drag-over');
+          }
+        });
+
+        const finishDrag = (ev) => {
+          if (dragFromIndex < 0) return;
+          const elUnder = document.elementFromPoint(ev.clientX, ev.clientY);
+          const targetCard = elUnder ? elUnder.closest('.gallery-thumb') : null;
+          const toIdx = targetCard ? Number(targetCard.dataset.index) : -1;
+
+          galleryGrid.querySelectorAll('.gallery-thumb').forEach((c) => {
+            c.classList.remove('is-dragging', 'is-drag-over');
+          });
+
+          if (toIdx >= 0 && toIdx !== dragFromIndex) {
+            const [moved] = draftImages.splice(dragFromIndex, 1);
+            draftImages.splice(toIdx, 0, moved);
+            renderGalleryGrid();
+            showToast('사진 순서를 바꿨어요!', '🔀');
+          }
+          dragFromIndex = -1;
+        };
+
+        card.addEventListener('pointerup', finishDrag);
+        card.addEventListener('pointercancel', finishDrag);
+
+        card.appendChild(imgEl);
+        card.appendChild(numBadge);
+        card.appendChild(delBtn);
+        galleryGrid.appendChild(card);
+      });
+    }
+
+    function loadImageFile(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = () => resolve(null);
+          img.src = ev.target.result;
+        };
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    btnOpenGallery.addEventListener('click', () => {
+      if (selectedImages.length > 0) {
+        draftImages = [...selectedImages];
+        renderGalleryGrid();
+        showView('gallery');
+      } else {
+        galleryInput.click();
+      }
+    });
+
+    btnGalleryRepick.addEventListener('click', () => {
+      galleryInput.click();
+    });
+
+    galleryInput.addEventListener('change', async (e) => {
+      const files = Array.from(e.target.files || []);
+      galleryInput.value = '';
+      if (files.length === 0) return;
+
+      const loaded = [];
+      for (const f of files) {
+        const img = await loadImageFile(f);
+        if (img) loaded.push(img);
+      }
+
+      if (loaded.length === 0) {
+        showToast('사진을 불러오지 못했어요. 다시 선택해 주세요.', '⚠️');
+        return;
+      }
+
+      if (currentView === 'gallery') {
+        // 기존 사진 유지 + 새 사진 뒤에 추가
+        draftImages = [...draftImages, ...loaded];
+        showToast(`${loaded.length}장의 사진을 추가했어요!`, '🖼️');
+      } else {
+        draftImages = [...selectedImages, ...loaded];
+        showToast(`${loaded.length}장의 사진을 골랐어요!`, '🖼️');
+      }
+
+      renderGalleryGrid();
+      showView('gallery');
+    });
+
+    btnGalleryBack.addEventListener('click', () => showView('home'));
+
+    btnGalleryConfirm.addEventListener('click', () => {
+      selectedImages = [...draftImages];
+      animStartTime = performance.now();
+      showView('home');
+      showToast(
+        selectedImages.length > 0
+          ? `사진 ${selectedImages.length}장이 적용되었어요!`
+          : '기본 배경으로 설정되었어요.',
+        '📷'
+      );
+    });
+
+    // ===== 2. 문구 페이지 (주제별 3종 원터치 적용 + 직접쓰기) =====
+    function updateTextPresetUI(selectedKey) {
+      draftTextPreset = selectedKey;
+      textPresetBtns.forEach((btn) => {
+        btn.classList.toggle('selected', btn.dataset.preset === selectedKey);
+      });
+
+      if (selectedKey && TEXT_PRESET_CATEGORIES[selectedKey]) {
+        const cat = TEXT_PRESET_CATEGORIES[selectedKey];
+        presetChoicesTitle.textContent = `${cat.label} (3가지)`;
+        presetChoicesList.innerHTML = '';
+
+        cat.items.forEach((item) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'preset-choice-card w-full p-4 rounded-3xl text-left space-y-1.5';
+          btn.innerHTML = `
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-base font-black text-[#B45309]">${item.title}</span>
+              <span class="text-xs font-extrabold text-[#F59E0B]">터치해서 적용 ▸</span>
+            </div>
+            <p class="text-[15px] leading-relaxed font-dandi text-[#3A3D42] whitespace-pre-line">${item.body}</p>
+          `;
+          btn.addEventListener('click', () => {
+            savedTextPreset = selectedKey;
+            savedTextBody = item.body;
+            savedTextName = textNameInput.value.trim();
+            textCacheKey = '';
+            animStartTime = performance.now();
+            showView('home');
+            showToast(`'${item.title}' 문구가 바로 적용되었어요!`, '💌');
+          });
+          presetChoicesList.appendChild(btn);
+        });
+
+        presetChoicesSection.classList.remove('hidden');
+        directWriteSection.classList.add('hidden');
+        textConfirmFooter.classList.add('hidden');
+      } else {
+        presetChoicesSection.classList.add('hidden');
+        directWriteSection.classList.remove('hidden');
+        textConfirmFooter.classList.remove('hidden');
+      }
+    }
+
+    btnOpenText.addEventListener('click', () => {
+      textBodyInput.value = savedTextBody;
+      textNameInput.value = savedTextName;
+      updateTextPresetUI(savedTextPreset === 'custom' || !savedTextPreset ? 'custom' : savedTextPreset);
+      showView('text');
+    });
+
+    textPresetBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.preset;
+        updateTextPresetUI(key);
+        if (key === 'custom') {
+          textBodyInput.focus();
+        }
+      });
+    });
+
+    btnTextClear.addEventListener('click', () => {
+      textBodyInput.value = '';
+      textNameInput.value = '';
+      savedTextPreset = '';
+      savedTextBody = '';
+      savedTextName = '';
+      textCacheKey = '';
+      updateTextPresetUI('custom');
+      showToast('문구를 깨끗하게 지웠어요.', '🗑️');
+    });
+
+    btnTextBack.addEventListener('click', () => showView('home'));
+
+    btnTextConfirm.addEventListener('click', () => {
+      savedTextBody = textBodyInput.value;
+      savedTextName = textNameInput.value.trim();
+      savedTextPreset = savedTextBody.trim() ? (draftTextPreset || 'custom') : '';
+      textCacheKey = '';
+      animStartTime = performance.now();
+      showView('home');
+      showToast(
+        savedTextBody.trim() || savedTextName
+          ? '안부 문구가 적용되었어요!'
+          : '글자 없이 영상만 나오게 설정했어요.',
+        '💌'
+      );
+    });
+
+    // ===== 3. 음악 페이지 =====
+    function refreshMusicSelectionUI() {
+      musicTrackBtns.forEach((btn) => {
+        const idx = Number(btn.dataset.track);
+        btn.classList.toggle('selected', draftMusicMode === 'builtin' && draftBuiltinIndex === idx);
+      });
+      btnPickCustomAudio.classList.toggle('selected', draftMusicMode === 'custom');
+      btnNoMusic.classList.toggle('selected', draftMusicMode === 'none');
+
+      if (draftCustomAudioName) {
+        customAudioNameEl.textContent = draftCustomAudioName;
+        customAudioLenEl.textContent = draftCustomAudioDuration > 0 ? formatTime(draftCustomAudioDuration) : '선택됨';
+      } else {
+        customAudioNameEl.textContent = '내 음악 가져오기';
+        customAudioLenEl.textContent = '파일 열기';
+      }
+    }
+
+    btnOpenMusic.addEventListener('click', () => {
+      draftMusicMode = savedMusicMode;
+      draftBuiltinIndex = savedBuiltinIndex;
+      draftCustomAudioFile = savedCustomAudioFile;
+      draftCustomAudioBuffer = savedCustomAudioBuffer;
+      draftCustomAudioName = savedCustomAudioName;
+      draftCustomAudioDuration = savedCustomAudioDuration;
+      refreshMusicSelectionUI();
+      showView('music');
+    });
+
+    musicTrackBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        stopLiveAudio();
+        draftMusicMode = 'builtin';
+        draftBuiltinIndex = Number(btn.dataset.track);
+        refreshMusicSelectionUI();
+        // 선택한 MP3 파일 길이와 오디오를 미리 준비
+        getBuiltinAudioBuffer(draftBuiltinIndex).catch(() => {});
+      });
+    });
+
+    btnNoMusic.addEventListener('click', () => {
+      stopLiveAudio();
+      draftMusicMode = 'none';
+      draftBuiltinIndex = -1;
+      refreshMusicSelectionUI();
+    });
+
+    btnPickCustomAudio.addEventListener('click', () => {
+      customAudioInput.click();
+    });
+
+    customAudioInput.addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      customAudioInput.value = '';
+      if (!file) return;
+
+      stopLiveAudio();
+      showToast('음악을 불러오고 있어요...', '🎵');
+      try {
+        const arr = await file.arrayBuffer();
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        const tmpCtx = new AudioCtx();
+        const decoded = await tmpCtx.decodeAudioData(arr.slice(0));
+        await tmpCtx.close();
+
+        applyFadeToAudioBuffer(decoded, AUDIO_FADE_SEC);
+        draftMusicMode = 'custom';
+        draftBuiltinIndex = -1;
+        draftCustomAudioFile = file;
+        draftCustomAudioBuffer = decoded;
+        draftCustomAudioName = file.name.replace(/\.[^/.]+$/, '');
+        draftCustomAudioDuration = decoded.duration;
+        refreshMusicSelectionUI();
+        showToast(`'${draftCustomAudioName}' 음악을 가져왔어요!`, '🎶');
+      } catch (err) {
+        console.error(err);
+        showToast('지원하지 않는 음악 파일이에요. MP3 파일을 골라주세요.', '⚠️');
+      }
+    });
+
+    btnPreviewAudio.addEventListener('click', async () => {
+      if (isPreviewAudioPlaying) {
+        stopLiveAudio();
+        return;
+      }
+      if (draftMusicMode === 'none') {
+        showToast('먼저 위에서 음악을 선택해 주세요.', 'ℹ️');
+        return;
+      }
+      const ok = await startLiveAudio(true, false);
+      if (ok) {
+        previewAudioIcon.textContent = '⏹️';
+        previewAudioLabel.textContent = '미리듣기 멈추기';
+      }
+    });
+
+    btnMusicBack.addEventListener('click', () => {
+      stopLiveAudio();
+      showView('home');
+    });
+
+    btnMusicConfirm.addEventListener('click', () => {
+      stopLiveAudio();
+      savedMusicMode = draftMusicMode;
+      savedBuiltinIndex = draftBuiltinIndex;
+      savedCustomAudioFile = draftCustomAudioFile;
+      savedCustomAudioBuffer = draftCustomAudioBuffer;
+      savedCustomAudioName = draftCustomAudioName;
+      savedCustomAudioDuration = draftCustomAudioDuration;
+      if (savedMusicMode !== 'none') {
+        homeSoundMuted = false; // 새 음악 적용 시 바로 들리도록 음소거 해제
+      }
+      if (savedMusicMode === 'builtin' && savedBuiltinIndex >= 0) {
+        getBuiltinAudioBuffer(savedBuiltinIndex).catch(() => {});
+      }
+      showView('home');
+      showToast(savedMusicMode === 'none' ? '음악 없음으로 설정했어요.' : '음악이 적용되어 바로 재생됩니다!', '🎵');
+    });
+
+    // ===== 4. 효과 페이지 (눈 / 반짝이 원터치 ON/OFF) =====
+    function refreshEffectUI() {
+      btnToggleSnow.classList.toggle('selected', snowEnabled);
+      snowStateBadge.textContent = snowEnabled ? '켜짐' : '꺼짐';
+      snowStateBadge.className = snowEnabled
+        ? 'text-sm font-black px-3.5 py-1 rounded-full bg-[#F59E0B] text-white'
+        : 'text-sm font-black px-3.5 py-1 rounded-full bg-slate-200 text-slate-600';
+
+      btnToggleSparkle.classList.toggle('selected', sparkleEnabled);
+      sparkleStateBadge.textContent = sparkleEnabled ? '켜짐' : '꺼짐';
+      sparkleStateBadge.className = sparkleEnabled
+        ? 'text-sm font-black px-3.5 py-1 rounded-full bg-[#F59E0B] text-white'
+        : 'text-sm font-black px-3.5 py-1 rounded-full bg-slate-200 text-slate-600';
+    }
+
+    btnOpenEffect.addEventListener('click', () => {
+      refreshEffectUI();
+      showView('effect');
+    });
+
+    btnToggleSnow.addEventListener('click', () => {
+      snowEnabled = !snowEnabled;
+      refreshEffectUI();
+    });
+
+    btnToggleSparkle.addEventListener('click', () => {
+      sparkleEnabled = !sparkleEnabled;
+      refreshEffectUI();
+    });
+
+    btnEffectConfirm.addEventListener('click', () => showView('home'));
+
+    // ===== 5. 크게 미리보기 & 동영상 추출(저장) =====
+    btnOpenPreview.addEventListener('click', () => showView('preview'));
+    btnPreviewBack.addEventListener('click', () => showView('home'));
+
+    function setSavingProgress(pct, detail) {
+      const clamped = Math.max(0, Math.min(100, Math.round(pct)));
+      savingPercentBig.textContent = `${clamped}%`;
+      savingBar.style.width = `${clamped}%`;
+      if (detail) savingDetailText.textContent = detail;
+    }
+
+    function triggerDownload(blob, fileName) {
+      try {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 1500);
+      } catch (_) {}
+    }
+
+    async function exportWithWebCodecs() {
+      const durationSec = getVideoDurationSec();
+      const totalFrames = Math.max(1, Math.round(durationSec * FPS));
+      const audioBuffer = await getActiveAudioBuffer(false);
+      let canEncodeAudio = false;
+
+      if (audioBuffer && typeof AudioEncoder !== 'undefined') {
+        try {
+          const support = await AudioEncoder.isConfigSupported({
+            codec: 'mp4a.40.2',
+            sampleRate: audioBuffer.sampleRate,
+            numberOfChannels: Math.min(2, audioBuffer.numberOfChannels),
+            bitrate: 128000
+          });
+          canEncodeAudio = Boolean(support && support.supported);
+        } catch (_) {
+          canEncodeAudio = false;
+        }
+      }
+
+      const candidateCodecs = ['avc1.42001f', 'avc1.4d002a', 'avc1.640028'];
+      let chosenCodec = null;
+      for (const codec of candidateCodecs) {
+        const sup = await VideoEncoder.isConfigSupported({
+          codec,
+          width: WIDTH,
+          height: HEIGHT,
+          bitrate: 3_000_000,
+          framerate: FPS
+        });
+        if (sup && sup.supported) {
+          chosenCodec = codec;
+          break;
+        }
+      }
+      if (!chosenCodec) throw new Error('VideoEncoder unsupported');
+
+      const muxerOptions = {
+        target: new Mp4Muxer.ArrayBufferTarget(),
+        video: { codec: 'avc', width: WIDTH, height: HEIGHT },
+        fastStart: 'in-memory',
+        firstTimestampBehavior: 'offset'
+      };
+      if (canEncodeAudio && audioBuffer) {
+        muxerOptions.audio = {
+          codec: 'aac',
+          sampleRate: audioBuffer.sampleRate,
+          numberOfChannels: Math.min(2, audioBuffer.numberOfChannels)
+        };
+      }
+
+      const muxer = new Mp4Muxer.Muxer(muxerOptions);
+      let encErr = null;
+      const videoEncoder = new VideoEncoder({
+        output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
+        error: (e) => { encErr = e; }
+      });
+      videoEncoder.configure({
+        codec: chosenCodec,
+        width: WIDTH,
+        height: HEIGHT,
+        bitrate: 3_000_000,
+        framerate: FPS
+      });
+
+      const offCanvas = document.createElement('canvas');
+      offCanvas.width = WIDTH;
+      offCanvas.height = HEIGHT;
+      const offCtx = offCanvas.getContext('2d', { alpha: false });
+
+      for (let i = 0; i < totalFrames; i++) {
+        if (exportCancelled || encErr) break;
+
+        drawSceneAtTime(offCtx, i / FPS);
+        const frame = new VideoFrame(offCanvas, {
+          timestamp: Math.round((i * 1_000_000) / FPS),
+          duration: Math.round(1_000_000 / FPS)
+        });
+        videoEncoder.encode(frame, { keyFrame: i % (FPS * 2) === 0 });
+        frame.close();
+
+        if (videoEncoder.encodeQueueSize > 8 || i % 10 === 0) {
+          const pct = canEncodeAudio ? (i / totalFrames) * 85 : (i / totalFrames) * 95;
+          setSavingProgress(pct, `화면 만드는 중 (${i + 1}/${totalFrames})`);
+          await new Promise((r) => setTimeout(r, 0));
+        }
+      }
+
+      if (exportCancelled) {
+        videoEncoder.close();
+        return null;
+      }
+      if (encErr) throw encErr;
+
+      await videoEncoder.flush();
+      videoEncoder.close();
+
+      if (canEncodeAudio && audioBuffer && !exportCancelled) {
+        setSavingProgress(88, '배경 음악 합치는 중...');
+        const numCh = Math.min(2, audioBuffer.numberOfChannels);
+        const sampleRate = audioBuffer.sampleRate;
+        const totalSamples = Math.min(audioBuffer.length, Math.floor(durationSec * sampleRate));
+
+        let aErr = null;
+        const audioEncoder = new AudioEncoder({
+          output: (chunk, meta) => muxer.addAudioChunk(chunk, meta),
+          error: (e) => { aErr = e; }
+        });
+        audioEncoder.configure({
+          codec: 'mp4a.40.2',
+          sampleRate,
+          numberOfChannels: numCh,
+          bitrate: 128000
+        });
+
+        const chunkSamples = 4096;
+        for (let offset = 0; offset < totalSamples; offset += chunkSamples) {
+          if (exportCancelled || aErr) break;
+          const frames = Math.min(chunkSamples, totalSamples - offset);
+          const planar = new Float32Array(frames * numCh);
+          for (let ch = 0; ch < numCh; ch++) {
+            const src = audioBuffer.getChannelData(ch);
+            planar.set(src.subarray(offset, offset + frames), ch * frames);
+          }
+
+          const audioData = new AudioData({
+            format: 'f32-planar',
+            sampleRate,
+            numberOfFrames: frames,
+            numberOfChannels: numCh,
+            timestamp: Math.round((offset / sampleRate) * 1_000_000),
+            data: planar
+          });
+          audioEncoder.encode(audioData);
+          audioData.close();
+
+          if (offset % (chunkSamples * 25) === 0) {
+            setSavingProgress(88 + (offset / totalSamples) * 10, '배경 음악 합치는 중...');
+            await new Promise((r) => setTimeout(r, 0));
+          }
+        }
+
+        if (aErr) throw aErr;
+        await audioEncoder.flush();
+        audioEncoder.close();
+      }
+
+      if (exportCancelled) return null;
+      setSavingProgress(99, 'MP4 파일 마무리 중...');
+      muxer.finalize();
+      return {
+        blob: new Blob([muxer.target.buffer], { type: 'video/mp4' }),
+        ext: 'mp4'
+      };
+    }
+
+    async function exportWithMediaRecorderFallback() {
+      const durationSec = getVideoDurationSec();
+      const stream = canvas.captureStream(FPS);
+      const audioBuffer = await getActiveAudioBuffer(false);
+      let recAudioCtx = null;
+      let recSource = null;
+
+      if (audioBuffer) {
+        try {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          recAudioCtx = new AudioCtx();
+          const dest = recAudioCtx.createMediaStreamDestination();
+          recSource = recAudioCtx.createBufferSource();
+          recSource.buffer = audioBuffer;
+          recSource.connect(dest);
+          dest.stream.getAudioTracks().forEach((t) => stream.addTrack(t));
+        } catch (_) {}
+      }
+
+      const mimeTypes = ['video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+      const chosenMime = mimeTypes.find((m) => MediaRecorder.isTypeSupported(m)) || '';
+      const recorder = new MediaRecorder(stream, chosenMime ? { mimeType: chosenMime } : undefined);
+      const chunks = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) chunks.push(e.data);
+      };
+
+      const donePromise = new Promise((resolve) => {
+        recorder.onstop = () => {
+          const ext = chosenMime.includes('mp4') ? 'mp4' : 'webm';
+          resolve({ blob: new Blob(chunks, { type: chosenMime || 'video/webm' }), ext });
+        };
+      });
+
+      recorder.start(200);
+      if (recSource) recSource.start(0);
+
+      const startMs = performance.now();
+      while (true) {
+        if (exportCancelled) break;
+        const elapsed = (performance.now() - startMs) / 1000;
+        if (elapsed >= durationSec) break;
+        drawSceneAtTime(ctx, elapsed);
+        setSavingProgress((elapsed / durationSec) * 98, `${formatTime(elapsed)} / ${formatTime(durationSec)}`);
+        await new Promise((r) => setTimeout(r, 1000 / FPS));
+      }
+
+      if (recSource) { try { recSource.stop(); } catch (_) {} }
+      if (recAudioCtx) recAudioCtx.close().catch(() => {});
+      if (recorder.state !== 'inactive') recorder.stop();
+
+      if (exportCancelled) return null;
+      return await donePromise;
+    }
+
+    async function startExport() {
+      if (isExporting) return;
+      isExporting = true;
+      exportCancelled = false;
+      stopLiveAudio();
+
+      setSavingProgress(0, '영상 준비 중...');
+      showView('saving');
+
+      try {
+        if (document.fonts && document.fonts.ready) {
+          await document.fonts.ready;
+        }
+        textCacheKey = '';
+
+        let result = null;
+        const supportsFastMP4 = typeof VideoEncoder !== 'undefined' && typeof VideoFrame !== 'undefined' && typeof Mp4Muxer !== 'undefined';
+
+        if (supportsFastMP4) {
+          try {
+            result = await exportWithWebCodecs();
+          } catch (err) {
+            console.warn('고속 인코딩 실패, 안전 모드로 전환:', err);
+            if (!exportCancelled) {
+              result = await exportWithMediaRecorderFallback();
+            }
+          }
+        } else {
+          result = await exportWithMediaRecorderFallback();
+        }
+
+        if (result && result.blob && !exportCancelled) {
+          setSavingProgress(100, '완성되었습니다!');
+          if (lastExportUrl) URL.revokeObjectURL(lastExportUrl);
+          lastExportBlob = result.blob;
+          lastExportExt = result.ext;
+          const now = new Date();
+          const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+          lastExportFileName = `프레임공방_${stamp}.${result.ext}`;
+          lastExportUrl = URL.createObjectURL(result.blob);
+
+          completeVideo.src = lastExportUrl;
+          triggerDownload(result.blob, lastExportFileName);
+          showView('complete');
+        } else if (exportCancelled) {
+          showView('preview');
+          showToast('저장을 취소했어요.', 'ℹ️');
+        }
+      } catch (err) {
+        console.error('영상 추출 오류:', err);
+        showView('preview');
+        showToast('영상 저장 중 오류가 났어요. 다시 눌러주세요.', '⚠️');
+      } finally {
+        isExporting = false;
+      }
+    }
+
+    btnStartExport.addEventListener('click', startExport);
+    btnCancelExport.addEventListener('click', () => {
+      exportCancelled = true;
+    });
+
+    // ===== 완료 화면: 공유하기 & 처음으로 =====
+    btnShareVideo.addEventListener('click', async () => {
+      if (!lastExportBlob) return;
+      try {
+        const mimeType = lastExportExt === 'mp4' ? 'video/mp4' : 'video/webm';
+        const file = new File([lastExportBlob], lastExportFileName, { type: mimeType });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: '프레임 공방',
+            text: '따뜻한 마음을 담아 영상을 보냅니다.'
+          });
+          return;
+        }
+      } catch (err) {
+        if (err && err.name === 'AbortError') return;
+        console.warn('공유 실패:', err);
+      }
+      // 공유 API 미지원 기기에서는 다시 다운로드 안내
+      triggerDownload(lastExportBlob, lastExportFileName);
+      showToast('저장된 영상을 카톡이나 문자에서 첨부해 보내주세요!', '💬');
+    });
+
+    btnGoHome.addEventListener('click', () => {
+      completeVideo.pause();
+      animStartTime = performance.now();
+      showView('home');
+    });
+
+    // ===== 인앱 브라우저(카카오톡 등) 감지 안내 =====
+    if (/KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line/i.test(navigator.userAgent)) {
+      inAppBanner.classList.remove('hidden');
+      inAppBanner.classList.add('flex');
+    }
+    closeInAppBanner.addEventListener('click', () => {
+      inAppBanner.classList.add('hidden');
+      inAppBanner.classList.remove('flex');
+    });
+
+    // ===== 초기화 및 시작 =====
+    window.addEventListener('load', () => {
+      buildDefaultBackground();
+      initParticles();
+      refreshEffectUI();
+      refreshHomeBadges();
+      requestAnimationFrame(animateLoop);
+    });
+  </script>
+</body>
+</html>
