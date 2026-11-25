@@ -17,7 +17,7 @@
   <!-- 초고속 브라우저 내 MP4 바로 생성 라이브러리 -->
   <script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/build/mp4-muxer.min.js"></script>
   <style>
-    /* 부산 단디 명조체 (눈누 공식 CDN) */
+    /* 1. 부산 단디 명조체 (눈누 공식 CDN) */
     @font-face {
       font-family: 'BusanDandiMyeongjo';
       src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/2610132210@l-2/l/부산단디명조M.woff2') format('woff2');
@@ -28,6 +28,30 @@
       font-family: 'BusanDandiMyeongjo';
       src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/2610132210@l-2/l/부산단디명조B.woff2') format('woff2');
       font-weight: 700;
+      font-display: swap;
+    }
+
+    /* 2. 동글동글 볼드체 (눈누 공식 CDN) */
+    @font-face {
+      font-family: 'Donggle';
+      src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108_2@1.0/Dongle-Bold.woff') format('woff');
+      font-weight: 700;
+      font-display: swap;
+    }
+
+    /* 3. 손글씨체 - 학교안심 오카리나 (눈누 공식 CDN, OFL 웹폰트 허용) */
+    @font-face {
+      font-family: 'SchoolSafetyOcarina';
+      src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2511-1@1.0/HakgyoansimOcarinaR.woff2') format('woff2');
+      font-weight: 400;
+      font-display: swap;
+    }
+
+    /* 4. 정묵바위체 (눈누 공식 CDN) */
+    @font-face {
+      font-family: 'Jeongmeokbawi';
+      src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/SangSangRockOTF.woff') format('woff');
+      font-weight: 400;
       font-display: swap;
     }
 
@@ -52,6 +76,16 @@
 
     .font-dandi {
       font-family: 'BusanDandiMyeongjo', 'Noto Serif KR', 'Batang', serif;
+    }
+    .font-dongle {
+      font-family: 'Donggle', 'Pretendard', sans-serif;
+      font-weight: 700;
+    }
+    .font-ocarina {
+      font-family: 'SchoolSafetyOcarina', 'Pretendard', cursive, sans-serif;
+    }
+    .font-bawi {
+      font-family: 'Jeongmeokbawi', 'Noto Serif KR', serif;
     }
 
     /* 스마트폰 9:16 메인 프레임 (구형 모바일 100vh 폴백 + 100dvh 지원) */
@@ -125,6 +159,20 @@
       border-color: #FBC246;
       color: #92400E;
       box-shadow: 0 6px 18px rgba(251, 194, 70, 0.28);
+    }
+
+    /* 미리보기 내 컴팩트 글꼴 선택 칩 */
+    .preview-font-chip {
+      transition: all 0.14s ease;
+      border: 2px solid #E2E8F0;
+      background: #F8FAFC;
+      color: #475569;
+    }
+    .preview-font-chip.selected {
+      background: #FFFBEB;
+      border-color: #F59E0B;
+      color: #B45309;
+      box-shadow: 0 3px 10px rgba(245, 158, 11, 0.22);
     }
 
     /* 내 음악 가져오기 노란 버튼 선택 상태 */
@@ -394,7 +442,7 @@
       <!-- 하단: 2x2 카드 그리드 + 미리보기 버튼 -->
       <div class="space-y-2.5 pb-0.5">
         <div class="grid grid-cols-2 gap-2.5">
-          <!-- 1. 갤러리 (사진 미선택 시 카드 위 투명 file input이 직접 터치를 받아 즉시 갤러리 열림) -->
+          <!-- 1. 갤러리 -->
           <div id="btnOpenGallery" role="button" tabindex="0"
             class="floating-card relative overflow-hidden rounded-[24px] py-2.5 px-2 flex flex-col items-center justify-center gap-1 text-center cursor-pointer">
             <input type="file" id="galleryInputHome" accept="image/*" multiple class="native-file-overlay" aria-label="갤러리에서 사진 선택" />
@@ -491,7 +539,7 @@
     </div>
 
     <!-- =========================================================
-         화면 2: 문구 선택 페이지
+         화면 2: 문구 선택 페이지 (글꼴 선택 4종 포함)
          ========================================================= -->
     <div id="view-text" class="hidden absolute inset-0 z-20 bg-[#F4F5F7] flex-col h-full">
       <header class="shrink-0 bg-white px-4 py-3.5 border-b border-slate-200/70 flex items-center justify-between">
@@ -504,12 +552,12 @@
         </button>
       </header>
 
-      <div class="smooth-scroll flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
+      <div class="smooth-scroll flex-1 min-h-0 overflow-y-auto p-4 space-y-3.5">
         <div class="bg-white rounded-3xl px-4 py-3 shadow-sm border border-slate-100 flex items-center gap-3">
-          <svg class="w-16 h-16 shrink-0" aria-hidden="true"><use href="#char-text" /></svg>
+          <svg class="w-14 h-14 shrink-0" aria-hidden="true"><use href="#char-text" /></svg>
           <div class="text-left space-y-0.5">
             <p class="text-base font-black text-[#3A3D42] leading-snug">
-              마음에 드는 <span class="text-[#E11D48]">안부 문구</span>를 골라보세요!
+              원하는 <span class="text-[#E11D48]">글꼴과 안부 문구</span>를 골라보세요!
             </p>
             <p class="text-xs font-bold text-slate-400">
               주제를 눌러 문구를 터치하면 바로 적용돼요
@@ -517,21 +565,47 @@
           </div>
         </div>
 
+        <!-- 글꼴 선택 4종 -->
+        <div class="bg-white p-3.5 rounded-3xl shadow-sm space-y-2">
+          <div class="flex items-center justify-between px-1">
+            <span class="text-base font-black text-[#3A3D42]">🔤 글꼴 고르기</span>
+            <span id="selectedFontLabel" class="text-xs font-extrabold text-[#B45309] bg-[#FFF8E1] px-2.5 py-0.5 rounded-full">단디체</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" data-font="dandi"
+              class="text-font-btn select-chip selected py-2.5 px-3 rounded-2xl text-lg text-[#3A3D42] font-dandi font-bold">
+              단디체
+            </button>
+            <button type="button" data-font="dongle"
+              class="text-font-btn select-chip py-2.5 px-3 rounded-2xl text-2xl leading-none text-[#3A3D42] font-dongle">
+              동글동글
+            </button>
+            <button type="button" data-font="ocarina"
+              class="text-font-btn select-chip py-2.5 px-3 rounded-2xl text-lg text-[#3A3D42] font-ocarina">
+              손글씨체
+            </button>
+            <button type="button" data-font="bawi"
+              class="text-font-btn select-chip py-2.5 px-3 rounded-2xl text-lg text-[#3A3D42] font-bawi">
+              정묵바위체
+            </button>
+          </div>
+        </div>
+
         <div class="flex justify-center">
           <button type="button" data-preset="custom"
-            class="text-preset-btn select-chip w-full max-w-[240px] py-3.5 px-5 rounded-3xl text-lg font-black text-[#3A3D42] flex items-center justify-center gap-2">
+            class="text-preset-btn select-chip w-full max-w-[240px] py-3 px-5 rounded-3xl text-lg font-black text-[#3A3D42] flex items-center justify-center gap-2">
             <span>✏️</span>
             <span>직접쓰기</span>
           </button>
         </div>
 
-        <div class="grid grid-cols-3 gap-2.5">
-          <button type="button" data-preset="winter" class="text-preset-btn select-chip py-3.5 px-2 rounded-3xl text-base font-black text-[#3A3D42]">❄️ 겨울</button>
-          <button type="button" data-preset="christmas" class="text-preset-btn select-chip py-3.5 px-2 rounded-3xl text-base font-black text-[#3A3D42]">🎄 성탄절</button>
-          <button type="button" data-preset="greeting" class="text-preset-btn select-chip py-3.5 px-2 rounded-3xl text-base font-black text-[#3A3D42]">💌 안부</button>
-          <button type="button" data-preset="health" class="text-preset-btn select-chip py-3.5 px-2 rounded-3xl text-base font-black text-[#3A3D42]">🍵 건강</button>
-          <button type="button" data-preset="yearend" class="text-preset-btn select-chip py-3.5 px-2 rounded-3xl text-base font-black text-[#3A3D42]">🌟 연말</button>
-          <button type="button" data-preset="newyear" class="text-preset-btn select-chip py-3.5 px-2 rounded-3xl text-base font-black text-[#3A3D42]">🌅 새해</button>
+        <div class="grid grid-cols-3 gap-2">
+          <button type="button" data-preset="winter" class="text-preset-btn select-chip py-3 px-2 rounded-3xl text-base font-black text-[#3A3D42]">❄️ 겨울</button>
+          <button type="button" data-preset="christmas" class="text-preset-btn select-chip py-3 px-2 rounded-3xl text-base font-black text-[#3A3D42]">🎄 성탄절</button>
+          <button type="button" data-preset="greeting" class="text-preset-btn select-chip py-3 px-2 rounded-3xl text-base font-black text-[#3A3D42]">💌 안부</button>
+          <button type="button" data-preset="health" class="text-preset-btn select-chip py-3 px-2 rounded-3xl text-base font-black text-[#3A3D42]">🍵 건강</button>
+          <button type="button" data-preset="yearend" class="text-preset-btn select-chip py-3 px-2 rounded-3xl text-base font-black text-[#3A3D42]">🌟 연말</button>
+          <button type="button" data-preset="newyear" class="text-preset-btn select-chip py-3 px-2 rounded-3xl text-base font-black text-[#3A3D42]">🌅 새해</button>
         </div>
 
         <div class="bg-white p-3.5 rounded-3xl border-2 border-transparent focus-within:border-[#FBC246] space-y-1 shadow-sm">
@@ -553,7 +627,7 @@
         </div>
 
         <div id="directWriteSection" class="space-y-1.5">
-          <textarea id="textBodyInput" rows="6"
+          <textarea id="textBodyInput" rows="5"
             class="w-full p-4 rounded-3xl bg-white border-2 border-transparent focus:border-[#FBC246] outline-none text-lg leading-relaxed font-dandi text-[#3A3D42] resize-none shadow-sm"
             placeholder="위 버튼을 눌러 추천 문구를 고르거나&#10;직접 안부글을 적어주세요.&#10;(비워두면 글자 없이 영상만 나와요)"></textarea>
         </div>
@@ -568,7 +642,7 @@
     </div>
 
     <!-- =========================================================
-         화면 3: 음악 선택 페이지 (한 화면에 모두 표시 + 터치 즉시 재생/정지 + 노란 내 음악 버튼)
+         화면 3: 음악 선택 페이지
          ========================================================= -->
     <div id="view-music" class="hidden absolute inset-0 z-20 bg-[#F4F5F7] flex-col h-full">
       <header class="shrink-0 bg-white px-4 py-3 border-b border-slate-200/70 flex items-center justify-between">
@@ -580,7 +654,6 @@
       </header>
 
       <div class="smooth-scroll flex-1 min-h-0 overflow-y-auto px-3.5 py-2.5 flex flex-col justify-between gap-2">
-        <!-- 파란 헤드폰 캐릭터 안내 -->
         <div class="bg-white rounded-2xl px-3.5 py-2 shadow-sm border border-slate-100 flex items-center gap-2.5 shrink-0">
           <svg class="w-12 h-12 shrink-0" aria-hidden="true"><use href="#char-music" /></svg>
           <div class="text-left">
@@ -590,7 +663,6 @@
           </div>
         </div>
 
-        <!-- 4곡 기본 음악 (music 폴더 연결) -->
         <div class="grid grid-cols-1 gap-2 shrink-0">
           <button type="button" data-track="0" class="music-track-btn select-chip px-3.5 py-2.5 rounded-2xl flex items-center justify-between">
             <div class="flex items-center gap-2.5 min-w-0">
@@ -625,7 +697,6 @@
           </button>
         </div>
 
-        <!-- 내 음악 가져오기 (노란색 강조 + 네이티브 파일 선택 오버레이) -->
         <div id="btnPickCustomAudio" role="button" tabindex="0"
           class="custom-audio-yellow relative overflow-hidden w-full px-3.5 py-2.5 rounded-2xl flex items-center justify-between gap-2 cursor-pointer shrink-0 transition">
           <input type="file" id="customAudioInputMain" accept="audio/*" class="native-file-overlay" aria-label="내 음악 파일 열기" />
@@ -642,7 +713,6 @@
           </div>
         </div>
 
-        <!-- 음악 없음 -->
         <button type="button" id="btnNoMusic"
           class="select-chip selected w-full py-2.5 px-3.5 rounded-2xl flex items-center justify-center gap-2 text-base font-black text-[#3A3D42] shrink-0">
           <span>🔇</span>
@@ -695,7 +765,7 @@
     </div>
 
     <!-- =========================================================
-         화면 5: 크게 미리보기 페이지 (직관적 픽토그램 + 시니어 조절 카드 + 2종 저장 버튼)
+         화면 5: 크게 미리보기 페이지 (픽토그램 + 글꼴/크기/속도 조절 + 2종 저장)
          ========================================================= -->
     <div id="view-preview" class="hidden absolute inset-0 z-30 flex-col justify-between p-3.5 sm:p-4 bg-gradient-to-b from-black/45 via-transparent to-black/75">
 
@@ -743,22 +813,42 @@
         </div>
       </div>
 
-      <!-- 하단: 시니어 친화 글자 크기·속도 조절 카드 + 저장 버튼 2종 -->
-      <div class="space-y-2.5 pb-0.5">
-        <div class="bg-white/95 backdrop-blur-md rounded-[26px] p-3.5 shadow-2xl border-2 border-[#FBC246] space-y-2.5">
+      <!-- 하단: 실시간 글꼴·크기·속도 조절 카드 + 저장 버튼 2종 -->
+      <div class="space-y-2 pb-0.5">
+        <div class="bg-white/95 backdrop-blur-md rounded-[24px] p-3 shadow-2xl border-2 border-[#FBC246] space-y-2">
+          <!-- 0) 실시간 글꼴 선택 4종 -->
+          <div class="grid grid-cols-4 gap-1.5">
+            <button type="button" data-font="dandi"
+              class="preview-font-btn preview-font-chip selected py-2 px-1 rounded-xl text-sm font-dandi font-bold whitespace-nowrap active:scale-95">
+              단디체
+            </button>
+            <button type="button" data-font="dongle"
+              class="preview-font-btn preview-font-chip py-2 px-1 rounded-xl text-lg leading-none font-dongle whitespace-nowrap active:scale-95">
+              동글동글
+            </button>
+            <button type="button" data-font="ocarina"
+              class="preview-font-btn preview-font-chip py-2 px-1 rounded-xl text-sm font-ocarina whitespace-nowrap active:scale-95">
+              손글씨체
+            </button>
+            <button type="button" data-font="bawi"
+              class="preview-font-btn preview-font-chip py-2 px-1 rounded-xl text-sm font-bawi whitespace-nowrap active:scale-95">
+              정묵바위
+            </button>
+          </div>
+
           <!-- 1) 글자 크기 조절 -->
-          <div class="grid grid-cols-[1fr_auto] items-center gap-2.5">
-            <div class="flex items-center gap-2 min-w-0">
-              <svg class="w-12 h-12 shrink-0" aria-hidden="true"><use href="#char-text" /></svg>
-              <span class="text-lg sm:text-xl font-black text-[#3A3D42] whitespace-nowrap tracking-tight">글자 크기</span>
+          <div class="grid grid-cols-[1fr_auto] items-center gap-2">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <svg class="w-10 h-10 shrink-0" aria-hidden="true"><use href="#char-text" /></svg>
+              <span class="text-base sm:text-lg font-black text-[#3A3D42] whitespace-nowrap tracking-tight">글자 크기</span>
             </div>
 
             <div class="flex items-center gap-1.5 shrink-0">
               <button type="button" id="btnFontSmaller" aria-label="글자 작게"
-                class="w-12 h-12 rounded-2xl bg-[#F4F5F7] border-2 border-slate-200 active:scale-95 text-[#3A3D42] text-3xl font-black flex items-center justify-center leading-none transition">
+                class="w-11 h-11 rounded-2xl bg-[#F4F5F7] border-2 border-slate-200 active:scale-95 text-[#3A3D42] text-2xl font-black flex items-center justify-center leading-none transition">
                 －
               </button>
-              <div id="fontStepDots" class="w-[70px] flex items-center justify-center gap-1.5" aria-hidden="true">
+              <div id="fontStepDots" class="w-[66px] flex items-center justify-center gap-1.5" aria-hidden="true">
                 <span class="w-2.5 h-2.5 rounded-full bg-[#F59E0B]"></span>
                 <span class="w-2.5 h-2.5 rounded-full bg-[#F59E0B]"></span>
                 <span class="w-2.5 h-2.5 rounded-full bg-[#F59E0B]"></span>
@@ -766,25 +856,25 @@
                 <span class="w-2.5 h-2.5 rounded-full bg-slate-200"></span>
               </div>
               <button type="button" id="btnFontLarger" aria-label="글자 크게"
-                class="w-12 h-12 rounded-2xl bg-[#FFF8E1] border-2 border-[#FBC246] active:scale-95 text-[#B45309] text-3xl font-black flex items-center justify-center leading-none transition">
+                class="w-11 h-11 rounded-2xl bg-[#FFF8E1] border-2 border-[#FBC246] active:scale-95 text-[#B45309] text-2xl font-black flex items-center justify-center leading-none transition">
                 ＋
               </button>
             </div>
           </div>
 
           <!-- 2) 글자 속도 조절 -->
-          <div class="grid grid-cols-[1fr_auto] items-center gap-2.5">
-            <div class="flex items-center gap-2 min-w-0">
-              <svg class="w-12 h-12 shrink-0" aria-hidden="true"><use href="#char-clapper" /></svg>
-              <span class="text-lg sm:text-xl font-black text-[#3A3D42] whitespace-nowrap tracking-tight">글자 속도</span>
+          <div class="grid grid-cols-[1fr_auto] items-center gap-2">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <svg class="w-10 h-10 shrink-0" aria-hidden="true"><use href="#char-clapper" /></svg>
+              <span class="text-base sm:text-lg font-black text-[#3A3D42] whitespace-nowrap tracking-tight">글자 속도</span>
             </div>
 
             <div class="flex items-center gap-1.5 shrink-0">
               <button type="button" id="btnSpeedSlower" aria-label="속도 느리게"
-                class="w-12 h-12 rounded-2xl bg-[#F4F5F7] border-2 border-slate-200 active:scale-95 text-[#3A3D42] text-3xl font-black flex items-center justify-center leading-none transition">
+                class="w-11 h-11 rounded-2xl bg-[#F4F5F7] border-2 border-slate-200 active:scale-95 text-[#3A3D42] text-2xl font-black flex items-center justify-center leading-none transition">
                 －
               </button>
-              <div id="speedStepDots" class="w-[70px] flex items-center justify-center gap-1.5" aria-hidden="true">
+              <div id="speedStepDots" class="w-[66px] flex items-center justify-center gap-1.5" aria-hidden="true">
                 <span class="w-2.5 h-2.5 rounded-full bg-[#F59E0B]"></span>
                 <span class="w-2.5 h-2.5 rounded-full bg-[#F59E0B]"></span>
                 <span class="w-2.5 h-2.5 rounded-full bg-[#F59E0B]"></span>
@@ -792,7 +882,7 @@
                 <span class="w-2.5 h-2.5 rounded-full bg-slate-200"></span>
               </div>
               <button type="button" id="btnSpeedFaster" aria-label="속도 빠르게"
-                class="w-12 h-12 rounded-2xl bg-[#FFF8E1] border-2 border-[#FBC246] active:scale-95 text-[#B45309] text-3xl font-black flex items-center justify-center leading-none transition">
+                class="w-11 h-11 rounded-2xl bg-[#FFF8E1] border-2 border-[#FBC246] active:scale-95 text-[#B45309] text-2xl font-black flex items-center justify-center leading-none transition">
                 ＋
               </button>
             </div>
@@ -876,7 +966,6 @@
         <h2 class="text-2xl font-black text-[#3A3D42]"><span class="bean-underline">영상 완성!</span></h2>
       </div>
 
-      <!-- 완성된 9:16 영상 미리보기 (배경 흰색으로 검은 테두리 오해 방지) -->
       <div class="flex-1 min-h-0 my-3.5 flex items-center justify-center bg-white rounded-[28px] overflow-hidden shadow-lg border-4 border-white">
         <video id="completeVideo" controls playsinline class="h-full w-auto max-w-full object-contain bg-white"></video>
       </div>
@@ -935,10 +1024,9 @@
   <script>
     /**
      * 프레임공방 - 시니어 스마트폰 전용 쉬운 숏폼 영상 만들기
-     * - 540x960 (9:16) 24fps 1.6Mbps 고속 저장 (갤럭시 S21 등 모바일 최적화)
-     * - music 폴더 4곡 연결: xmas.mp3(성탄절), travel.mp3(겨울), Warmth.mp3(여행), newyear.mp3(새해)
-     * - 글·사진 길이 단축 저장 vs 음악 전체 저장 2종 지원 (끝부분 1.5초 부드러운 페이드아웃)
-     * - 3단계 저장 안전망: HW WebCodecs MP4 -> SW WebCodecs MP4 -> MediaRecorder
+     * - 4가지 글꼴 선택 (단디체 / 동글동글 볼드 / 손글씨체(학교안심 오카리나) / 정묵바위체)
+     * - 문구 화면 & 미리보기 화면 모두에서 실시간 글꼴 변경 지원
+     * - 540x960 (9:16) 24fps 1.6Mbps 고속 저장 + 2종 길이(글·사진 길이 / 음악 전체)
      */
 
     const canvas = document.getElementById('sceneCanvas');
@@ -955,16 +1043,55 @@
     const AUDIO_FADE_SEC = 1.5;
     const DEFAULT_NO_AUDIO_SEC = 15;
     const TEXT_START_Y_RATIO = 0.60;
-    const TEXT_FADE_IN_SEC = 1.5;     // 처음 글자 나타날 때 1.5초 서서히 등장
+    const TEXT_FADE_IN_SEC = 1.5;
 
     const SNOW_COUNT = 52;
     const SPARKLE_COUNT = 24;
 
-    // 실시간 조절 가능한 글자 크기(5단계: 32~64) 및 속도(5단계: 24~60)
+    // ===== 4가지 지원 글꼴 설정 =====
+    const FONT_OPTIONS = {
+      dandi: {
+        label: '단디체',
+        family: '"BusanDandiMyeongjo", "Noto Serif KR", serif',
+        loadFamily: 'BusanDandiMyeongjo',
+        weight: '700',
+        sizeScale: 1.0,
+        lineHeightRatio: 1.82,
+        cssClass: 'font-dandi'
+      },
+      dongle: {
+        label: '동글동글',
+        family: '"Donggle", "Pretendard", sans-serif',
+        loadFamily: 'Donggle',
+        weight: '700',
+        sizeScale: 1.32, // 동글체는 시각적 크기가 작아 1.32배 보정
+        lineHeightRatio: 1.38,
+        cssClass: 'font-dongle'
+      },
+      ocarina: {
+        label: '손글씨체',
+        family: '"SchoolSafetyOcarina", "Pretendard", cursive, sans-serif',
+        loadFamily: 'SchoolSafetyOcarina',
+        weight: '400',
+        sizeScale: 1.04,
+        lineHeightRatio: 1.72,
+        cssClass: 'font-ocarina'
+      },
+      bawi: {
+        label: '정묵바위체',
+        family: '"Jeongmeokbawi", "Noto Serif KR", serif',
+        loadFamily: 'Jeongmeokbawi',
+        weight: '400',
+        sizeScale: 1.08,
+        lineHeightRatio: 1.72,
+        cssClass: 'font-bawi'
+      }
+    };
+
+    let selectedFontKey = 'dandi';
     let textFontSizePx = 48;
     let textScrollSpeed = 42;
 
-    // 2배 고해상도 텍스트 캐시 및 페이드 마스크 레이어
     let textCacheCanvas = null;
     let textCacheWidth = 0;
     let textCacheHeight = 0;
@@ -1111,7 +1238,7 @@
     // ===== 앱 상태 =====
     let currentView = 'home';
     let defaultBgCanvas = null;
-    let selectedImages = []; // { canvas: HTMLCanvasElement, thumbUrl: string }[]
+    let selectedImages = [];
     let draftImages = [];
 
     let savedTextPreset = '';
@@ -1119,7 +1246,7 @@
     let savedTextName = '';
     let draftTextPreset = '';
 
-    let savedMusicMode = 'none'; // 'none' | 'builtin' | 'custom'
+    let savedMusicMode = 'none';
     let savedBuiltinIndex = -1;
     let savedCustomAudioFile = null;
     let savedCustomAudioBuffer = null;
@@ -1138,14 +1265,13 @@
 
     const snowflakes = [];
     const sparkles = [];
-    const sparkleSprites = []; // 사전 캐싱된 반짝이 스프라이트
+    const sparkleSprites = [];
 
-    // 공용 AudioContext 싱글톤 (iOS Safari 개수 제한 및 팝 노이즈 방지)
     let sharedAudioCtx = null;
     let liveAudioSource = null;
     let liveAudioGain = null;
     let isPreviewAudioPlaying = false;
-    let playingDraftKey = ''; // 음악 화면에서 현재 재생 중인 항목 ('builtin:0' | 'custom')
+    let playingDraftKey = '';
     let audioPlayReqId = 0;
     let homeSoundMuted = false;
     let activeBgAudioKey = '';
@@ -1213,6 +1339,9 @@
     const textNameInput = document.getElementById('textNameInput');
     const btnTextConfirm = document.getElementById('btnTextConfirm');
     const textPresetBtns = document.querySelectorAll('.text-preset-btn');
+    const textFontBtns = document.querySelectorAll('.text-font-btn');
+    const previewFontBtns = document.querySelectorAll('.preview-font-btn');
+    const selectedFontLabel = document.getElementById('selectedFontLabel');
     const presetChoicesSection = document.getElementById('presetChoicesSection');
     const presetChoicesTitle = document.getElementById('presetChoicesTitle');
     const presetChoicesList = document.getElementById('presetChoicesList');
@@ -1295,7 +1424,58 @@
       };
     }
 
-    // 글·사진 길이 계산 (텍스트 있으면 글자 끝까지, 없으면 사진 1장=15초 / 2장 이상=사진 길이)
+    function getCurrentFontOpt() {
+      return FONT_OPTIONS[selectedFontKey] || FONT_OPTIONS.dandi;
+    }
+
+    // 글꼴 변경 시 문구 화면·미리보기 버튼·입력창·캔버스 즉시 동기화
+    async function selectFont(fontKey, showNotice = false) {
+      if (!FONT_OPTIONS[fontKey]) return;
+      selectedFontKey = fontKey;
+      const opt = FONT_OPTIONS[fontKey];
+
+      if (selectedFontLabel) selectedFontLabel.textContent = opt.label;
+      textFontBtns.forEach((b) => b.classList.toggle('selected', b.dataset.font === fontKey));
+      previewFontBtns.forEach((b) => b.classList.toggle('selected', b.dataset.font === fontKey));
+
+      // 입력창 및 추천 문구 카드에 선택한 글꼴 바로 반영
+      const allFontClasses = ['font-dandi', 'font-dongle', 'font-ocarina', 'font-bawi'];
+      [textNameInput, textBodyInput, quickEditName, quickEditBody].forEach((el) => {
+        if (!el) return;
+        el.classList.remove(...allFontClasses);
+        el.classList.add(opt.cssClass);
+      });
+      presetChoicesList.querySelectorAll('.preset-body-preview').forEach((p) => {
+        p.classList.remove(...allFontClasses);
+        p.classList.add(opt.cssClass);
+      });
+
+      textCacheKey = '';
+      if (currentView === 'preview') {
+        refreshPreviewAdjustUI();
+      }
+      if (showNotice) {
+        showToast(`'${opt.label}' 글꼴로 바꿨어요!`, '🔤');
+      }
+
+      // 선택한 웹폰트가 아직 로딩 전이면 로드 완료 후 캔버스 다시 그리기
+      if (document.fonts && document.fonts.load) {
+        try {
+          await document.fonts.load(`${opt.weight} 36px "${opt.loadFamily}"`);
+          textCacheKey = '';
+          if (currentView === 'preview') refreshPreviewAdjustUI();
+        } catch (_) {}
+      }
+    }
+
+    textFontBtns.forEach((btn) => {
+      btn.addEventListener('click', () => selectFont(btn.dataset.font, false));
+    });
+    previewFontBtns.forEach((btn) => {
+      btn.addEventListener('click', () => selectFont(btn.dataset.font, true));
+    });
+
+    // 글·사진 길이 계산
     function getContentDurationSec() {
       const hasText = Boolean(savedTextBody.trim() || savedTextName.trim());
       if (hasText) {
@@ -1303,8 +1483,9 @@
         if (textCacheCanvas && textCacheHeight > 0) {
           const startY = HEIGHT * TEXT_START_Y_RATIO;
           const topLimitY = HEIGHT * 0.10;
+          const scaledSpeed = textScrollSpeed * (HEIGHT / 1280);
           const travelDist = (startY - topLimitY) + textCacheHeight + 60;
-          const cycleSec = Math.max(5, travelDist / Math.max(12, textScrollSpeed));
+          const cycleSec = Math.max(5, travelDist / Math.max(10, scaledSpeed));
           return Math.ceil(cycleSec);
         }
       }
@@ -1403,8 +1584,8 @@
     }
 
     function refreshPreviewAdjustUI() {
-      const fontStep = Math.round((textFontSizePx - 32) / 8) + 1; // 1 ~ 5
-      const speedStep = Math.round((textScrollSpeed - 24) / 9) + 1; // 1 ~ 5
+      const fontStep = Math.round((textFontSizePx - 32) / 8) + 1;
+      const speedStep = Math.round((textScrollSpeed - 24) / 9) + 1;
 
       if (fontStepDots) {
         Array.from(fontStepDots.children).forEach((dot, idx) => {
@@ -1421,7 +1602,8 @@
         });
       }
 
-      // 저장 버튼 2종의 예상 시간 실시간 표시
+      previewFontBtns.forEach((b) => b.classList.toggle('selected', b.dataset.font === selectedFontKey));
+
       const contentSec = getContentDurationSec();
       if (shortExportDurText) {
         shortExportDurText.textContent = contentSec >= 60
@@ -1441,7 +1623,6 @@
     function refreshHomeBadges() {
       refreshSoundToggleUI();
 
-      // 1. 갤러리 (사진이 1장 이상이면 홈 카드의 투명 파일 오버레이를 숨겨 관리 화면으로 진입)
       if (selectedImages.length === 0) {
         badgeGallery.textContent = '사진 선택';
         btnOpenGallery.classList.remove('has-value');
@@ -1452,7 +1633,6 @@
         galleryInputHome.classList.add('hidden', 'pointer-events-none');
       }
 
-      // 2. 문구
       const hasText = Boolean(savedTextBody.trim() || savedTextName.trim());
       if (!hasText) {
         badgeText.textContent = '글 없음';
@@ -1471,7 +1651,6 @@
         btnOpenText.classList.add('has-value');
       }
 
-      // 3. 음악
       if (savedMusicMode === 'none') {
         badgeMusic.textContent = '음악 없음';
         btnOpenMusic.classList.remove('has-value');
@@ -1483,7 +1662,6 @@
         btnOpenMusic.classList.add('has-value');
       }
 
-      // 4. 효과
       if (snowEnabled && sparkleEnabled) {
         badgeEffect.textContent = '눈 · 반짝이';
         btnOpenEffect.classList.add('has-value');
@@ -1551,7 +1729,7 @@
       defaultBgCanvas = off;
     }
 
-    // ===== 반짝이 스프라이트 사전 캐싱 (고속 저장 최적화) =====
+    // ===== 반짝이 스프라이트 사전 캐싱 =====
     function buildSparkleSprites() {
       sparkleSprites.length = 0;
       const colors = [
@@ -1575,7 +1753,6 @@
         g.arc(half, half, half, 0, Math.PI * 2);
         g.fill();
 
-        // 십자 별빛
         g.strokeStyle = `rgba(${c.r}, ${c.g}, ${c.b}, 0.85)`;
         g.lineWidth = 1.6;
         g.beginPath();
@@ -1649,18 +1826,19 @@
       return result;
     }
 
-    // ===== 2배 고해상도 글자 캐시 (모바일 최대 캔버스 높이 3800px 안전 방어) =====
+    // ===== 2배 고해상도 글자 캐시 (선택한 글꼴 반영 + 모바일 최대 높이 3800px 방어) =====
     function ensureTextCache(bodyText, nameText) {
-      const scaledFont = Math.round(textFontSizePx * (WIDTH / 720));
-      const key = `${bodyText}||${nameText}||${scaledFont}||${document.fonts ? document.fonts.status : ''}`;
+      const fontOpt = getCurrentFontOpt();
+      const scaledFont = Math.round(textFontSizePx * (WIDTH / 720) * fontOpt.sizeScale);
+      const key = `${bodyText}||${nameText}||${selectedFontKey}||${scaledFont}||${document.fonts ? document.fonts.status : ''}`;
       if (textCacheKey === key && textCacheCanvas) return;
 
       const maxTextW = WIDTH - 76;
-      const lineH = Math.round(scaledFont * 1.82);
+      const lineH = Math.round(scaledFont * fontOpt.lineHeightRatio);
 
       const measureCanvas = document.createElement('canvas');
       const mCtx = measureCanvas.getContext('2d');
-      mCtx.font = `700 ${scaledFont}px "BusanDandiMyeongjo", "Noto Serif KR", serif`;
+      mCtx.font = `${fontOpt.weight} ${scaledFont}px ${fontOpt.family}`;
 
       const lines = [];
       if (bodyText.trim()) {
@@ -1682,7 +1860,6 @@
       const padY = 36;
       const logicalW = WIDTH;
       const logicalH = lines.length * lineH + padY * 2;
-      // 모바일 GPU 최대 캔버스 높이(4096px) 초과 방지
       const scale = logicalH * 2 > 3800 ? Math.max(1, 3800 / logicalH) : 2;
 
       const off = document.createElement('canvas');
@@ -1699,7 +1876,7 @@
         if (!item.text) return;
         const y = padY + idx * lineH + lineH / 2;
         const fSize = item.isName ? Math.round(scaledFont * 0.92) : scaledFont;
-        oCtx.font = `700 ${fSize}px "BusanDandiMyeongjo", "Noto Serif KR", serif`;
+        oCtx.font = `${fontOpt.weight} ${fSize}px ${fontOpt.family}`;
 
         oCtx.shadowColor = 'rgba(0, 0, 0, 0.72)';
         oCtx.shadowBlur = 8;
@@ -1720,7 +1897,7 @@
       textCacheKey = key;
     }
 
-    // ===== 편지 상승 애니메이션 그리기 (처음 1.5초 부드러운 페이드인 + 상/하단 마스크) =====
+    // ===== 편지 상승 애니메이션 그리기 (처음 1.5초 서서히 등장 + 상/하단 마스크) =====
     function drawLetterText(targetCtx, tSec) {
       if (!savedTextBody.trim() && !savedTextName.trim()) return;
       ensureTextCache(savedTextBody, savedTextName);
@@ -1736,7 +1913,6 @@
       const localT = tSec % cycleSec;
       const drawY = startY - localT * scaledSpeed;
 
-      // 처음 1.5초 동안 서서히 나타나도록 부드러운 곡선 페이드인
       let startFadeAlpha = 1;
       if (localT < TEXT_FADE_IN_SEC) {
         const p = Math.max(0, Math.min(1, localT / TEXT_FADE_IN_SEC));
@@ -1772,7 +1948,6 @@
 
     // ===== 결정론적 씬 렌더링 =====
     function drawSceneAtTime(targetCtx, tSec) {
-      // 1) 배경 사진 렌더링 (이미 540x960으로 최적화된 캔버스 사용)
       if (selectedImages.length === 0) {
         if (defaultBgCanvas) {
           targetCtx.drawImage(defaultBgCanvas, 0, 0, WIDTH, HEIGHT);
@@ -1803,13 +1978,11 @@
         }
       }
 
-      // 사진 첨부 시 글자 가독성을 위한 은은한 어둡게(28%) 오버레이
       if (selectedImages.length > 0) {
         targetCtx.fillStyle = 'rgba(0, 0, 0, 0.28)';
         targetCtx.fillRect(0, 0, WIDTH, HEIGHT);
       }
 
-      // 2) 눈 효과
       if (snowEnabled) {
         targetCtx.save();
         for (let i = 0; i < snowflakes.length; i++) {
@@ -1824,7 +1997,6 @@
         targetCtx.restore();
       }
 
-      // 3) 사전 캐싱된 고속 반짝이 효과
       if (sparkleEnabled && sparkleSprites.length > 0) {
         targetCtx.save();
         targetCtx.globalCompositeOperation = 'lighter';
@@ -1849,7 +2021,6 @@
         targetCtx.restore();
       }
 
-      // 4) 안부글 편지 애니메이션
       drawLetterText(targetCtx, tSec);
     }
 
@@ -1876,7 +2047,6 @@
       return sharedAudioCtx;
     }
 
-    // iOS Safari 사용자 제스처 즉시 오디오 잠금 해제
     function unlockAudioOnGesture() {
       try {
         const ctxAudio = getSharedAudioContext();
@@ -1886,7 +2056,6 @@
       } catch (_) {}
     }
 
-    // 시작·끝 1.5초 S자 곡선 페이드 + 모바일 스피커 찢어짐 방지(0.92 headroom)
     function applyFadeToAudioBuffer(buffer, fadeSec = AUDIO_FADE_SEC) {
       const sr = buffer.sampleRate;
       const total = buffer.length;
@@ -1915,7 +2084,6 @@
       const track = BUILTIN_TRACKS[trackIdx];
       const audioCtx = getSharedAudioContext();
 
-      // 1) ./music/*.mp3 실제 파일 불러오기 시도
       if (track.url) {
         try {
           const res = await fetch(track.url);
@@ -1932,7 +2100,6 @@
         }
       }
 
-      // 2) 로컬 미리보기 등 MP3 미존재 시 따뜻한 오르골 폴백 멜로디 생성
       const sampleRate = 44100;
       const duration = track.duration || 20;
       const totalSamples = Math.floor(sampleRate * duration);
@@ -1983,7 +2150,6 @@
       return null;
     }
 
-    // 팝 노이즈(지직 소리) 없이 부드럽게 정지
     function stopLiveAudio() {
       audioPlayReqId++;
       const src = liveAudioSource;
@@ -2013,7 +2179,6 @@
       }
     }
 
-    // 팝 노이즈 없이 0.04초 부드럽게 재생 시작
     async function startLiveAudio(useDraft = false, loop = true, draftKey = '') {
       unlockAudioOnGesture();
       stopLiveAudio();
@@ -2092,7 +2257,6 @@
     btnToggleHomeSound.addEventListener('click', toggleHomeSoundMute);
     btnTogglePreviewSound.addEventListener('click', toggleHomeSoundMute);
 
-    // 전화가 오거나 앱이 백그라운드로 내려가면 음악 즉시 정지
     document.addEventListener('visibilitychange', () => {
       if (document.hidden && !isExporting) {
         stopLiveAudio();
@@ -2140,7 +2304,6 @@
           showToast('사진을 지웠어요.', '🗑️');
         });
 
-        // 포인터 기반 드래그 순서 변경
         card.addEventListener('pointerdown', (ev) => {
           if (ev.target === delBtn) return;
           dragFromIndex = idx;
@@ -2189,7 +2352,6 @@
       });
     }
 
-    // 스마트폰 고화질 원본 사진을 즉시 540x960 캔버스 + 초경량 썸네일로 최적화 (모바일 OOM 완벽 방지)
     function optimizeLoadedImage(img) {
       const imgW = img.naturalWidth || img.width;
       const imgH = img.naturalHeight || img.height;
@@ -2212,7 +2374,6 @@
       }
       g.drawImage(img, sx, sy, sw, sh, 0, 0, WIDTH, HEIGHT);
 
-      // 갤러리 목록용 초경량 썸네일 (180x240)
       const tc = document.createElement('canvas');
       tc.width = 180;
       tc.height = 240;
@@ -2321,6 +2482,8 @@
         btn.classList.toggle('selected', btn.dataset.preset === selectedKey);
       });
 
+      const curFontClass = getCurrentFontOpt().cssClass;
+
       if (selectedKey && TEXT_PRESET_CATEGORIES[selectedKey]) {
         const cat = TEXT_PRESET_CATEGORIES[selectedKey];
         presetChoicesTitle.textContent = `${cat.label} (3가지)`;
@@ -2335,7 +2498,7 @@
               <span class="text-base font-black text-[#B45309]">${item.title}</span>
               <span class="text-xs font-extrabold text-[#F59E0B]">터치해서 적용 ▸</span>
             </div>
-            <p class="text-[15px] leading-relaxed font-dandi text-[#3A3D42] whitespace-pre-line">${item.body}</p>
+            <p class="preset-body-preview text-[16px] leading-relaxed ${curFontClass} text-[#3A3D42] whitespace-pre-line">${item.body}</p>
           `;
           btn.addEventListener('click', () => {
             savedTextPreset = selectedKey;
@@ -2362,6 +2525,7 @@
     btnOpenText.addEventListener('click', () => {
       textBodyInput.value = savedTextBody;
       textNameInput.value = savedTextName;
+      selectFont(selectedFontKey, false);
       updateTextPresetUI(savedTextPreset === 'custom' || !savedTextPreset ? 'custom' : savedTextPreset);
       showView('text');
     });
@@ -2404,7 +2568,7 @@
       );
     });
 
-    // ===== 3. 음악 페이지 (터치 즉시 재생 / 다시 터치 시 정지) =====
+    // ===== 3. 음악 페이지 =====
     function refreshMusicSelectionUI() {
       musicTrackBtns.forEach((btn) => {
         const idx = Number(btn.dataset.track);
@@ -2659,7 +2823,6 @@
       } catch (_) {}
     }
 
-    // 선택된 영상 길이에 맞춰 오디오를 자르거나 반복하고 끝부분 1.5초 부드러운 페이드아웃 적용
     function sliceAndFadeAudioBuffer(audioBuffer, targetDurationSec) {
       if (!audioBuffer) return null;
       const sr = audioBuffer.sampleRate;
@@ -2689,7 +2852,6 @@
       return out;
     }
 
-    // 모바일 AudioEncoder(AAC) 호환성을 위해 44100Hz 스테레오 AudioBuffer로 안전 정규화
     async function normalizeAudioBufferForAAC(audioBuffer, targetDurationSec) {
       if (!audioBuffer) return null;
       const targetRate = 44100;
@@ -2809,7 +2971,6 @@
       for (let i = 0; i < totalFrames; i++) {
         if (exportCancelled || encErr || videoEncoder.state === 'closed') break;
 
-        // 85% 멈춤 방지: 인코더 대기열이 밀리면 숨 고르기
         let waitGuard = 0;
         while (videoEncoder.encodeQueueSize >= 4 && !exportCancelled && !encErr && waitGuard < 400) {
           await new Promise((r) => setTimeout(r, 12));
@@ -2877,7 +3038,7 @@
           }
 
           const frames = Math.min(chunkSamples, totalSamples - offset);
-          if (frames < 128) break; // 너무 작은 마지막 잔여 샘플 AAC 오류 방지
+          if (frames < 128) break;
 
           const planar = new Float32Array(frames * numCh);
           for (let ch = 0; ch < numCh; ch++) {
@@ -3000,7 +3161,6 @@
       exportCancelled = false;
       stopLiveAudio();
 
-      // 저장 도중 스마트폰 화면 자동 꺼짐 방지
       let wakeLock = null;
       if (navigator.wakeLock && navigator.wakeLock.request) {
         try { wakeLock = await navigator.wakeLock.request('screen'); } catch (_) {}
@@ -3010,11 +3170,13 @@
       showView('saving');
 
       try {
-        if (document.fonts && document.fonts.ready) {
+        // 선택된 글꼴 로딩 보장
+        const fontOpt = getCurrentFontOpt();
+        if (document.fonts) {
           await Promise.race([
-            document.fonts.ready,
+            document.fonts.load(`${fontOpt.weight} 36px "${fontOpt.loadFamily}"`),
             new Promise((r) => setTimeout(r, 2000))
-          ]);
+          ]).catch(() => {});
         }
         textCacheKey = '';
 
@@ -3058,7 +3220,6 @@
           lastExportFileName = `프레임공방_${stamp}.${result.ext}`;
           lastExportUrl = URL.createObjectURL(result.blob);
 
-          // 스마트폰 공유창 즉시 호출을 위해 영문 파일명 File 객체 사전 준비
           try {
             const shareMime = result.ext === 'mp4' ? 'video/mp4' : 'video/webm';
             lastExportFile = new File([result.blob], `frame_studio_${stamp}.${result.ext}`, { type: shareMime });
@@ -3091,7 +3252,7 @@
       exportCancelled = true;
     });
 
-    // ===== 완료 화면: 스마트폰 공유 팝업 (3단계 네이티브 시도 + 앱 내 공유 팝업) =====
+    // ===== 완료 화면: 스마트폰 공유 팝업 =====
     async function tryNativeVideoShare() {
       if (!lastExportBlob || typeof navigator.share !== 'function') return false;
 
@@ -3114,7 +3275,7 @@
           return true;
         } catch (err) {
           if (err && err.name === 'AbortError') {
-            return true; // 사용자가 공유창을 열었다가 직접 닫은 경우
+            return true;
           }
         }
       }
@@ -3199,6 +3360,7 @@
       setupWebAppManifest();
       buildDefaultBackground();
       initParticles();
+      selectFont('dandi', false);
       refreshEffectUI();
       refreshPreviewAdjustUI();
       refreshHomeBadges();
