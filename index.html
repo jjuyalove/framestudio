@@ -3,7 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>프레임 공방 - 내 사진으로 만드는 쉬운 영상</title>
+  <title>프레임공방</title>
+  <!-- 스마트폰 홈 화면 추가 시 앱 이름(프레임공방) 및 아이콘(icon.png) 설정 -->
+  <meta name="application-name" content="프레임공방" />
+  <meta name="apple-mobile-web-app-title" content="프레임공방" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" content="#FBC246" />
+  <link rel="icon" type="image/png" href="./icon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./icon.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- 초고속 브라우저 내 MP4 바로 생성 라이브러리 -->
   <script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/build/mp4-muxer.min.js"></script>
@@ -32,19 +41,20 @@
       -webkit-tap-highlight-color: transparent;
       overscroll-behavior: none;
       user-select: none;
+      -webkit-user-select: none;
     }
 
-    /* iOS Safari에서 입력창 터치·커서 이동·복사/붙여넣기 정상 동작 보장 */
+    /* iOS Safari 문구 입력창 터치·편집 허용 */
     input, textarea {
-      -webkit-user-select: text;
       user-select: text;
+      -webkit-user-select: text;
     }
 
     .font-dandi {
       font-family: 'BusanDandiMyeongjo', 'Noto Serif KR', 'Batang', serif;
     }
 
-    /* 스마트폰 9:16 메인 프레임 (구형 브라우저 100vh 폴백 + 최신 100dvh) */
+    /* 스마트폰 9:16 메인 프레임 (구형 모바일 100vh 폴백 + 100dvh 지원) */
     .phone-stage {
       width: 100%;
       height: 100vh;
@@ -55,22 +65,9 @@
       overflow: hidden;
       background-color: #F4F5F7;
       box-shadow: 0 18px 60px rgba(15, 23, 42, 0.18);
-      padding-bottom: env(safe-area-inset-bottom, 0px);
     }
 
-    /* 스마트폰 9:16 메인 프레임 (PC에서는 중앙에 스마트폰 비율로 표시) */
-    .phone-stage {
-      width: 100%;
-      height: 100dvh;
-      max-width: 480px;
-      margin: 0 auto;
-      position: relative;
-      overflow: hidden;
-      background-color: #F4F5F7;
-      box-shadow: 0 18px 60px rgba(15, 23, 42, 0.18);
-    }
-
-    /* Bean 스타일 손그림 노란 밑줄 */
+    /* 손그림 노란 밑줄 */
     .bean-underline {
       position: relative;
       display: inline-block;
@@ -89,16 +86,16 @@
       transform: rotate(-1.2deg);
     }
 
-    /* 상단 Bean 플로팅 헤더 카드 */
+    /* 상단 플로팅 헤더 카드 */
     .bean-header-pill {
-      background: rgba(255, 255, 255, 0.92);
+      background: rgba(255, 255, 255, 0.93);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       border: 1.5px solid rgba(255, 255, 255, 0.98);
-      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
     }
 
-    /* 첫 화면 4개 플로팅 타일 카드 (4개 모두 동일한 따뜻한 배경 + 노란 테두리 통일) */
+    /* 첫 화면 4개 플로팅 카드 */
     .floating-card {
       background: rgba(255, 253, 246, 0.96);
       backdrop-filter: blur(10px);
@@ -112,11 +109,11 @@
     }
     .floating-card.has-value {
       background: rgba(255, 253, 246, 0.98);
-      border-color: #FBC246;
-      box-shadow: 0 10px 26px rgba(245, 158, 11, 0.24), 0 2px 6px rgba(15, 23, 42, 0.06);
+      border-color: #F59E0B;
+      box-shadow: 0 10px 26px rgba(245, 158, 11, 0.26), 0 2px 6px rgba(15, 23, 42, 0.06);
     }
 
-    /* 서브 페이지 선택 버튼 (Bean 화이트 카드 스타일) */
+    /* 서브 페이지 선택 버튼 */
     .select-chip {
       transition: all 0.15s ease;
       border: 2.5px solid transparent;
@@ -130,7 +127,31 @@
       box-shadow: 0 6px 18px rgba(251, 194, 70, 0.28);
     }
 
-    /* Bean 캐릭터 부드러운 둥실 모션 */
+    /* 내 음악 가져오기 노란 버튼 선택 상태 */
+    .custom-audio-yellow {
+      background: #FEF08A;
+      border: 2.5px solid #FACC15;
+      color: #854D0E;
+      box-shadow: 0 4px 14px rgba(234, 179, 8, 0.18);
+    }
+    .custom-audio-yellow.selected {
+      background: #FDE047;
+      border-color: #CA8A04;
+      box-shadow: 0 6px 18px rgba(202, 138, 4, 0.30);
+    }
+
+    /* 버튼 위 투명 네이티브 파일 입력기 (모바일 터치 즉시 열림) */
+    .native-file-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 20;
+    }
+
+    /* 캐릭터 부드러운 둥실 모션 */
     @keyframes beanFloat {
       0%, 100% { transform: translateY(0px); }
       50% { transform: translateY(-6px); }
@@ -139,7 +160,6 @@
       animation: beanFloat 2.4s ease-in-out infinite;
     }
 
-    /* 부드러운 스크롤 */
     .smooth-scroll {
       -webkit-overflow-scrolling: touch;
     }
@@ -174,47 +194,41 @@
 </head>
 <body>
 
-  <!-- 공용 복슬복슬 폼폼 캐릭터 5종 SVG 심볼 (display:none 금지 -> 색상/그라데이션 정상 렌더링 보장) -->
+  <!-- 공용 복슬복슬 폼폼 캐릭터 5종 SVG 심볼 -->
   <svg width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden;pointer-events:none;" aria-hidden="true">
     <defs>
-      <!-- 복슬복슬 폼폼 질감 필터 -->
       <filter id="pom-fuzz" x="-20%" y="-20%" width="140%" height="140%">
         <feTurbulence type="fractalNoise" baseFrequency="0.24" numOctaves="2" seed="7" result="noise"/>
         <feDisplacementMap in="SourceGraphic" in2="noise" scale="4.6" xChannelSelector="R" yChannelSelector="G"/>
       </filter>
 
-      <!-- 노랑 (타이틀/저장) -->
       <radialGradient id="grad-pom-yellow" cx="42%" cy="38%" r="62%">
         <stop offset="0%" stop-color="#FDE047"/>
         <stop offset="72%" stop-color="#FACC15"/>
         <stop offset="100%" stop-color="#F59E0B"/>
       </radialGradient>
-      <!-- 주황 (1. 갤러리) -->
       <radialGradient id="grad-pom-orange" cx="42%" cy="38%" r="62%">
         <stop offset="0%" stop-color="#FDBA74"/>
         <stop offset="72%" stop-color="#FB923C"/>
         <stop offset="100%" stop-color="#F97316"/>
       </radialGradient>
-      <!-- 핑크 (2. 문구) -->
       <radialGradient id="grad-pom-pink" cx="42%" cy="38%" r="62%">
         <stop offset="0%" stop-color="#FBCFE8"/>
         <stop offset="70%" stop-color="#FDA4AF"/>
         <stop offset="100%" stop-color="#FB7185"/>
       </radialGradient>
-      <!-- 파랑 (3. 음악) -->
       <radialGradient id="grad-pom-blue" cx="42%" cy="38%" r="62%">
         <stop offset="0%" stop-color="#93C5FD"/>
         <stop offset="72%" stop-color="#60A5FA"/>
         <stop offset="100%" stop-color="#3B82F6"/>
       </radialGradient>
-      <!-- 초록 (4. 효과) -->
       <radialGradient id="grad-pom-green" cx="42%" cy="38%" r="62%">
         <stop offset="0%" stop-color="#BEF264"/>
         <stop offset="72%" stop-color="#84CC16"/>
         <stop offset="100%" stop-color="#65A30D"/>
       </radialGradient>
 
-      <!-- 0. 노란 슬레이트 캐릭터 (상단 타이틀 & 저장 화면용) -->
+      <!-- 0. 노란 슬레이트 캐릭터 -->
       <symbol id="char-clapper" viewBox="0 0 120 120">
         <ellipse cx="56" cy="108" rx="28" ry="6" fill="#E2E8F0"/>
         <path d="M46 90 Q46 102 38 104" stroke="#3F342F" stroke-width="4" stroke-linecap="round" fill="none"/>
@@ -239,7 +253,7 @@
         <circle cx="76" cy="88" r="4.5" fill="#3F342F"/>
       </symbol>
 
-      <!-- 1. 주황 카메라 캐릭터 (1. 갤러리) -->
+      <!-- 1. 주황 카메라 캐릭터 -->
       <symbol id="char-gallery" viewBox="0 0 120 120">
         <ellipse cx="56" cy="108" rx="28" ry="6" fill="#E2E8F0"/>
         <path d="M46 90 Q46 102 38 104" stroke="#3F342F" stroke-width="4" stroke-linecap="round" fill="none"/>
@@ -264,7 +278,7 @@
         <circle cx="98" cy="76" r="4.2" fill="#3F342F"/>
       </symbol>
 
-      <!-- 2. 핑크 하트 캐릭터 (2. 문구) -->
+      <!-- 2. 핑크 하트 캐릭터 -->
       <symbol id="char-text" viewBox="0 0 120 120">
         <ellipse cx="56" cy="108" rx="28" ry="6" fill="#E2E8F0"/>
         <path d="M46 90 Q46 102 38 104" stroke="#3F342F" stroke-width="4" stroke-linecap="round" fill="none"/>
@@ -283,7 +297,7 @@
         <path d="M54 66.5 Q58 63.5 62 66.5 Q58 70 54 66.5 Z" fill="#F472B6"/>
       </symbol>
 
-      <!-- 3. 파란 헤드폰 캐릭터 (3. 음악) -->
+      <!-- 3. 파란 헤드폰 캐릭터 -->
       <symbol id="char-music" viewBox="0 0 120 120">
         <ellipse cx="56" cy="108" rx="28" ry="6" fill="#E2E8F0"/>
         <path d="M46 90 Q46 102 38 104" stroke="#3F342F" stroke-width="4" stroke-linecap="round" fill="none"/>
@@ -307,7 +321,7 @@
         <path d="M85 77 Q86 86 77 86" stroke="#3F342F" stroke-width="3.5" stroke-linecap="round" fill="none"/>
       </symbol>
 
-      <!-- 4. 초록 반짝이 캐릭터 (4. 효과) -->
+      <!-- 4. 초록 반짝이 캐릭터 -->
       <symbol id="char-effect" viewBox="0 0 120 120">
         <ellipse cx="56" cy="108" rx="28" ry="6" fill="#E2E8F0"/>
         <path d="M46 90 Q46 102 38 104" stroke="#3F342F" stroke-width="4" stroke-linecap="round" fill="none"/>
@@ -332,7 +346,7 @@
   </svg>
 
   <!-- 상단 토스트 알림 (alert 미사용) -->
-  <div id="toastBox" class="fixed top-4 left-1/2 -translate-x-1/2 z-[70] hidden items-center gap-2 bg-[#3A3D42]/95 text-white text-base font-extrabold px-5 py-3 rounded-2xl shadow-2xl max-w-[90vw] backdrop-blur-md">
+  <div id="toastBox" class="fixed top-4 left-1/2 -translate-x-1/2 z-[80] hidden items-center gap-2 bg-[#3A3D42]/95 text-white text-base font-extrabold px-5 py-3 rounded-2xl shadow-2xl max-w-[90vw] backdrop-blur-md">
     <span id="toastIcon" class="text-xl">✨</span>
     <span id="toastMessage">안내</span>
   </div>
@@ -340,97 +354,91 @@
   <!-- 스마트폰 기준 메인 무대 -->
   <div class="phone-stage">
 
-    <!-- 공용 실시간 9:16 캔버스 (고해상도 720x1280) -->
-    <canvas id="sceneCanvas" width="720" height="1280"
+    <!-- 공용 실시간 9:16 캔버스 (고속 카톡/인스타 최적화 540x960) -->
+    <canvas id="sceneCanvas" width="540" height="960"
       class="absolute inset-0 w-full h-full object-cover block z-0"></canvas>
 
     <!-- =========================================================
-         화면 1: 첫 화면 (뒤에 미리보기 재생 + 4개 화이트 카드 + 미리보기 버튼)
+         화면 1: 첫 화면 (상단 슬림 타이틀 + 시원한 중앙 여백 + 하단 4개 카드)
          ========================================================= -->
-    <div id="view-home" class="relative z-10 w-full h-full flex flex-col justify-between px-4 py-3 sm:p-5 bg-gradient-to-b from-black/15 via-transparent to-black/30">
+    <div id="view-home" class="relative z-10 w-full h-full flex flex-col justify-between p-3.5 sm:p-4 bg-gradient-to-b from-black/15 via-transparent to-black/30">
 
-      <!-- 상단 인앱 브라우저 안내 + Bean 스타일 타이틀 배너 -->
+      <!-- 상단 인앱 브라우저 안내 + 슬림 타이틀 배너 -->
       <div class="space-y-2">
-        <div id="inAppBanner" class="hidden bg-[#F59E0B] text-white text-xs font-extrabold px-3.5 py-2 rounded-2xl items-center justify-between gap-2 shadow-md">
+        <div id="inAppBanner" class="hidden bg-[#F59E0B] text-white text-xs font-extrabold px-3 py-1.5 rounded-2xl items-center justify-between gap-2 shadow-md">
           <span>저장이 안 되면 ⋮ 눌러 '다른 브라우저로 열기'</span>
           <button type="button" id="closeInAppBanner" class="bg-black/20 px-2.5 py-0.5 rounded-lg shrink-0">닫기</button>
         </div>
 
-        <div class="bean-header-pill relative rounded-[24px] px-3.5 py-2.5 flex items-center justify-center">
+        <div class="bean-header-pill relative rounded-[22px] px-3.5 py-2 flex items-center justify-center">
           <div class="flex items-center justify-center gap-2.5 min-w-0">
-            <svg class="w-14 h-14 sm:w-16 sm:h-16 shrink-0" aria-hidden="true"><use href="#char-clapper" /></svg>
+            <svg class="w-12 h-12 sm:w-14 sm:h-14 shrink-0" aria-hidden="true"><use href="#char-clapper" /></svg>
             <div class="min-w-0 text-center">
-              <p class="text-[11px] sm:text-xs font-extrabold text-slate-500 leading-tight mb-0.5 truncate">디강이와 함께하는 쉬운 영상 만들기</p>
-              <h1 class="text-[24px] sm:text-[28px] font-black text-[#3A3D42] leading-tight tracking-tight truncate">
+              <p class="text-[11px] font-extrabold text-slate-500 leading-tight truncate">디강이와 함께하는 쉬운 영상 만들기</p>
+              <h1 class="text-[24px] sm:text-[26px] font-black text-[#3A3D42] leading-tight tracking-tight truncate">
                 <span class="bean-underline">프레임</span> 공방
               </h1>
-              <p class="text-[10px] sm:text-[11px] font-black text-amber-600/90 tracking-[0.2em] mt-0.5 truncate">F R A M E　S T U D I O</p>
             </div>
           </div>
 
-          <!-- 음악 소리 켜기/끄기 버튼 (음악 적용 시 우측 상단 표시) -->
+          <!-- 음악 소리 켜기/끄기 버튼 -->
           <button type="button" id="btnToggleHomeSound"
-            class="hidden absolute top-2 right-2 items-center gap-1 px-2.5 py-1 rounded-2xl bg-[#FFF8E1] text-[#B45309] border border-[#FDE68A] active:scale-95 text-xs font-black transition shadow-sm"
+            class="hidden absolute top-2 right-2 items-center gap-1 px-2 py-1 rounded-xl bg-[#FFF8E1] text-[#B45309] border border-[#FDE68A] active:scale-95 text-[11px] font-black transition shadow-sm"
             aria-label="음악 소리 끄기 또는 켜기">
-            <span id="homeSoundIcon" class="text-sm">🔊</span>
+            <span id="homeSoundIcon" class="text-xs">🔊</span>
             <span id="homeSoundLabel">켜짐</span>
           </button>
         </div>
       </div>
 
-      <!-- 중앙~하단: Bean 화이트 2x2 카드 그리드 + 하단 큰 미리보기 버튼 -->
+      <!-- 하단: 2x2 카드 그리드 + 미리보기 버튼 -->
       <div class="space-y-2.5 pb-0.5">
         <div class="grid grid-cols-2 gap-2.5">
-          <!-- 1. 갤러리 (사진 없을 때는 네이티브 파일 선택기가 직접 터치되도록 오버레이 배치) -->
+          <!-- 1. 갤러리 (사진 미선택 시 카드 위 투명 file input이 직접 터치를 받아 즉시 갤러리 열림) -->
           <div id="btnOpenGallery" role="button" tabindex="0"
             class="floating-card relative overflow-hidden rounded-[24px] py-2.5 px-2 flex flex-col items-center justify-center gap-1 text-center cursor-pointer">
-            <svg class="w-16 h-16 sm:w-[74px] sm:h-[74px] pointer-events-none" aria-hidden="true"><use href="#char-gallery" /></svg>
-            <span class="text-[22px] sm:text-[25px] font-black text-[#3A3D42] leading-tight tracking-tight pointer-events-none">1. 갤러리</span>
-            <span id="badgeGallery" class="text-xs sm:text-sm font-extrabold text-[#3B82F6] bg-[#EFF6FF] px-2.5 py-0.5 rounded-full pointer-events-none">사진 선택</span>
-            <input type="file" id="galleryDirectInput" accept="image/*" multiple
-              aria-label="갤러리 사진 선택"
-              class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
+            <input type="file" id="galleryInputHome" accept="image/*" multiple class="native-file-overlay" aria-label="갤러리에서 사진 선택" />
+            <svg class="w-[62px] h-[62px] sm:w-[70px] sm:h-[70px]" aria-hidden="true"><use href="#char-gallery" /></svg>
+            <span class="text-[21px] sm:text-[23px] font-black text-[#3A3D42] leading-tight tracking-tight">1. 갤러리</span>
+            <span id="badgeGallery" class="text-xs sm:text-sm font-extrabold text-[#3B82F6] bg-[#EFF6FF] px-2.5 py-0.5 rounded-full">사진 선택</span>
           </div>
 
           <!-- 2. 문구 -->
           <button type="button" id="btnOpenText"
             class="floating-card rounded-[24px] py-2.5 px-2 flex flex-col items-center justify-center gap-1 text-center">
-            <svg class="w-16 h-16 sm:w-[74px] sm:h-[74px]" aria-hidden="true"><use href="#char-text" /></svg>
-            <span class="text-[22px] sm:text-[25px] font-black text-[#3A3D42] leading-tight tracking-tight">2. 문구</span>
+            <svg class="w-[62px] h-[62px] sm:w-[70px] sm:h-[70px]" aria-hidden="true"><use href="#char-text" /></svg>
+            <span class="text-[21px] sm:text-[23px] font-black text-[#3A3D42] leading-tight tracking-tight">2. 문구</span>
             <span id="badgeText" class="text-xs sm:text-sm font-extrabold text-[#E11D48] bg-[#FFF1F2] px-2.5 py-0.5 rounded-full">글 없음</span>
           </button>
 
           <!-- 3. 음악 -->
           <button type="button" id="btnOpenMusic"
             class="floating-card rounded-[24px] py-2.5 px-2 flex flex-col items-center justify-center gap-1 text-center">
-            <svg class="w-16 h-16 sm:w-[74px] sm:h-[74px]" aria-hidden="true"><use href="#char-music" /></svg>
-            <span class="text-[22px] sm:text-[25px] font-black text-[#3A3D42] leading-tight tracking-tight">3. 음악</span>
+            <svg class="w-[62px] h-[62px] sm:w-[70px] sm:h-[70px]" aria-hidden="true"><use href="#char-music" /></svg>
+            <span class="text-[21px] sm:text-[23px] font-black text-[#3A3D42] leading-tight tracking-tight">3. 음악</span>
             <span id="badgeMusic" class="text-xs sm:text-sm font-extrabold text-[#B45309] bg-[#FFFBEB] px-2.5 py-0.5 rounded-full">음악 없음</span>
           </button>
 
           <!-- 4. 효과 -->
           <button type="button" id="btnOpenEffect"
             class="floating-card rounded-[24px] py-2.5 px-2 flex flex-col items-center justify-center gap-1 text-center">
-            <svg class="w-16 h-16 sm:w-[74px] sm:h-[74px]" aria-hidden="true"><use href="#char-effect" /></svg>
-            <span class="text-[22px] sm:text-[25px] font-black text-[#3A3D42] leading-tight tracking-tight">4. 효과</span>
-            <span id="badgeEffect" class="text-xs sm:text-sm font-extrabold text-[#047857] bg-[#ECFDF5] px-2.5 py-0.5 rounded-full">눈·반짝이</span>
+            <svg class="w-[62px] h-[62px] sm:w-[70px] sm:h-[70px]" aria-hidden="true"><use href="#char-effect" /></svg>
+            <span class="text-[21px] sm:text-[23px] font-black text-[#3A3D42] leading-tight tracking-tight">4. 효과</span>
+            <span id="badgeEffect" class="text-xs sm:text-sm font-extrabold text-[#047857] bg-[#ECFDF5] px-2.5 py-0.5 rounded-full">눈 · 반짝이</span>
           </button>
         </div>
 
-        <!-- 하단 큰 미리보기 버튼 -->
+        <!-- 하단 미리보기 버튼 -->
         <button type="button" id="btnOpenPreview"
-          class="w-full py-3.5 px-5 rounded-[24px] bg-gradient-to-r from-[#FBC246] via-[#F59E0B] to-[#F97316] active:scale-[0.98] text-white text-[23px] sm:text-[25px] font-black shadow-xl shadow-amber-600/30 border-2 border-white/80 flex items-center justify-center gap-2 transition">
+          class="w-full py-3.5 px-5 rounded-[24px] bg-gradient-to-r from-[#FBC246] via-[#F59E0B] to-[#F97316] active:scale-[0.98] text-white text-[22px] sm:text-[24px] font-black shadow-xl shadow-amber-600/30 border-2 border-white/80 flex items-center justify-center gap-2 transition">
           <span>▶️</span>
           <span>미리보기</span>
         </button>
 
         <!-- 하단 브랜드 문구 & 제작자 표기 -->
-        <div class="text-center pt-0.5 space-y-0.5 select-none">
+        <div class="text-center space-y-0.5 select-none">
           <p class="text-xs sm:text-sm font-extrabold text-white/95 drop-shadow-[0_1px_4px_rgba(0,0,0,0.65)]">
-            사진으로 나만의 영상 한 편
-          </p>
-          <p class="text-[11px] font-bold text-amber-200/95 tracking-wide drop-shadow-[0_1px_4px_rgba(0,0,0,0.65)]">
-            디강쭈야 제작
+            사진으로 나만의 영상 한 편 · <span class="text-amber-200">디강쭈야 제작</span>
           </p>
         </div>
       </div>
@@ -449,7 +457,6 @@
       </header>
 
       <div class="smooth-scroll flex-1 min-h-0 overflow-y-auto p-4 space-y-3">
-        <!-- 주황 카메라 캐릭터 안내 배너 -->
         <div class="bg-white rounded-3xl px-4 py-3 shadow-sm border border-slate-100 flex items-center gap-3">
           <svg class="w-16 h-16 shrink-0" aria-hidden="true"><use href="#char-gallery" /></svg>
           <div class="text-left space-y-0.5">
@@ -457,15 +464,13 @@
               사진을 <span class="text-[#F59E0B]">꾹 눌러 옮기면</span> 순서가 바뀌어요!
             </p>
             <p class="text-xs font-bold text-slate-400">
-              오른쪽 위 ✕를 누르면 사진을 지울 수 있어요
+              오른쪽 위 ✕를 누르면 사진을 지울 수 있어요 (최대 20장)
             </p>
           </div>
         </div>
 
-        <!-- 선택된 사진 썸네일 그리드 -->
         <div id="galleryGrid" class="grid grid-cols-3 gap-3 pb-2"></div>
 
-        <!-- 사진이 모두 삭제되었을 때 안내 -->
         <div id="galleryEmptyNotice" class="hidden bg-white rounded-3xl p-8 text-center space-y-2 shadow-sm">
           <p class="text-3xl">🖼️</p>
           <p class="text-base font-black text-[#3A3D42]">선택된 사진이 없어요</p>
@@ -473,14 +478,11 @@
         </div>
       </div>
 
-      <!-- 하단 사진 추가하기 + 확인 버튼 -->
       <footer class="shrink-0 p-4 bg-white border-t border-slate-200/70 grid grid-cols-2 gap-3">
-        <label id="btnGalleryRepick"
-          class="relative overflow-hidden py-4 px-3 rounded-3xl bg-[#EFF6FF] border-2 border-[#BFDBFE] active:scale-[0.98] text-[#1D4ED8] text-lg font-black flex items-center justify-center cursor-pointer">
-          <span class="pointer-events-none">➕ 사진 추가하기</span>
-          <input type="file" id="galleryAddInput" accept="image/*" multiple
-            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-        </label>
+        <div class="relative overflow-hidden py-4 px-3 rounded-3xl bg-[#EFF6FF] border-2 border-[#BFDBFE] active:scale-[0.98] text-[#1D4ED8] text-lg font-black text-center cursor-pointer">
+          <input type="file" id="galleryInputAdd" accept="image/*" multiple class="native-file-overlay" aria-label="사진 추가하기" />
+          <span>➕ 사진 추가하기</span>
+        </div>
         <button type="button" id="btnGalleryConfirm"
           class="py-4 px-3 rounded-3xl bg-gradient-to-r from-[#FBC246] to-[#F59E0B] active:scale-[0.98] text-white text-xl font-black shadow-lg shadow-amber-500/25">
           확인
@@ -503,7 +505,6 @@
       </header>
 
       <div class="smooth-scroll flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
-        <!-- 핑크 하트 캐릭터 안내 배너 -->
         <div class="bg-white rounded-3xl px-4 py-3 shadow-sm border border-slate-100 flex items-center gap-3">
           <svg class="w-16 h-16 shrink-0" aria-hidden="true"><use href="#char-text" /></svg>
           <div class="text-left space-y-0.5">
@@ -516,7 +517,6 @@
           </div>
         </div>
 
-        <!-- 상단 가운데: 직접쓰기 버튼 -->
         <div class="flex justify-center">
           <button type="button" data-preset="custom"
             class="text-preset-btn select-chip w-full max-w-[240px] py-3.5 px-5 rounded-3xl text-lg font-black text-[#3A3D42] flex items-center justify-center gap-2">
@@ -525,7 +525,6 @@
           </button>
         </div>
 
-        <!-- 아래 6개 버튼 -->
         <div class="grid grid-cols-3 gap-2.5">
           <button type="button" data-preset="winter" class="text-preset-btn select-chip py-3.5 px-2 rounded-3xl text-base font-black text-[#3A3D42]">❄️ 겨울</button>
           <button type="button" data-preset="christmas" class="text-preset-btn select-chip py-3.5 px-2 rounded-3xl text-base font-black text-[#3A3D42]">🎄 성탄절</button>
@@ -535,7 +534,6 @@
           <button type="button" data-preset="newyear" class="text-preset-btn select-chip py-3.5 px-2 rounded-3xl text-base font-black text-[#3A3D42]">🌅 새해</button>
         </div>
 
-        <!-- 이름 입력 공간 (선택 사항) -->
         <div class="bg-white p-3.5 rounded-3xl border-2 border-transparent focus-within:border-[#FBC246] space-y-1 shadow-sm">
           <div class="flex items-center justify-between px-1">
             <label for="textNameInput" class="text-base font-black text-[#3A3D42]">이름</label>
@@ -546,7 +544,6 @@
             placeholder="예> 이주영 드림" />
         </div>
 
-        <!-- 카테고리 선택 시 표시되는 추천 문구 3종 (터치하면 바로 적용) -->
         <div id="presetChoicesSection" class="hidden space-y-2.5">
           <div class="flex items-center justify-between px-1">
             <p id="presetChoicesTitle" class="text-base font-black text-[#3A3D42]">추천 문구 3가지</p>
@@ -555,7 +552,6 @@
           <div id="presetChoicesList" class="space-y-3"></div>
         </div>
 
-        <!-- 직접쓰기 입력 공간 -->
         <div id="directWriteSection" class="space-y-1.5">
           <textarea id="textBodyInput" rows="6"
             class="w-full p-4 rounded-3xl bg-white border-2 border-transparent focus:border-[#FBC246] outline-none text-lg leading-relaxed font-dandi text-[#3A3D42] resize-none shadow-sm"
@@ -563,7 +559,6 @@
         </div>
       </div>
 
-      <!-- 하단 확인 버튼 -->
       <footer id="textConfirmFooter" class="shrink-0 p-4 bg-white border-t border-slate-200/70">
         <button type="button" id="btnTextConfirm"
           class="w-full py-4 rounded-3xl bg-gradient-to-r from-[#FBC246] to-[#F59E0B] active:scale-[0.98] text-white text-xl font-black shadow-lg shadow-amber-500/25">
@@ -573,97 +568,89 @@
     </div>
 
     <!-- =========================================================
-         화면 3: 음악 선택 페이지 (한 화면 맞춤 + 터치 즉시 재생/정지)
+         화면 3: 음악 선택 페이지 (한 화면에 모두 표시 + 터치 즉시 재생/정지 + 노란 내 음악 버튼)
          ========================================================= -->
     <div id="view-music" class="hidden absolute inset-0 z-20 bg-[#F4F5F7] flex-col h-full">
       <header class="shrink-0 bg-white px-4 py-3 border-b border-slate-200/70 flex items-center justify-between">
-        <button type="button" id="btnMusicBack" class="px-3.5 py-1.5 rounded-2xl bg-[#F4F5F7] text-[#3A3D42] text-base font-black">
+        <button type="button" id="btnMusicBack" class="px-3.5 py-2 rounded-2xl bg-[#F4F5F7] text-[#3A3D42] text-base font-black">
           ◀ 뒤로
         </button>
         <h2 class="text-2xl font-black text-[#3A3D42]"><span class="bean-underline">3. 음악</span></h2>
         <div class="w-14"></div>
       </header>
 
-      <div class="smooth-scroll flex-1 min-h-0 overflow-y-auto px-4 py-2.5 flex flex-col justify-between gap-2">
-        <!-- 파란 헤드폰 캐릭터 안내 배너 -->
-        <div class="bg-white rounded-3xl px-3.5 py-2 shadow-sm border border-slate-100 flex items-center gap-2.5 shrink-0">
+      <div class="smooth-scroll flex-1 min-h-0 overflow-y-auto px-3.5 py-2.5 flex flex-col justify-between gap-2">
+        <!-- 파란 헤드폰 캐릭터 안내 -->
+        <div class="bg-white rounded-2xl px-3.5 py-2 shadow-sm border border-slate-100 flex items-center gap-2.5 shrink-0">
           <svg class="w-12 h-12 shrink-0" aria-hidden="true"><use href="#char-music" /></svg>
-          <div class="text-left space-y-0.5">
+          <div class="text-left">
             <p class="text-sm sm:text-base font-black text-[#3A3D42] leading-snug">
-              음악을 <span class="text-[#F59E0B]">누르면 바로 들려요!</span>
-            </p>
-            <p class="text-xs font-bold text-slate-400">
-              다시 누르면 멈추고, 아래 확인을 누르면 적용돼요
+              노래를 <span class="text-[#F59E0B]">누르면 바로 들리고</span>, 다시 누르면 멈춰요!
             </p>
           </div>
         </div>
 
-        <!-- 4곡 기본 음악 -->
+        <!-- 4곡 기본 음악 (music 폴더 연결) -->
         <div class="grid grid-cols-1 gap-2 shrink-0">
-          <button type="button" data-track="0" class="music-track-btn select-chip py-2.5 px-3.5 rounded-2xl flex items-center justify-between">
-            <div class="flex items-center gap-2.5">
-              <span class="w-9 h-9 rounded-xl bg-[#EFF6FF] flex items-center justify-center text-lg">🎄</span>
-              <span class="text-base sm:text-lg font-black text-[#3A3D42]">성탄절 캐롤</span>
+          <button type="button" data-track="0" class="music-track-btn select-chip px-3.5 py-2.5 rounded-2xl flex items-center justify-between">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="w-9 h-9 rounded-xl bg-[#FFF1F2] flex items-center justify-center text-lg shrink-0">🎄</span>
+              <span class="text-base sm:text-lg font-black text-[#3A3D42] truncate">성탄절 캐롤</span>
             </div>
-            <span class="track-status text-xs sm:text-sm font-extrabold text-slate-400">▶ 듣기</span>
+            <span class="track-status text-xs font-extrabold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full shrink-0">▶ 듣기</span>
           </button>
 
-          <button type="button" data-track="1" class="music-track-btn select-chip py-2.5 px-3.5 rounded-2xl flex items-center justify-between">
-            <div class="flex items-center gap-2.5">
-              <span class="w-9 h-9 rounded-xl bg-[#FFFBEB] flex items-center justify-center text-lg">☕</span>
-              <span class="text-base sm:text-lg font-black text-[#3A3D42]">따뜻한 겨울</span>
+          <button type="button" data-track="1" class="music-track-btn select-chip px-3.5 py-2.5 rounded-2xl flex items-center justify-between">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="w-9 h-9 rounded-xl bg-[#FFFBEB] flex items-center justify-center text-lg shrink-0">☕</span>
+              <span class="text-base sm:text-lg font-black text-[#3A3D42] truncate">따뜻한 겨울</span>
             </div>
-            <span class="track-status text-xs sm:text-sm font-extrabold text-slate-400">▶ 듣기</span>
+            <span class="track-status text-xs font-extrabold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full shrink-0">▶ 듣기</span>
           </button>
 
-          <button type="button" data-track="2" class="music-track-btn select-chip py-2.5 px-3.5 rounded-2xl flex items-center justify-between">
-            <div class="flex items-center gap-2.5">
-              <span class="w-9 h-9 rounded-xl bg-[#ECFDF5] flex items-center justify-center text-lg">✈️</span>
-              <span class="text-base sm:text-lg font-black text-[#3A3D42]">즐거운 여행</span>
+          <button type="button" data-track="2" class="music-track-btn select-chip px-3.5 py-2.5 rounded-2xl flex items-center justify-between">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="w-9 h-9 rounded-xl bg-[#EFF6FF] flex items-center justify-center text-lg shrink-0">✈️</span>
+              <span class="text-base sm:text-lg font-black text-[#3A3D42] truncate">즐거운 여행</span>
             </div>
-            <span class="track-status text-xs sm:text-sm font-extrabold text-slate-400">▶ 듣기</span>
+            <span class="track-status text-xs font-extrabold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full shrink-0">▶ 듣기</span>
           </button>
 
-          <button type="button" data-track="3" class="music-track-btn select-chip py-2.5 px-3.5 rounded-2xl flex items-center justify-between">
-            <div class="flex items-center gap-2.5">
-              <span class="w-9 h-9 rounded-xl bg-[#FFF1F2] flex items-center justify-center text-lg">🌅</span>
-              <span class="text-base sm:text-lg font-black text-[#3A3D42]">희망찬 새해</span>
+          <button type="button" data-track="3" class="music-track-btn select-chip px-3.5 py-2.5 rounded-2xl flex items-center justify-between">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="w-9 h-9 rounded-xl bg-[#ECFDF5] flex items-center justify-center text-lg shrink-0">🌅</span>
+              <span class="text-base sm:text-lg font-black text-[#3A3D42] truncate">희망찬 새해</span>
             </div>
-            <span class="track-status text-xs sm:text-sm font-extrabold text-slate-400">▶ 듣기</span>
+            <span class="track-status text-xs font-extrabold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full shrink-0">▶ 듣기</span>
           </button>
         </div>
 
-        <!-- 내 음악 가져오기 (노란색 버튼) -->
+        <!-- 내 음악 가져오기 (노란색 강조 + 네이티브 파일 선택 오버레이) -->
         <div id="btnPickCustomAudio" role="button" tabindex="0"
-          class="select-chip relative overflow-hidden w-full py-2.5 px-3.5 rounded-2xl !bg-[#FEF08A] !border-[#F59E0B] flex items-center justify-between cursor-pointer shrink-0 shadow-sm">
-          <div class="flex items-center gap-2.5 min-w-0 pointer-events-none">
+          class="custom-audio-yellow relative overflow-hidden w-full px-3.5 py-2.5 rounded-2xl flex items-center justify-between gap-2 cursor-pointer shrink-0 transition">
+          <input type="file" id="customAudioInputMain" accept="audio/*" class="native-file-overlay" aria-label="내 음악 파일 열기" />
+          <div class="flex items-center gap-2.5 min-w-0">
             <span class="w-9 h-9 rounded-xl bg-white/90 flex items-center justify-center text-lg shrink-0">📂</span>
-            <span id="customAudioName" class="text-base sm:text-lg font-black text-[#78350F] truncate">내 음악 가져오기</span>
+            <span id="customAudioName" class="text-base sm:text-lg font-black text-[#854D0E] truncate">내 음악 가져오기</span>
           </div>
           <div class="flex items-center gap-1.5 shrink-0">
-            <span id="customAudioStatus" class="hidden text-xs font-extrabold text-[#B45309] bg-white/85 px-2.5 py-1 rounded-xl pointer-events-none">▶ 듣기</span>
-            <label id="btnChangeCustomAudio"
-              class="relative overflow-hidden px-2.5 py-1 rounded-xl bg-[#F59E0B] text-white text-xs sm:text-sm font-black cursor-pointer">
-              <span id="customAudioLen" class="pointer-events-none">파일 열기</span>
-              <input type="file" id="customAudioChangeInput" accept="audio/*"
-                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-            </label>
+            <span id="customAudioStatus" class="text-xs font-extrabold text-[#854D0E] bg-white/80 px-2.5 py-1 rounded-full">파일 열기</span>
+            <div id="btnChangeCustomAudio" class="hidden relative overflow-hidden bg-white text-[#854D0E] border border-[#CA8A04] px-2.5 py-1 rounded-full text-xs font-black z-30">
+              <input type="file" id="customAudioInputChange" accept="audio/*" class="native-file-overlay" aria-label="다른 음악 파일 고르기" />
+              <span>다른 곡</span>
+            </div>
           </div>
-          <!-- 처음 불러올 때는 전체 영역 터치로 파일 열기 -->
-          <input type="file" id="customAudioInput" accept="audio/*"
-            aria-label="내 음악 가져오기"
-            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
         </div>
 
         <!-- 음악 없음 -->
         <button type="button" id="btnNoMusic"
-          class="select-chip selected w-full py-2.5 px-4 rounded-2xl flex items-center justify-center gap-2 text-base sm:text-lg font-black text-[#3A3D42] shrink-0">
+          class="select-chip selected w-full py-2.5 px-3.5 rounded-2xl flex items-center justify-center gap-2 text-base font-black text-[#3A3D42] shrink-0">
           <span>🔇</span>
           <span>음악 없음</span>
         </button>
       </div>
 
-      <footer class="shrink-0 px-4 py-3 bg-white border-t border-slate-200/70">
+      <footer class="shrink-0 px-3.5 py-3 bg-white border-t border-slate-200/70">
         <button type="button" id="btnMusicConfirm"
           class="w-full py-3.5 rounded-3xl bg-gradient-to-r from-[#FBC246] to-[#F59E0B] active:scale-[0.98] text-white text-xl font-black shadow-lg shadow-amber-500/25">
           확인
@@ -708,63 +695,57 @@
     </div>
 
     <!-- =========================================================
-         화면 5: 크게 미리보기 페이지 (직관적 픽토그램 + 캐릭터 -/+ 조절 + 동영상 저장)
+         화면 5: 크게 미리보기 페이지 (직관적 픽토그램 + 시니어 조절 카드 + 2종 저장 버튼)
          ========================================================= -->
-    <div id="view-preview" class="hidden absolute inset-0 z-30 flex-col justify-between p-3.5 bg-gradient-to-b from-black/50 via-transparent to-black/75">
-      <!-- 상단 바 (줄바꿈 금지 + 직관적 픽토그램 버튼) -->
-      <div class="flex items-center justify-between gap-2 whitespace-nowrap">
+    <div id="view-preview" class="hidden absolute inset-0 z-30 flex-col justify-between p-3.5 sm:p-4 bg-gradient-to-b from-black/45 via-transparent to-black/75">
+
+      <!-- 상단: 줄바꿈 없는 직관적 SVG 픽토그램 버튼 + 타이머 -->
+      <div class="flex items-center justify-between gap-2">
         <div class="flex items-center gap-2 shrink-0">
           <!-- 뒤로가기 픽토그램 -->
-          <button type="button" id="btnPreviewBack"
-            class="w-[54px] h-[54px] rounded-2xl bg-white/95 text-[#3A3D42] shadow-lg border border-white flex flex-col items-center justify-center gap-0.5 active:scale-95 transition shrink-0 whitespace-nowrap"
-            aria-label="뒤로가기">
-            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M19 12H5"></path>
-              <path d="M12 19l-7-7 7-7"></path>
+          <button type="button" id="btnPreviewBack" aria-label="뒤로가기"
+            class="w-[54px] h-[54px] rounded-2xl bg-white/95 active:scale-95 text-[#3A3D42] shadow-lg border-2 border-white flex flex-col items-center justify-center gap-0.5 whitespace-nowrap transition">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 18l-6-6 6-6"/>
             </svg>
-            <span class="text-[11px] font-black leading-none whitespace-nowrap">뒤로</span>
+            <span class="text-[11px] font-black leading-none">뒤로</span>
           </button>
 
           <!-- 글수정 픽토그램 -->
-          <button type="button" id="btnPreviewQuickEdit"
-            class="w-[54px] h-[54px] rounded-2xl bg-[#FFF8E1] text-[#B45309] shadow-lg border-2 border-[#FBC246] flex flex-col items-center justify-center gap-0.5 active:scale-95 transition shrink-0 whitespace-nowrap"
-            aria-label="글 수정">
-            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M12 20h9"></path>
-              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path>
+          <button type="button" id="btnPreviewQuickEdit" aria-label="글 수정"
+            class="w-[54px] h-[54px] rounded-2xl bg-[#FFF8E1] active:scale-95 text-[#B45309] shadow-lg border-2 border-[#FBC246] flex flex-col items-center justify-center gap-0.5 whitespace-nowrap transition">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"/>
+              <path d="M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4Z"/>
             </svg>
-            <span class="text-[11px] font-black leading-none whitespace-nowrap">글수정</span>
+            <span class="text-[11px] font-black leading-none">글수정</span>
           </button>
 
           <!-- 소리 켜기/끄기 픽토그램 -->
-          <button type="button" id="btnTogglePreviewSound"
-            class="hidden w-[54px] h-[54px] rounded-2xl bg-white/95 text-[#3A3D42] shadow-lg border border-white flex-col items-center justify-center gap-0.5 active:scale-95 transition shrink-0 whitespace-nowrap"
-            aria-label="미리보기 음악 소리 끄기 또는 켜기">
-            <!-- 소리 켜짐 아이콘 -->
-            <svg id="previewSoundSvgOn" class="w-6 h-6 text-[#F59E0B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" fill-opacity="0.18"></polygon>
-              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          <button type="button" id="btnTogglePreviewSound" aria-label="소리 켜기 또는 끄기"
+            class="hidden w-[54px] h-[54px] rounded-2xl bg-white/95 active:scale-95 text-[#3A3D42] shadow-lg border-2 border-white flex-col items-center justify-center gap-0.5 whitespace-nowrap transition">
+            <svg id="previewSoundOnSvg" class="w-6 h-6 text-[#F59E0B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
             </svg>
-            <!-- 소리 꺼짐 아이콘 -->
-            <svg id="previewSoundSvgOff" class="hidden w-6 h-6 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" fill-opacity="0.15"></polygon>
-              <line x1="23" y1="9" x2="17" y2="15"></line>
-              <line x1="17" y1="9" x2="23" y2="15"></line>
+            <svg id="previewSoundOffSvg" class="hidden w-6 h-6 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+              <line x1="23" y1="9" x2="17" y2="15"/>
+              <line x1="17" y1="9" x2="23" y2="15"/>
             </svg>
-            <span id="previewSoundLabel" class="text-[11px] font-black leading-none whitespace-nowrap">소리</span>
+            <span id="previewSoundText" class="text-[11px] font-black leading-none">소리</span>
           </button>
         </div>
 
-        <!-- 재생 시간 배지 (한 줄 고정) -->
-        <div id="previewTimerBadge" class="px-3 py-2 rounded-2xl bg-[#3A3D42]/85 backdrop-blur-md text-[#FBC246] text-xs sm:text-sm font-black tabular-nums whitespace-nowrap shrink-0 shadow-md">
+        <div id="previewTimerBadge" class="px-3.5 py-2.5 rounded-2xl bg-[#3A3D42]/90 backdrop-blur-md text-[#FBC246] text-sm font-black whitespace-nowrap shrink-0 shadow-md">
           00:00 / 00:15
         </div>
       </div>
 
-      <!-- 하단: 시니어 친화 캐릭터 조절 카드 (-/+ 전용) + 동영상 저장 버튼 -->
-      <div class="space-y-2.5 pb-1">
-        <div class="bg-white/95 backdrop-blur-md border-2 border-[#FBC246] rounded-[26px] px-4 py-3.5 space-y-3 shadow-2xl">
+      <!-- 하단: 시니어 친화 글자 크기·속도 조절 카드 + 저장 버튼 2종 -->
+      <div class="space-y-2.5 pb-0.5">
+        <div class="bg-white/95 backdrop-blur-md rounded-[26px] p-3.5 shadow-2xl border-2 border-[#FBC246] space-y-2.5">
           <!-- 1) 글자 크기 조절 -->
           <div class="grid grid-cols-[1fr_auto] items-center gap-2.5">
             <div class="flex items-center gap-2 min-w-0">
@@ -790,8 +771,6 @@
               </button>
             </div>
           </div>
-
-          <div class="h-px bg-slate-100"></div>
 
           <!-- 2) 글자 속도 조절 -->
           <div class="grid grid-cols-[1fr_auto] items-center gap-2.5">
@@ -820,35 +799,35 @@
           </div>
         </div>
 
-        <button type="button" id="btnStartExport"
-          class="w-full py-4 px-4 rounded-[26px] bg-gradient-to-r from-[#FBC246] via-[#F59E0B] to-[#F97316] active:scale-[0.98] text-white text-lg sm:text-xl font-black shadow-2xl border-2 border-white/80 flex items-center justify-center gap-2 whitespace-nowrap">
-          <span>📥</span>
-          <span>동영상 저장하기 (갤러리)</span>
-        </button>
+        <!-- 저장 버튼 2종: 글·사진 길이만큼 짧게 저장 / 음악 전체 길이 저장 -->
+        <div class="grid grid-cols-2 gap-2.5">
+          <button type="button" id="btnStartExportShort"
+            class="py-3.5 px-3 rounded-[24px] bg-gradient-to-r from-[#FBC246] via-[#F59E0B] to-[#F97316] active:scale-[0.98] text-white shadow-2xl border-2 border-white/85 flex flex-col items-center justify-center gap-0.5 whitespace-nowrap">
+            <span class="text-base sm:text-lg font-black leading-tight">⚡ 글·사진 길이</span>
+            <span id="shortExportDurText" class="text-xs font-extrabold text-amber-50/95">약 15초 저장</span>
+          </button>
+
+          <button type="button" id="btnStartExportFull"
+            class="py-3.5 px-3 rounded-[24px] bg-white/95 active:scale-[0.98] text-[#3A3D42] shadow-2xl border-2 border-[#FBC246] flex flex-col items-center justify-center gap-0.5 whitespace-nowrap">
+            <span class="text-base sm:text-lg font-black leading-tight">🎵 음악 전체</span>
+            <span id="fullExportDurText" class="text-xs font-extrabold text-[#B45309]">음악 없음</span>
+          </button>
+        </div>
       </div>
 
       <!-- 미리보기 위에서 바로 문구 수정하는 간편 팝업 시트 -->
-      <div id="previewQuickEditSheet" class="hidden absolute inset-0 z-40 bg-black/60 backdrop-blur-sm flex-col justify-end p-4">
-        <div class="bg-[#F4F5F7] rounded-[30px] p-5 shadow-2xl space-y-3.5 border-2 border-white">
+      <div id="previewQuickEditSheet" class="hidden absolute inset-0 z-40 bg-black/55 backdrop-blur-sm items-end p-3.5">
+        <div class="w-full bg-[#F4F5F7] rounded-[28px] p-4 shadow-2xl space-y-3 border-2 border-white">
           <div class="flex items-center justify-between">
-            <h3 class="text-xl font-black text-[#3A3D42]">✏️ 문구 바로 수정</h3>
-            <button type="button" id="btnCloseQuickEdit"
-              class="px-3.5 py-1.5 rounded-2xl bg-white text-slate-600 text-sm font-black shadow-sm">
-              닫기
-            </button>
+            <h3 class="text-lg font-black text-[#3A3D42]">✏️ 문구 바로 수정하기</h3>
+            <button type="button" id="btnCloseQuickEdit" class="px-3 py-1.5 rounded-xl bg-white text-slate-600 text-sm font-black">닫기</button>
           </div>
-
+          <input type="text" id="quickEditName"
+            class="w-full px-3.5 py-2.5 rounded-2xl bg-white border-2 border-transparent focus:border-[#FBC246] outline-none text-base font-dandi text-[#3A3D42]"
+            placeholder="이름 (예> 이주영 드림, 안써도 됨)" />
           <textarea id="quickEditBody" rows="5"
-            class="w-full p-3.5 rounded-2xl bg-white border-2 border-slate-200 focus:border-[#FBC246] outline-none text-base leading-relaxed font-dandi text-[#3A3D42] resize-none"
-            placeholder="안부 문구를 수정하세요 (비우면 글자 없이 나와요)"></textarea>
-
-          <div class="bg-white px-3.5 py-2.5 rounded-2xl border-2 border-slate-200 focus-within:border-[#FBC246] flex items-center gap-2">
-            <span class="text-sm font-black text-slate-500 shrink-0">이름</span>
-            <input type="text" id="quickEditName"
-              class="w-full outline-none text-base font-dandi text-[#3A3D42] bg-transparent"
-              placeholder="예> 이주영 드림 (안써도 괜찮아요)" />
-          </div>
-
+            class="w-full p-3.5 rounded-2xl bg-white border-2 border-transparent focus:border-[#FBC246] outline-none text-base leading-relaxed font-dandi text-[#3A3D42] resize-none"
+            placeholder="화면에 올라갈 문구를 수정하세요"></textarea>
           <button type="button" id="btnApplyQuickEdit"
             class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#FBC246] to-[#F59E0B] active:scale-[0.98] text-white text-lg font-black shadow-md">
             바로 적용하기
@@ -889,7 +868,7 @@
     </div>
 
     <!-- =========================================================
-         화면 7: 저장 완료 화면 (갤러리에 저장되었습니다 -> 공유하기 -> 처음으로)
+         화면 7: 저장 완료 화면 (배경 흰색 통일 + 공유하기 + 처음으로)
          ========================================================= -->
     <div id="view-complete" class="hidden absolute inset-0 z-50 bg-[#F4F5F7] flex-col p-5 justify-between">
       <div class="flex items-center justify-center gap-2 pt-1">
@@ -897,8 +876,9 @@
         <h2 class="text-2xl font-black text-[#3A3D42]"><span class="bean-underline">영상 완성!</span></h2>
       </div>
 
-      <div class="flex-1 min-h-0 my-3.5 flex items-center justify-center bg-white rounded-[28px] p-2 overflow-hidden shadow-md border-2 border-slate-100">
-        <video id="completeVideo" controls playsinline class="h-full w-auto max-w-full object-contain rounded-[20px] shadow-sm bg-white"></video>
+      <!-- 완성된 9:16 영상 미리보기 (배경 흰색으로 검은 테두리 오해 방지) -->
+      <div class="flex-1 min-h-0 my-3.5 flex items-center justify-center bg-white rounded-[28px] overflow-hidden shadow-lg border-4 border-white">
+        <video id="completeVideo" controls playsinline class="h-full w-auto max-w-full object-contain bg-white"></video>
       </div>
 
       <div class="space-y-3 shrink-0">
@@ -918,43 +898,73 @@
           <span>처음으로</span>
         </button>
       </div>
+
+      <!-- 기기 브라우저가 파일 공유를 막았을 때 열리는 앱 내 공유 팝업 -->
+      <div id="shareFallbackModal" class="hidden absolute inset-0 z-[60] bg-black/55 backdrop-blur-sm items-center justify-center p-5">
+        <div class="w-full max-w-sm bg-white rounded-[30px] p-5 shadow-2xl space-y-4 text-center">
+          <div class="flex justify-center">
+            <svg class="w-16 h-16" aria-hidden="true"><use href="#char-text" /></svg>
+          </div>
+          <div class="space-y-1.5">
+            <h3 class="text-xl font-black text-[#3A3D42]">💬 영상 공유하기</h3>
+            <p class="text-sm font-bold text-slate-600 leading-relaxed">
+              이 브라우저에서는 공유창이 바로 안 열릴 수 있어요.<br />
+              이미 저장된 영상을 <strong>갤러리에서 바로 선택</strong>해 보내거나 아래 버튼으로 다시 시도해 주세요!
+            </p>
+          </div>
+          <div class="space-y-2.5">
+            <button type="button" id="btnRetryNativeShare"
+              class="w-full py-3.5 rounded-2xl bg-[#FEE500] active:scale-[0.98] text-[#191919] text-base font-black">
+              📤 공유창 다시 열어보기
+            </button>
+            <button type="button" id="btnRedownloadFromShare"
+              class="w-full py-3.5 rounded-2xl bg-[#FFF8E1] border-2 border-[#FBC246] active:scale-[0.98] text-[#B45309] text-base font-black">
+              📥 영상 다시 저장하기
+            </button>
+            <button type="button" id="btnCloseShareModal"
+              class="w-full py-3 rounded-2xl bg-[#F4F5F7] text-[#3A3D42] text-base font-black">
+              닫기
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>
 
   <script>
     /**
-     * 프레임 공방 (FRAME STUDIO) - 시니어 친화 모바일 숏폼 만들기 웹앱
-     * - 스마트폰 9:16 한 화면 구성 (첫 화면 배경 = 실시간 미리보기, 4개 플로팅 버튼 + 미리보기 버튼)
-     * - 다중 사진: 1장 고정 / 2장 이상 4초씩 재생 + 1.5초 크로스페이드 전환, 음악 길이만큼 반복, 무조건 채움(Cover)
-     * - 갤러리 관리: 썸네일 X 삭제, 터치/마우스 드래그 순서 변경, 기존 사진 유지하며 추가, 720x1280 메모리 최적화
-     * - 문구: 부산 단디 명조체, 2배 슈퍼샘플링 캐시, 시작 1.5초 페이드인, 미리보기에서 크기·속도·내용 바로 수정
-     * - 음악: 기본 4곡(music 폴더 MP3 연결) + 내 음악 가져오기 + 음악 없음, 시작/끝 1.5초 페이드, 적용 즉시 재생 + 소리 켜기/끄기
-     * - 효과: 눈 / 반짝이 원터치 ON/OFF (천천히, 적당한 양)
-     * - 저장: 3단계 자동 안전망 (HW 고속 MP4 -> SW 고속 MP4 -> MediaRecorder 안전 모드)
+     * 프레임공방 - 시니어 스마트폰 전용 쉬운 숏폼 영상 만들기
+     * - 540x960 (9:16) 24fps 1.6Mbps 고속 저장 (갤럭시 S21 등 모바일 최적화)
+     * - music 폴더 4곡 연결: xmas.mp3(성탄절), travel.mp3(겨울), Warmth.mp3(여행), newyear.mp3(새해)
+     * - 글·사진 길이 단축 저장 vs 음악 전체 저장 2종 지원 (끝부분 1.5초 부드러운 페이드아웃)
+     * - 3단계 저장 안전망: HW WebCodecs MP4 -> SW WebCodecs MP4 -> MediaRecorder
      */
 
     const canvas = document.getElementById('sceneCanvas');
     const ctx = canvas.getContext('2d', { alpha: false });
-    const WIDTH = canvas.width;   // 720
-    const HEIGHT = canvas.height; // 1280
-    const FPS = 30;
+    const WIDTH = canvas.width;   // 540
+    const HEIGHT = canvas.height; // 960
+    const EXPORT_FPS = 24;
+    const EXPORT_BITRATE = 1_600_000;
+    const MAX_PHOTOS = 20;
 
     // ===== 기본 상수 =====
-    const PHOTO_SLIDE_SEC = 4.0;      // 2장 이상일 때 사진 1장당 재생 길이 (4초)
-    const PHOTO_FADE_SEC = 1.5;       // 사진 전환 페이드 길이 (1.5초)
-    const AUDIO_FADE_SEC = 1.5;       // 음악 시작/끝 페이드 길이 (1.5초)
-    const DEFAULT_NO_AUDIO_SEC = 15;  // 음악 없을 때 기본 영상 길이 (15초)
+    const PHOTO_SLIDE_SEC = 4.0;
+    const PHOTO_FADE_SEC = 1.5;
+    const AUDIO_FADE_SEC = 1.5;
+    const DEFAULT_NO_AUDIO_SEC = 15;
+    const TEXT_START_Y_RATIO = 0.60;
+    const TEXT_FADE_IN_SEC = 1.5;     // 처음 글자 나타날 때 1.5초 서서히 등장
 
-    const TEXT_START_Y_RATIO = 0.60;  // 화면 5등분 중 아래 2등분 지점 (위에서 60%)
-    const SNOW_COUNT = 55;
-    const SPARKLE_COUNT = 26;
+    const SNOW_COUNT = 52;
+    const SPARKLE_COUNT = 24;
 
-    // 미리보기에서 실시간 조절 가능한 글자 크기 & 프레임 속도
-    let textFontSizePx = 48;          // 32 ~ 64px (8px 단위 5단계)
-    let textScrollSpeed = 42;         // 24 ~ 60px/s (9 단위 5단계)
+    // 실시간 조절 가능한 글자 크기(5단계: 32~64) 및 속도(5단계: 24~60)
+    let textFontSizePx = 48;
+    let textScrollSpeed = 42;
 
-    // 글자 깨짐·떨림 방지를 위한 2배 고해상도 텍스트 캐시 및 페이드 마스크 레이어
+    // 2배 고해상도 텍스트 캐시 및 페이드 마스크 레이어
     let textCacheCanvas = null;
     let textCacheWidth = 0;
     let textCacheHeight = 0;
@@ -964,7 +974,7 @@
     textLayerCanvas.height = HEIGHT;
     const textLayerCtx = textLayerCanvas.getContext('2d');
 
-    // ===== 6개 주제별 추천 안부 문구 (각 3종, 자연스러운 줄바꿈 적용) =====
+    // ===== 6개 주제별 추천 안부 문구 (각 3종) =====
     const TEXT_PRESET_CATEGORIES = {
       winter: {
         label: '❄️ 겨울 문구',
@@ -1070,7 +1080,7 @@
       }
     };
 
-    // ===== 기본 음악 4곡 (music 폴더 내 MP3 파일 연결 — 대소문자 정확히 일치) =====
+    // ===== 기본 음악 4곡 (music 폴더 연결: travel=겨울, Warmth=여행) =====
     const BUILTIN_TRACKS = [
       {
         name: '성탄절 캐롤',
@@ -1099,26 +1109,23 @@
     ];
 
     // ===== 앱 상태 =====
-    let currentView = 'home'; // 'home' | 'gallery' | 'text' | 'music' | 'effect' | 'preview' | 'saving' | 'complete'
+    let currentView = 'home';
     let defaultBgCanvas = null;
-    let selectedImages = [];
+    let selectedImages = []; // { canvas: HTMLCanvasElement, thumbUrl: string }[]
     let draftImages = [];
 
-    // 문구 상태
     let savedTextPreset = '';
     let savedTextBody = '';
     let savedTextName = '';
     let draftTextPreset = '';
 
-    // 음악 상태
-    let savedMusicMode = 'none';     // 'none' | 'builtin' | 'custom'
+    let savedMusicMode = 'none'; // 'none' | 'builtin' | 'custom'
     let savedBuiltinIndex = -1;
     let savedCustomAudioFile = null;
     let savedCustomAudioBuffer = null;
     let savedCustomAudioName = '';
     let savedCustomAudioDuration = 0;
 
-    // 음악 페이지 임시 선택 상태
     let draftMusicMode = 'none';
     let draftBuiltinIndex = -1;
     let draftCustomAudioFile = null;
@@ -1126,30 +1133,29 @@
     let draftCustomAudioName = '';
     let draftCustomAudioDuration = 0;
 
-    // 효과 상태 (기본 ON: 눈, 반짝이)
     let snowEnabled = true;
     let sparkleEnabled = true;
 
-    // 파티클
     const snowflakes = [];
     const sparkles = [];
+    const sparkleSprites = []; // 사전 캐싱된 반짝이 스프라이트
 
-    // 오디오 미리듣기 / 백그라운드 재생 제어
-    let liveAudioCtx = null;
+    // 공용 AudioContext 싱글톤 (iOS Safari 개수 제한 및 팝 노이즈 방지)
+    let sharedAudioCtx = null;
     let liveAudioSource = null;
-    let liveGainNode = null;
+    let liveAudioGain = null;
     let isPreviewAudioPlaying = false;
-    let playingDraftKey = ''; // 음악 선택 화면에서 현재 재생 중인 곡 키 ('builtin:0' | 'custom' | '')
+    let playingDraftKey = ''; // 음악 화면에서 현재 재생 중인 항목 ('builtin:0' | 'custom')
+    let audioPlayReqId = 0;
     let homeSoundMuted = false;
     let activeBgAudioKey = '';
-    let audioPlayRequestId = 0;
     const builtinBufferCache = new Map();
 
-    // 애니메이션 및 내보내기 상태
     let animStartTime = performance.now();
     let isExporting = false;
     let exportCancelled = false;
     let lastExportBlob = null;
+    let lastExportFile = null;
     let lastExportExt = 'mp4';
     let lastExportUrl = null;
     let lastExportFileName = '프레임공방.mp4';
@@ -1175,14 +1181,14 @@
     const homeSoundIcon = document.getElementById('homeSoundIcon');
     const homeSoundLabel = document.getElementById('homeSoundLabel');
     const btnTogglePreviewSound = document.getElementById('btnTogglePreviewSound');
-    const previewSoundSvgOn = document.getElementById('previewSoundSvgOn');
-    const previewSoundSvgOff = document.getElementById('previewSoundSvgOff');
-    const previewSoundLabel = document.getElementById('previewSoundLabel');
+    const previewSoundOnSvg = document.getElementById('previewSoundOnSvg');
+    const previewSoundOffSvg = document.getElementById('previewSoundOffSvg');
+    const previewSoundText = document.getElementById('previewSoundText');
 
-    const galleryDirectInput = document.getElementById('galleryDirectInput');
-    const galleryAddInput = document.getElementById('galleryAddInput');
-    const customAudioInput = document.getElementById('customAudioInput');
-    const customAudioChangeInput = document.getElementById('customAudioChangeInput');
+    const galleryInputHome = document.getElementById('galleryInputHome');
+    const galleryInputAdd = document.getElementById('galleryInputAdd');
+    const customAudioInputMain = document.getElementById('customAudioInputMain');
+    const customAudioInputChange = document.getElementById('customAudioInputChange');
 
     const btnOpenGallery = document.getElementById('btnOpenGallery');
     const btnOpenText = document.getElementById('btnOpenText');
@@ -1217,8 +1223,8 @@
     const musicTrackBtns = document.querySelectorAll('.music-track-btn');
     const btnPickCustomAudio = document.getElementById('btnPickCustomAudio');
     const customAudioNameEl = document.getElementById('customAudioName');
-    const customAudioLenEl = document.getElementById('customAudioLen');
     const customAudioStatusEl = document.getElementById('customAudioStatus');
+    const btnChangeCustomAudio = document.getElementById('btnChangeCustomAudio');
     const btnNoMusic = document.getElementById('btnNoMusic');
     const btnMusicConfirm = document.getElementById('btnMusicConfirm');
 
@@ -1231,18 +1237,20 @@
     const btnPreviewBack = document.getElementById('btnPreviewBack');
     const btnPreviewQuickEdit = document.getElementById('btnPreviewQuickEdit');
     const previewTimerBadge = document.getElementById('previewTimerBadge');
-    const btnStartExport = document.getElementById('btnStartExport');
+    const btnStartExportShort = document.getElementById('btnStartExportShort');
+    const btnStartExportFull = document.getElementById('btnStartExportFull');
+    const shortExportDurText = document.getElementById('shortExportDurText');
+    const fullExportDurText = document.getElementById('fullExportDurText');
     const btnFontSmaller = document.getElementById('btnFontSmaller');
     const btnFontLarger = document.getElementById('btnFontLarger');
-    const fontStepDots = document.getElementById('fontStepDots');
     const btnSpeedSlower = document.getElementById('btnSpeedSlower');
     const btnSpeedFaster = document.getElementById('btnSpeedFaster');
+    const fontStepDots = document.getElementById('fontStepDots');
     const speedStepDots = document.getElementById('speedStepDots');
-
     const previewQuickEditSheet = document.getElementById('previewQuickEditSheet');
     const btnCloseQuickEdit = document.getElementById('btnCloseQuickEdit');
-    const quickEditBody = document.getElementById('quickEditBody');
     const quickEditName = document.getElementById('quickEditName');
+    const quickEditBody = document.getElementById('quickEditBody');
     const btnApplyQuickEdit = document.getElementById('btnApplyQuickEdit');
 
     const savingPercentBig = document.getElementById('savingPercentBig');
@@ -1253,6 +1261,10 @@
     const completeVideo = document.getElementById('completeVideo');
     const btnShareVideo = document.getElementById('btnShareVideo');
     const btnGoHome = document.getElementById('btnGoHome');
+    const shareFallbackModal = document.getElementById('shareFallbackModal');
+    const btnRetryNativeShare = document.getElementById('btnRetryNativeShare');
+    const btnRedownloadFromShare = document.getElementById('btnRedownloadFromShare');
+    const btnCloseShareModal = document.getElementById('btnCloseShareModal');
 
     // ===== 유틸리티 =====
     let toastTimer = null;
@@ -1283,7 +1295,26 @@
       };
     }
 
-    // 최종 영상 길이 계산
+    // 글·사진 길이 계산 (텍스트 있으면 글자 끝까지, 없으면 사진 1장=15초 / 2장 이상=사진 길이)
+    function getContentDurationSec() {
+      const hasText = Boolean(savedTextBody.trim() || savedTextName.trim());
+      if (hasText) {
+        ensureTextCache(savedTextBody, savedTextName);
+        if (textCacheCanvas && textCacheHeight > 0) {
+          const startY = HEIGHT * TEXT_START_Y_RATIO;
+          const topLimitY = HEIGHT * 0.10;
+          const travelDist = (startY - topLimitY) + textCacheHeight + 60;
+          const cycleSec = Math.max(5, travelDist / Math.max(12, textScrollSpeed));
+          return Math.ceil(cycleSec);
+        }
+      }
+      if (selectedImages.length >= 2) {
+        return selectedImages.length * PHOTO_SLIDE_SEC;
+      }
+      return DEFAULT_NO_AUDIO_SEC;
+    }
+
+    // 음악 전체 길이 기준 영상 길이 계산
     function getVideoDurationSec() {
       if (savedMusicMode === 'builtin' && savedBuiltinIndex >= 0) {
         return BUILTIN_TRACKS[savedBuiltinIndex].duration || 20;
@@ -1291,10 +1322,7 @@
       if (savedMusicMode === 'custom' && savedCustomAudioDuration > 1) {
         return savedCustomAudioDuration;
       }
-      if (selectedImages.length >= 2) {
-        return Math.max(DEFAULT_NO_AUDIO_SEC, selectedImages.length * PHOTO_SLIDE_SEC);
-      }
-      return DEFAULT_NO_AUDIO_SEC;
+      return getContentDurationSec();
     }
 
     // ===== 화면 전환 관리 =====
@@ -1360,17 +1388,17 @@
         homeSoundLabel.textContent = '꺼짐';
         btnToggleHomeSound.classList.remove('bg-[#FFF8E1]', 'text-[#B45309]', 'border-[#FDE68A]');
         btnToggleHomeSound.classList.add('bg-slate-100', 'text-slate-500', 'border-slate-200');
-        previewSoundSvgOn.classList.add('hidden');
-        previewSoundSvgOff.classList.remove('hidden');
-        previewSoundLabel.textContent = '음소거';
+        previewSoundOnSvg.classList.add('hidden');
+        previewSoundOffSvg.classList.remove('hidden');
+        previewSoundText.textContent = '음소거';
       } else {
         homeSoundIcon.textContent = '🔊';
         homeSoundLabel.textContent = '켜짐';
         btnToggleHomeSound.classList.add('bg-[#FFF8E1]', 'text-[#B45309]', 'border-[#FDE68A]');
         btnToggleHomeSound.classList.remove('bg-slate-100', 'text-slate-500', 'border-slate-200');
-        previewSoundSvgOn.classList.remove('hidden');
-        previewSoundSvgOff.classList.add('hidden');
-        previewSoundLabel.textContent = '소리';
+        previewSoundOnSvg.classList.remove('hidden');
+        previewSoundOffSvg.classList.add('hidden');
+        previewSoundText.textContent = '소리';
       }
     }
 
@@ -1392,20 +1420,36 @@
             : 'w-2.5 h-2.5 rounded-full bg-slate-200';
         });
       }
+
+      // 저장 버튼 2종의 예상 시간 실시간 표시
+      const contentSec = getContentDurationSec();
+      if (shortExportDurText) {
+        shortExportDurText.textContent = contentSec >= 60
+          ? `${formatTime(contentSec)} 저장`
+          : `약 ${Math.round(contentSec)}초 저장`;
+      }
+      if (fullExportDurText) {
+        if (savedMusicMode === 'none') {
+          fullExportDurText.textContent = `음악 없음 (${Math.round(contentSec)}초)`;
+        } else {
+          const fullSec = getVideoDurationSec();
+          fullExportDurText.textContent = `${formatTime(fullSec)} 저장`;
+        }
+      }
     }
 
     function refreshHomeBadges() {
       refreshSoundToggleUI();
 
-      // 1. 갤러리
+      // 1. 갤러리 (사진이 1장 이상이면 홈 카드의 투명 파일 오버레이를 숨겨 관리 화면으로 진입)
       if (selectedImages.length === 0) {
         badgeGallery.textContent = '사진 선택';
         btnOpenGallery.classList.remove('has-value');
-        galleryDirectInput.classList.remove('hidden');
+        galleryInputHome.classList.remove('hidden', 'pointer-events-none');
       } else {
         badgeGallery.textContent = `${selectedImages.length}장 선택됨`;
         btnOpenGallery.classList.add('has-value');
-        galleryDirectInput.classList.add('hidden');
+        galleryInputHome.classList.add('hidden', 'pointer-events-none');
       }
 
       // 2. 문구
@@ -1455,7 +1499,7 @@
       }
     }
 
-    // ===== 기본 겨울 밤하늘 배경 (사진 미선택 시) =====
+    // ===== 기본 겨울 밤하늘 배경 생성 =====
     function buildDefaultBackground() {
       const off = document.createElement('canvas');
       off.width = WIDTH;
@@ -1470,21 +1514,21 @@
       g.fillStyle = sky;
       g.fillRect(0, 0, WIDTH, HEIGHT);
 
-      const moonGrad = g.createRadialGradient(WIDTH * 0.78, HEIGHT * 0.18, 8, WIDTH * 0.78, HEIGHT * 0.18, 120);
+      const moonGrad = g.createRadialGradient(WIDTH * 0.78, HEIGHT * 0.18, 6, WIDTH * 0.78, HEIGHT * 0.18, 92);
       moonGrad.addColorStop(0, 'rgba(254, 249, 195, 0.95)');
       moonGrad.addColorStop(0.3, 'rgba(254, 240, 138, 0.35)');
       moonGrad.addColorStop(1, 'rgba(254, 240, 138, 0)');
       g.fillStyle = moonGrad;
       g.beginPath();
-      g.arc(WIDTH * 0.78, HEIGHT * 0.18, 120, 0, Math.PI * 2);
+      g.arc(WIDTH * 0.78, HEIGHT * 0.18, 92, 0, Math.PI * 2);
       g.fill();
 
       const rnd = createSeededRandom(2026);
       g.fillStyle = 'rgba(15, 23, 42, 0.45)';
       g.beginPath();
       g.moveTo(0, HEIGHT * 0.78);
-      for (let x = 0; x <= WIDTH; x += 24) {
-        const y = HEIGHT * 0.72 - Math.sin(x * 0.015) * 45 - rnd() * 25;
+      for (let x = 0; x <= WIDTH; x += 20) {
+        const y = HEIGHT * 0.72 - Math.sin(x * 0.02) * 34 - rnd() * 20;
         g.lineTo(x, y);
       }
       g.lineTo(WIDTH, HEIGHT);
@@ -1507,17 +1551,57 @@
       defaultBgCanvas = off;
     }
 
+    // ===== 반짝이 스프라이트 사전 캐싱 (고속 저장 최적화) =====
+    function buildSparkleSprites() {
+      sparkleSprites.length = 0;
+      const colors = [
+        { r: 255, g: 255, b: 255 },
+        { r: 254, g: 243, b: 199 },
+        { r: 224, g: 242, b: 254 }
+      ];
+      for (const c of colors) {
+        const s = 48;
+        const off = document.createElement('canvas');
+        off.width = s;
+        off.height = s;
+        const g = off.getContext('2d');
+        const half = s / 2;
+        const grad = g.createRadialGradient(half, half, 0, half, half, half);
+        grad.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, 1)`);
+        grad.addColorStop(0.38, `rgba(${c.r}, ${c.g}, ${c.b}, 0.35)`);
+        grad.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0)`);
+        g.fillStyle = grad;
+        g.beginPath();
+        g.arc(half, half, half, 0, Math.PI * 2);
+        g.fill();
+
+        // 십자 별빛
+        g.strokeStyle = `rgba(${c.r}, ${c.g}, ${c.b}, 0.85)`;
+        g.lineWidth = 1.6;
+        g.beginPath();
+        g.moveTo(half - 14, half);
+        g.lineTo(half + 14, half);
+        g.moveTo(half, half - 14);
+        g.lineTo(half, half + 14);
+        g.stroke();
+
+        sparkleSprites.push(off);
+      }
+    }
+
     // ===== 파티클 초기화 =====
     function initParticles() {
+      buildSparkleSprites();
+
       const rndSnow = createSeededRandom(7701);
       snowflakes.length = 0;
       for (let i = 0; i < SNOW_COUNT; i++) {
         snowflakes.push({
           x0: rndSnow() * WIDTH,
           y0: rndSnow() * HEIGHT,
-          r: 2.0 + rndSnow() * 3.8,
-          speedY: 22 + rndSnow() * 32,
-          swayAmp: 10 + rndSnow() * 24,
+          r: 1.6 + rndSnow() * 3.0,
+          speedY: 18 + rndSnow() * 26,
+          swayAmp: 8 + rndSnow() * 18,
           swayFreq: 0.45 + rndSnow() * 0.75,
           phase: rndSnow() * Math.PI * 2,
           alpha: 0.45 + rndSnow() * 0.45
@@ -1525,60 +1609,20 @@
       }
 
       const rndSpark = createSeededRandom(8802);
-      const colors = [
-        { r: 255, g: 255, b: 255 },
-        { r: 254, g: 243, b: 199 },
-        { r: 224, g: 242, b: 254 }
-      ];
       sparkles.length = 0;
       for (let i = 0; i < SPARKLE_COUNT; i++) {
         sparkles.push({
           x0: rndSpark() * WIDTH,
           y0: rndSpark() * HEIGHT,
-          size: 4 + rndSpark() * 6.5,
-          speedY: 12 + rndSpark() * 20,
-          swayAmp: 8 + rndSpark() * 18,
+          size: 16 + rndSpark() * 20,
+          speedY: 10 + rndSpark() * 16,
+          swayAmp: 7 + rndSpark() * 14,
           swayFreq: 0.35 + rndSpark() * 0.6,
           twinkleFreq: 0.9 + rndSpark() * 1.4,
           phase: rndSpark() * Math.PI * 2,
-          color: colors[i % colors.length]
+          spriteIdx: i % 3
         });
       }
-    }
-
-    // ===== 9:16 채움(Cover) 그리기 (최적화 캔버스 & 일반 이미지 모두 지원) =====
-    function drawCoverImage(targetCtx, imgItem, alpha = 1) {
-      if (!imgItem) return;
-      targetCtx.save();
-      targetCtx.globalAlpha = alpha;
-
-      if (imgItem.canvas) {
-        targetCtx.drawImage(imgItem.canvas, 0, 0, WIDTH, HEIGHT);
-        targetCtx.restore();
-        return;
-      }
-
-      const imgW = imgItem.naturalWidth || imgItem.width;
-      const imgH = imgItem.naturalHeight || imgItem.height;
-      if (!imgW || !imgH) {
-        targetCtx.restore();
-        return;
-      }
-
-      const canvasRatio = WIDTH / HEIGHT;
-      const imgRatio = imgW / imgH;
-      let sx = 0, sy = 0, sw = imgW, sh = imgH;
-
-      if (imgRatio > canvasRatio) {
-        sw = imgH * canvasRatio;
-        sx = (imgW - sw) / 2;
-      } else {
-        sh = imgW / canvasRatio;
-        sy = (imgH - sh) / 2;
-      }
-
-      targetCtx.drawImage(imgItem, sx, sy, sw, sh, 0, 0, WIDTH, HEIGHT);
-      targetCtx.restore();
     }
 
     // ===== 한글 자동 줄바꿈 =====
@@ -1605,17 +1649,18 @@
       return result;
     }
 
-    // ===== 고해상도 글자 캐시 생성 (모바일 캔버스 최대 높이 3800px 안전 제한 포함) =====
+    // ===== 2배 고해상도 글자 캐시 (모바일 최대 캔버스 높이 3800px 안전 방어) =====
     function ensureTextCache(bodyText, nameText) {
-      const key = `${bodyText}||${nameText}||${textFontSizePx}||${document.fonts ? document.fonts.status : ''}`;
+      const scaledFont = Math.round(textFontSizePx * (WIDTH / 720));
+      const key = `${bodyText}||${nameText}||${scaledFont}||${document.fonts ? document.fonts.status : ''}`;
       if (textCacheKey === key && textCacheCanvas) return;
 
-      const maxTextW = WIDTH - 104;
-      const lineH = Math.round(textFontSizePx * 1.85);
+      const maxTextW = WIDTH - 76;
+      const lineH = Math.round(scaledFont * 1.82);
 
       const measureCanvas = document.createElement('canvas');
       const mCtx = measureCanvas.getContext('2d');
-      mCtx.font = `700 ${textFontSizePx}px "BusanDandiMyeongjo", "Noto Serif KR", serif`;
+      mCtx.font = `700 ${scaledFont}px "BusanDandiMyeongjo", "Noto Serif KR", serif`;
 
       const lines = [];
       if (bodyText.trim()) {
@@ -1629,20 +1674,22 @@
 
       if (lines.length === 0) {
         textCacheCanvas = null;
+        textCacheHeight = 0;
         textCacheKey = key;
         return;
       }
 
-      const padY = 48;
+      const padY = 36;
       const logicalW = WIDTH;
       const logicalH = lines.length * lineH + padY * 2;
-      const safeScale = Math.min(2, Math.max(1, Math.floor((3800 / logicalH) * 10) / 10));
+      // 모바일 GPU 최대 캔버스 높이(4096px) 초과 방지
+      const scale = logicalH * 2 > 3800 ? Math.max(1, 3800 / logicalH) : 2;
 
       const off = document.createElement('canvas');
-      off.width = Math.round(logicalW * safeScale);
-      off.height = Math.round(logicalH * safeScale);
+      off.width = Math.round(logicalW * scale);
+      off.height = Math.round(logicalH * scale);
       const oCtx = off.getContext('2d');
-      oCtx.scale(safeScale, safeScale);
+      oCtx.scale(scale, scale);
       oCtx.textAlign = 'center';
       oCtx.textBaseline = 'middle';
       oCtx.lineJoin = 'round';
@@ -1651,14 +1698,14 @@
       lines.forEach((item, idx) => {
         if (!item.text) return;
         const y = padY + idx * lineH + lineH / 2;
-        const fSize = item.isName ? Math.round(textFontSizePx * 0.92) : textFontSizePx;
+        const fSize = item.isName ? Math.round(scaledFont * 0.92) : scaledFont;
         oCtx.font = `700 ${fSize}px "BusanDandiMyeongjo", "Noto Serif KR", serif`;
 
         oCtx.shadowColor = 'rgba(0, 0, 0, 0.72)';
-        oCtx.shadowBlur = 10;
+        oCtx.shadowBlur = 8;
         oCtx.shadowOffsetX = 0;
-        oCtx.shadowOffsetY = 3;
-        oCtx.lineWidth = 2.6;
+        oCtx.shadowOffsetY = 2;
+        oCtx.lineWidth = 2.2;
         oCtx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
         oCtx.strokeText(item.text, logicalW / 2, y);
 
@@ -1673,7 +1720,7 @@
       textCacheKey = key;
     }
 
-    // ===== 편지 상승 애니메이션 그리기 (시작 1.5초 부드러운 페이드인 포함) =====
+    // ===== 편지 상승 애니메이션 그리기 (처음 1.5초 부드러운 페이드인 + 상/하단 마스크) =====
     function drawLetterText(targetCtx, tSec) {
       if (!savedTextBody.trim() && !savedTextName.trim()) return;
       ensureTextCache(savedTextBody, savedTextName);
@@ -1683,14 +1730,19 @@
       const topLimitY = HEIGHT * 0.10;
       const bottomLimitY = HEIGHT * 0.90;
 
-      const travelDist = (startY - topLimitY) + textCacheHeight + 80;
-      const cycleSec = Math.max(5, travelDist / Math.max(12, textScrollSpeed));
+      const scaledSpeed = textScrollSpeed * (HEIGHT / 1280);
+      const travelDist = (startY - topLimitY) + textCacheHeight + 60;
+      const cycleSec = Math.max(5, travelDist / Math.max(10, scaledSpeed));
       const localT = tSec % cycleSec;
-      const drawY = startY - localT * textScrollSpeed;
+      const drawY = startY - localT * scaledSpeed;
 
-      // 처음 등장 및 반복 시작 시 1.5초 동안 서서히 나타남
-      const fadeInRatio = Math.max(0, Math.min(1, localT / 1.5));
-      const smoothFadeIn = fadeInRatio * fadeInRatio * (3 - 2 * fadeInRatio);
+      // 처음 1.5초 동안 서서히 나타나도록 부드러운 곡선 페이드인
+      let startFadeAlpha = 1;
+      if (localT < TEXT_FADE_IN_SEC) {
+        const p = Math.max(0, Math.min(1, localT / TEXT_FADE_IN_SEC));
+        startFadeAlpha = p * p * (3 - 2 * p);
+      }
+      if (startFadeAlpha <= 0.005) return;
 
       textLayerCtx.clearRect(0, 0, WIDTH, HEIGHT);
       textLayerCtx.save();
@@ -1713,13 +1765,14 @@
       textLayerCtx.restore();
 
       targetCtx.save();
-      targetCtx.globalAlpha = smoothFadeIn;
+      targetCtx.globalAlpha = startFadeAlpha;
       targetCtx.drawImage(textLayerCanvas, 0, 0);
       targetCtx.restore();
     }
 
     // ===== 결정론적 씬 렌더링 =====
     function drawSceneAtTime(targetCtx, tSec) {
+      // 1) 배경 사진 렌더링 (이미 540x960으로 최적화된 캔버스 사용)
       if (selectedImages.length === 0) {
         if (defaultBgCanvas) {
           targetCtx.drawImage(defaultBgCanvas, 0, 0, WIDTH, HEIGHT);
@@ -1728,7 +1781,7 @@
           targetCtx.fillRect(0, 0, WIDTH, HEIGHT);
         }
       } else if (selectedImages.length === 1) {
-        drawCoverImage(targetCtx, selectedImages[0], 1);
+        targetCtx.drawImage(selectedImages[0].canvas, 0, 0, WIDTH, HEIGHT);
       } else {
         const count = selectedImages.length;
         const totalCycle = count * PHOTO_SLIDE_SEC;
@@ -1737,26 +1790,31 @@
         const nextIdx = (curIdx + 1) % count;
         const slideT = cycleT - curIdx * PHOTO_SLIDE_SEC;
 
-        drawCoverImage(targetCtx, selectedImages[curIdx], 1);
+        targetCtx.drawImage(selectedImages[curIdx].canvas, 0, 0, WIDTH, HEIGHT);
 
         const fadeStart = PHOTO_SLIDE_SEC - PHOTO_FADE_SEC;
         if (slideT > fadeStart) {
           const fadeProgress = Math.max(0, Math.min(1, (slideT - fadeStart) / PHOTO_FADE_SEC));
           const smoothFade = fadeProgress * fadeProgress * (3 - 2 * fadeProgress);
-          drawCoverImage(targetCtx, selectedImages[nextIdx], smoothFade);
+          targetCtx.save();
+          targetCtx.globalAlpha = smoothFade;
+          targetCtx.drawImage(selectedImages[nextIdx].canvas, 0, 0, WIDTH, HEIGHT);
+          targetCtx.restore();
         }
       }
 
+      // 사진 첨부 시 글자 가독성을 위한 은은한 어둡게(28%) 오버레이
       if (selectedImages.length > 0) {
         targetCtx.fillStyle = 'rgba(0, 0, 0, 0.28)';
         targetCtx.fillRect(0, 0, WIDTH, HEIGHT);
       }
 
+      // 2) 눈 효과
       if (snowEnabled) {
         targetCtx.save();
         for (let i = 0; i < snowflakes.length; i++) {
           const f = snowflakes[i];
-          const y = (f.y0 + tSec * f.speedY) % (HEIGHT + 24) - 12;
+          const y = (f.y0 + tSec * f.speedY) % (HEIGHT + 20) - 10;
           const x = ((f.x0 + Math.sin(tSec * f.swayFreq + f.phase) * f.swayAmp) % WIDTH + WIDTH) % WIDTH;
           targetCtx.fillStyle = `rgba(255, 255, 255, ${f.alpha})`;
           targetCtx.beginPath();
@@ -1766,7 +1824,8 @@
         targetCtx.restore();
       }
 
-      if (sparkleEnabled) {
+      // 3) 사전 캐싱된 고속 반짝이 효과
+      if (sparkleEnabled && sparkleSprites.length > 0) {
         targetCtx.save();
         targetCtx.globalCompositeOperation = 'lighter';
         for (let i = 0; i < sparkles.length; i++) {
@@ -1775,39 +1834,26 @@
           const x = ((sp.x0 + Math.sin(tSec * sp.swayFreq + sp.phase) * sp.swayAmp) % WIDTH + WIDTH) % WIDTH;
           const pulse = 0.5 + 0.5 * Math.sin(tSec * sp.twinkleFreq + sp.phase);
           const alpha = Math.pow(pulse, 1.8) * 0.72;
-          if (alpha < 0.03) continue;
+          if (alpha < 0.04) continue;
 
-          const { r, g, b } = sp.color;
-          const rad = sp.size * (0.85 + pulse * 0.55);
-
-          const grad = targetCtx.createRadialGradient(x, y, 0, x, y, rad * 2.2);
-          grad.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alpha})`);
-          grad.addColorStop(0.45, `rgba(${r}, ${g}, ${b}, ${alpha * 0.32})`);
-          grad.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
-          targetCtx.fillStyle = grad;
-          targetCtx.beginPath();
-          targetCtx.arc(x, y, rad * 2.2, 0, Math.PI * 2);
-          targetCtx.fill();
-
-          if (pulse > 0.58) {
-            const starLen = rad * 1.35;
-            targetCtx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${alpha * 0.85})`;
-            targetCtx.lineWidth = 1.4;
-            targetCtx.beginPath();
-            targetCtx.moveTo(x - starLen, y);
-            targetCtx.lineTo(x + starLen, y);
-            targetCtx.moveTo(x, y - starLen);
-            targetCtx.lineTo(x, y + starLen);
-            targetCtx.stroke();
-          }
+          const drawSize = sp.size * (0.82 + pulse * 0.45);
+          targetCtx.globalAlpha = alpha;
+          targetCtx.drawImage(
+            sparkleSprites[sp.spriteIdx],
+            x - drawSize / 2,
+            y - drawSize / 2,
+            drawSize,
+            drawSize
+          );
         }
         targetCtx.restore();
       }
 
+      // 4) 안부글 편지 애니메이션
       drawLetterText(targetCtx, tSec);
     }
 
-    // ===== 실시간 캔버스 애니메이션 루프 =====
+    // ===== 실시간 캔버스 루프 =====
     function animateLoop(now) {
       if (!isExporting) {
         const totalDur = getVideoDurationSec();
@@ -1821,16 +1867,26 @@
       requestAnimationFrame(animateLoop);
     }
 
-    // ===== 공용 AudioContext 싱글톤 (iOS Safari 생성 개수 제한 해결) =====
+    // ===== 공용 AudioContext & 잡음 없는 오디오 처리 =====
     function getSharedAudioContext() {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!liveAudioCtx || liveAudioCtx.state === 'closed') {
-        liveAudioCtx = new AudioCtx();
+      if (!sharedAudioCtx || sharedAudioCtx.state === 'closed') {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        sharedAudioCtx = new AudioCtx();
       }
-      return liveAudioCtx;
+      return sharedAudioCtx;
     }
 
-    // ===== 기본 4곡 오디오 버퍼 생성 (시작·끝 1.5초 부드러운 곡선 페이드 적용) =====
+    // iOS Safari 사용자 제스처 즉시 오디오 잠금 해제
+    function unlockAudioOnGesture() {
+      try {
+        const ctxAudio = getSharedAudioContext();
+        if (ctxAudio.state === 'suspended') {
+          ctxAudio.resume().catch(() => {});
+        }
+      } catch (_) {}
+    }
+
+    // 시작·끝 1.5초 S자 곡선 페이드 + 모바일 스피커 찢어짐 방지(0.92 headroom)
     function applyFadeToAudioBuffer(buffer, fadeSec = AUDIO_FADE_SEC) {
       const sr = buffer.sampleRate;
       const total = buffer.length;
@@ -1838,17 +1894,14 @@
 
       for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
         const data = buffer.getChannelData(ch);
-        // 모바일 스피커 찢어짐(클리핑) 방지를 위해 전체 음량을 살짝 여유(92%) 있게 정리
         for (let i = 0; i < total; i++) {
           data[i] *= 0.92;
         }
-        // 직선 대신 부드러운 S자 코사인 곡선 페이드 적용 (시작·끝 잡음 제거)
         for (let i = 0; i < fadeSamples; i++) {
           const ratio = i / fadeSamples;
           const smoothGain = 0.5 * (1 - Math.cos(Math.PI * ratio));
           data[i] *= smoothGain;
-          const outIdx = total - 1 - i;
-          data[outIdx] *= smoothGain;
+          data[total - 1 - i] *= smoothGain;
         }
       }
       return buffer;
@@ -1862,7 +1915,7 @@
       const track = BUILTIN_TRACKS[trackIdx];
       const audioCtx = getSharedAudioContext();
 
-      // 1) music 폴더의 실제 MP3 파일 우선 로드
+      // 1) ./music/*.mp3 실제 파일 불러오기 시도
       if (track.url) {
         try {
           const res = await fetch(track.url);
@@ -1875,11 +1928,11 @@
             return decoded;
           }
         } catch (err) {
-          console.warn('MP3 파일 로드 실패(로컬 테스트 폴백 멜로디 사용):', track.url, err);
+          console.warn(`MP3 로드 실패(${track.url}), 안전 폴백 멜로디 사용:`, err);
         }
       }
 
-      // 2) MP3가 아직 없는 미리보기 환경용 폴백 오르골 멜로디
+      // 2) 로컬 미리보기 등 MP3 미존재 시 따뜻한 오르골 폴백 멜로디 생성
       const sampleRate = 44100;
       const duration = track.duration || 20;
       const totalSamples = Math.floor(sampleRate * duration);
@@ -1930,90 +1983,84 @@
       return null;
     }
 
+    // 팝 노이즈(지직 소리) 없이 부드럽게 정지
     function stopLiveAudio() {
-      audioPlayRequestId++;
-      const prevSource = liveAudioSource;
-      const prevGain = liveGainNode;
+      audioPlayReqId++;
+      const src = liveAudioSource;
+      const gain = liveAudioGain;
       liveAudioSource = null;
-      liveGainNode = null;
-
-      if (prevSource) {
-        try {
-          prevSource.onended = null;
-          // 소리를 뚝 끊지 않고 0.06초 동안 부드럽게 줄인 뒤 정지 (끝부분 '틱/지직' 소리 방지)
-          if (prevGain && liveAudioCtx && liveAudioCtx.state === 'running') {
-            const now = liveAudioCtx.currentTime;
-            prevGain.gain.cancelScheduledValues(now);
-            prevGain.gain.setValueAtTime(Math.max(0.0001, prevGain.gain.value), now);
-            prevGain.gain.linearRampToValueAtTime(0.0001, now + 0.06);
-            prevSource.stop(now + 0.07);
-            setTimeout(() => {
-              try { prevSource.disconnect(); } catch (_) {}
-              try { prevGain.disconnect(); } catch (_) {}
-            }, 100);
-          } else {
-            prevSource.stop();
-            prevSource.disconnect();
-            if (prevGain) prevGain.disconnect();
-          }
-        } catch (_) {}
-      }
+      liveAudioGain = null;
       isPreviewAudioPlaying = false;
-      playingDraftKey = '';
       activeBgAudioKey = '';
+      playingDraftKey = '';
+
+      if (src && gain && sharedAudioCtx && sharedAudioCtx.state === 'running') {
+        try {
+          const now = sharedAudioCtx.currentTime;
+          gain.gain.cancelScheduledValues(now);
+          gain.gain.setValueAtTime(Math.max(0.0001, gain.gain.value), now);
+          gain.gain.linearRampToValueAtTime(0, now + 0.06);
+          src.stop(now + 0.07);
+        } catch (_) {
+          try { src.stop(); } catch (__) {}
+        }
+      } else if (src) {
+        try { src.stop(); } catch (_) {}
+      }
+
       if (currentView === 'music') {
         refreshMusicSelectionUI();
       }
     }
 
-    async function startLiveAudio(useDraft = false, loop = true) {
+    // 팝 노이즈 없이 0.04초 부드럽게 재생 시작
+    async function startLiveAudio(useDraft = false, loop = true, draftKey = '') {
+      unlockAudioOnGesture();
       stopLiveAudio();
-      const myReqId = ++audioPlayRequestId;
-
-      // iOS Safari 중요: 비동기 fetch 전에 유저 터치 직후 동기적으로 AudioContext 잠금 해제
-      const audioCtx = getSharedAudioContext();
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume().catch(() => {});
-      }
+      const myReqId = ++audioPlayReqId;
 
       const buffer = await getActiveAudioBuffer(useDraft);
-      // 로딩 도중 다른 곡을 눌렀거나 정지했으면 중복 재생 방지
-      if (!buffer || myReqId !== audioPlayRequestId) return false;
+      if (!buffer || myReqId !== audioPlayReqId) return false;
 
+      const audioCtx = getSharedAudioContext();
       if (audioCtx.state === 'suspended') {
         await audioCtx.resume().catch(() => {});
       }
-      if (myReqId !== audioPlayRequestId) return false;
+      if (myReqId !== audioPlayReqId) return false;
 
       const source = audioCtx.createBufferSource();
       const gainNode = audioCtx.createGain();
+      const now = audioCtx.currentTime;
+
       source.buffer = buffer;
       source.loop = loop;
-
-      // 모바일 오디오 칩이 깨어날 0.04초 여유를 두고 0.08초 동안 부드럽게 볼륨 올림 (시작 '지직' 소리 방지)
-      const startAt = audioCtx.currentTime + 0.04;
-      gainNode.gain.setValueAtTime(0.0001, startAt);
-      gainNode.gain.linearRampToValueAtTime(1.0, startAt + 0.08);
+      gainNode.gain.setValueAtTime(0, now);
+      gainNode.gain.linearRampToValueAtTime(1, now + 0.04);
 
       source.connect(gainNode);
       gainNode.connect(audioCtx.destination);
       source.onended = () => {
-        if (liveAudioSource === source && !loop) stopLiveAudio();
+        if (liveAudioSource === source && !loop) {
+          stopLiveAudio();
+        }
       };
-      source.start(startAt);
+
+      source.start(now + 0.01);
       liveAudioSource = source;
-      liveGainNode = gainNode;
+      liveAudioGain = gainNode;
       isPreviewAudioPlaying = true;
-      if (useDraft) {
-        playingDraftKey = draftMusicMode === 'builtin' ? `builtin:${draftBuiltinIndex}` : (draftMusicMode === 'custom' ? 'custom' : '');
-        refreshMusicSelectionUI();
-      } else {
+      if (!useDraft) {
         activeBgAudioKey = getSavedMusicKey();
+      } else {
+        playingDraftKey = draftKey;
+        refreshMusicSelectionUI();
+      }
+      if (currentView === 'preview') {
+        refreshPreviewAdjustUI();
       }
       return true;
     }
 
-    // 첫 화면 / 효과 화면 / 미리보기 화면에서 적용된 음악 자동 재생 동기화
     async function syncBackgroundMusicPlayback(forceRestart = false) {
       const key = getSavedMusicKey();
       if (key === 'none' || homeSoundMuted) {
@@ -2030,6 +2077,7 @@
 
     function toggleHomeSoundMute() {
       if (savedMusicMode === 'none') return;
+      unlockAudioOnGesture();
       homeSoundMuted = !homeSoundMuted;
       refreshSoundToggleUI();
       if (homeSoundMuted) {
@@ -2044,7 +2092,14 @@
     btnToggleHomeSound.addEventListener('click', toggleHomeSoundMute);
     btnTogglePreviewSound.addEventListener('click', toggleHomeSoundMute);
 
-    // ===== 1. 갤러리 사진 선택 / 삭제(X) / 드래그 순서 변경 / 사진 추가 =====
+    // 전화가 오거나 앱이 백그라운드로 내려가면 음악 즉시 정지
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && !isExporting) {
+        stopLiveAudio();
+      }
+    });
+
+    // ===== 1. 갤러리 사진 선택 / OOM 방지 경량화 / 삭제(X) / 드래그 순서 변경 =====
     let dragFromIndex = -1;
 
     function renderGalleryGrid() {
@@ -2057,13 +2112,13 @@
       }
       galleryEmptyNotice.classList.add('hidden');
 
-      draftImages.forEach((img, idx) => {
+      draftImages.forEach((item, idx) => {
         const card = document.createElement('div');
         card.className = 'gallery-thumb relative aspect-[3/4] rounded-2xl overflow-hidden bg-slate-200 shadow-md border-2 border-white select-none cursor-grab';
         card.dataset.index = String(idx);
 
         const imgEl = document.createElement('img');
-        imgEl.src = img.thumbUrl || img.src;
+        imgEl.src = item.thumbUrl;
         imgEl.alt = `선택한 사진 ${idx + 1}`;
         imgEl.draggable = false;
         imgEl.className = 'w-full h-full object-cover pointer-events-none';
@@ -2085,7 +2140,7 @@
           showToast('사진을 지웠어요.', '🗑️');
         });
 
-        // 포인터 기반 드래그 순서 변경 (스마트폰 터치 & PC 마우스 모두 지원)
+        // 포인터 기반 드래그 순서 변경
         card.addEventListener('pointerdown', (ev) => {
           if (ev.target === delBtn) return;
           dragFromIndex = idx;
@@ -2134,16 +2189,16 @@
       });
     }
 
-    // 스마트폰 고화질 사진(12~48MP) OOM 크래시 방지: 불러오는 즉시 720x1280 Cover 캔버스 + 썸네일로 경량화
+    // 스마트폰 고화질 원본 사진을 즉시 540x960 캔버스 + 초경량 썸네일로 최적화 (모바일 OOM 완벽 방지)
     function optimizeLoadedImage(img) {
       const imgW = img.naturalWidth || img.width;
       const imgH = img.naturalHeight || img.height;
-      const off = document.createElement('canvas');
-      off.width = WIDTH;
-      off.height = HEIGHT;
-      const oCtx = off.getContext('2d', { alpha: false });
-      oCtx.imageSmoothingEnabled = true;
-      oCtx.imageSmoothingQuality = 'high';
+      if (!imgW || !imgH) return null;
+
+      const c = document.createElement('canvas');
+      c.width = WIDTH;
+      c.height = HEIGHT;
+      const g = c.getContext('2d', { alpha: false });
 
       const canvasRatio = WIDTH / HEIGHT;
       const imgRatio = imgW / imgH;
@@ -2155,110 +2210,66 @@
         sh = imgW / canvasRatio;
         sy = (imgH - sh) / 2;
       }
-      oCtx.drawImage(img, sx, sy, sw, sh, 0, 0, WIDTH, HEIGHT);
+      g.drawImage(img, sx, sy, sw, sh, 0, 0, WIDTH, HEIGHT);
 
-      // 갤러리 그리드용 초경량 썸네일 생성
-      const thumbCanvas = document.createElement('canvas');
-      thumbCanvas.width = 216;
-      thumbCanvas.height = 288;
-      const tCtx = thumbCanvas.getContext('2d', { alpha: false });
-      tCtx.drawImage(off, 0, 0, WIDTH, HEIGHT, 0, 0, 216, 288);
-      const thumbUrl = thumbCanvas.toDataURL('image/jpeg', 0.78);
+      // 갤러리 목록용 초경량 썸네일 (180x240)
+      const tc = document.createElement('canvas');
+      tc.width = 180;
+      tc.height = 240;
+      const tg = tc.getContext('2d', { alpha: false });
+      tg.drawImage(c, 0, 0, WIDTH, HEIGHT, 0, 0, 180, 240);
+      const thumbUrl = tc.toDataURL('image/jpeg', 0.72);
 
-      return { canvas: off, thumbUrl };
+      return { canvas: c, thumbUrl };
     }
 
     function loadImageFile(file) {
       return new Promise((resolve) => {
-        try {
-          const objUrl = URL.createObjectURL(file);
-          const img = new Image();
-          img.onload = () => {
-            try {
-              const optimized = optimizeLoadedImage(img);
-              URL.revokeObjectURL(objUrl);
-              resolve(optimized);
-            } catch (_) {
-              URL.revokeObjectURL(objUrl);
-              resolve(null);
-            }
-          };
-          img.onerror = () => {
-            URL.revokeObjectURL(objUrl);
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-              const fallbackImg = new Image();
-              fallbackImg.onload = () => {
-                try {
-                  resolve(optimizeLoadedImage(fallbackImg));
-                } catch (_) {
-                  resolve(null);
-                }
-              };
-              fallbackImg.onerror = () => resolve(null);
-              fallbackImg.src = ev.target.result;
-            };
-            reader.onerror = () => resolve(null);
-            reader.readAsDataURL(file);
-          };
-          img.src = objUrl;
-        } catch (_) {
+        const objectUrl = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+          URL.revokeObjectURL(objectUrl);
+          resolve(optimizeLoadedImage(img));
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(objectUrl);
           const reader = new FileReader();
           reader.onload = (ev) => {
-            const img = new Image();
-            img.onload = () => {
-              try {
-                resolve(optimizeLoadedImage(img));
-              } catch (_) {
-                resolve(null);
-              }
-            };
-            img.onerror = () => resolve(null);
-            img.src = ev.target.result;
+            const fbImg = new Image();
+            fbImg.onload = () => resolve(optimizeLoadedImage(fbImg));
+            fbImg.onerror = () => resolve(null);
+            fbImg.src = ev.target.result;
           };
           reader.onerror = () => resolve(null);
           reader.readAsDataURL(file);
-        }
+        };
+        img.src = objectUrl;
       });
     }
 
-    btnOpenGallery.addEventListener('click', () => {
-      if (selectedImages.length > 0) {
-        draftImages = [...selectedImages];
-        renderGalleryGrid();
-        showView('gallery');
-      }
-    });
-
-    async function handleGalleryFilesChange(e) {
-      const inputEl = e.target;
+    async function handleGalleryFilesSelected(inputEl) {
       const files = Array.from(inputEl.files || []);
-      if (files.length === 0) return;
-
-      const MAX_PHOTOS = 20;
-      const currentCount = currentView === 'gallery' ? draftImages.length : selectedImages.length;
-      const remaining = Math.max(0, MAX_PHOTOS - currentCount);
-      if (remaining === 0) {
-        inputEl.value = '';
-        showToast(`사진은 최대 ${MAX_PHOTOS}장까지 넣을 수 있어요.`, 'ℹ️');
-        return;
-      }
-      const filesToLoad = files.slice(0, remaining);
-      if (files.length > remaining) {
-        showToast(`최대 ${MAX_PHOTOS}장까지만 순서대로 불러와요.`, 'ℹ️');
-      } else {
-        showToast('사진을 불러오고 있어요...', '📷');
-      }
-
       try {
+        if (files.length === 0) return;
+
+        const baseList = currentView === 'gallery' ? draftImages : selectedImages;
+        const remainSlots = Math.max(0, MAX_PHOTOS - baseList.length);
+        if (remainSlots <= 0) {
+          showToast(`사진은 최대 ${MAX_PHOTOS}장까지 넣을 수 있어요.`, 'ℹ️');
+          return;
+        }
+
+        const limitedFiles = files.slice(0, remainSlots);
+        showToast('사진을 불러오고 있어요...', '📷');
+
         const loaded = [];
-        for (const f of filesToLoad) {
-          const img = await loadImageFile(f);
-          if (img) loaded.push(img);
+        for (const f of limitedFiles) {
+          const item = await loadImageFile(f);
+          if (item) loaded.push(item);
         }
 
         if (loaded.length === 0) {
-          showToast('사진을 불러오지 못했어요. JPG나 PNG 사진을 골라주세요.', '⚠️');
+          showToast('사진을 불러오지 못했어요. 다시 선택해 주세요.', '⚠️');
           return;
         }
 
@@ -2277,8 +2288,17 @@
       }
     }
 
-    galleryDirectInput.addEventListener('change', handleGalleryFilesChange);
-    galleryAddInput.addEventListener('change', handleGalleryFilesChange);
+    galleryInputHome.addEventListener('change', () => handleGalleryFilesSelected(galleryInputHome));
+    galleryInputAdd.addEventListener('change', () => handleGalleryFilesSelected(galleryInputAdd));
+
+    btnOpenGallery.addEventListener('click', (e) => {
+      if (e.target === galleryInputHome) return;
+      if (selectedImages.length > 0) {
+        draftImages = [...selectedImages];
+        renderGalleryGrid();
+        showView('gallery');
+      }
+    });
 
     btnGalleryBack.addEventListener('click', () => showView('home'));
 
@@ -2294,7 +2314,7 @@
       );
     });
 
-    // ===== 2. 문구 페이지 (주제별 3종 원터치 적용 + 직접쓰기) =====
+    // ===== 2. 문구 페이지 =====
     function updateTextPresetUI(selectedKey) {
       draftTextPreset = selectedKey;
       textPresetBtns.forEach((btn) => {
@@ -2384,45 +2404,44 @@
       );
     });
 
-    // ===== 3. 음악 페이지 (터치 시 바로 재생, 다시 터치 시 정지) =====
+    // ===== 3. 음악 페이지 (터치 즉시 재생 / 다시 터치 시 정지) =====
     function refreshMusicSelectionUI() {
       musicTrackBtns.forEach((btn) => {
         const idx = Number(btn.dataset.track);
-        const isSelected = draftMusicMode === 'builtin' && draftBuiltinIndex === idx;
-        const isPlayingThis = isPreviewAudioPlaying && playingDraftKey === `builtin:${idx}`;
-        btn.classList.toggle('selected', isSelected);
-
+        const isSel = draftMusicMode === 'builtin' && draftBuiltinIndex === idx;
+        const isPlaying = isPreviewAudioPlaying && playingDraftKey === `builtin:${idx}`;
+        btn.classList.toggle('selected', isSel);
         const statusEl = btn.querySelector('.track-status');
         if (statusEl) {
-          if (isPlayingThis) {
+          if (isPlaying) {
             statusEl.textContent = '⏸ 멈추기';
-            statusEl.className = 'track-status text-xs sm:text-sm font-black text-white bg-[#F59E0B] px-2.5 py-1 rounded-xl';
+            statusEl.className = 'track-status text-xs font-black text-white bg-[#F59E0B] px-2.5 py-1 rounded-full shrink-0';
           } else {
             statusEl.textContent = '▶ 듣기';
-            statusEl.className = 'track-status text-xs sm:text-sm font-extrabold text-slate-400';
+            statusEl.className = 'track-status text-xs font-extrabold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full shrink-0';
           }
         }
       });
 
-      const isCustomSelected = draftMusicMode === 'custom';
-      const isCustomPlaying = isPreviewAudioPlaying && playingDraftKey === 'custom';
-      btnPickCustomAudio.classList.toggle('selected', isCustomSelected);
+      const hasCustom = Boolean(draftCustomAudioBuffer);
+      btnPickCustomAudio.classList.toggle('selected', draftMusicMode === 'custom');
       btnNoMusic.classList.toggle('selected', draftMusicMode === 'none');
 
-      if (draftCustomAudioBuffer && draftCustomAudioName) {
-        customAudioNameEl.textContent = draftCustomAudioName;
-        customAudioLenEl.textContent = '다른 곡';
-        customAudioInput.classList.add('hidden');
-        customAudioStatusEl.classList.remove('hidden');
+      if (hasCustom) {
+        customAudioNameEl.textContent = draftCustomAudioName || '내 음악';
+        customAudioInputMain.classList.add('hidden', 'pointer-events-none');
+        btnChangeCustomAudio.classList.remove('hidden');
+        const isCustomPlaying = isPreviewAudioPlaying && playingDraftKey === 'custom';
         customAudioStatusEl.textContent = isCustomPlaying ? '⏸ 멈추기' : '▶ 듣기';
         customAudioStatusEl.className = isCustomPlaying
-          ? 'text-xs font-black text-white bg-[#B45309] px-2.5 py-1 rounded-xl pointer-events-none'
-          : 'text-xs font-extrabold text-[#B45309] bg-white/85 px-2.5 py-1 rounded-xl pointer-events-none';
+          ? 'text-xs font-black text-white bg-[#CA8A04] px-2.5 py-1 rounded-full'
+          : 'text-xs font-extrabold text-[#854D0E] bg-white/90 px-2.5 py-1 rounded-full';
       } else {
         customAudioNameEl.textContent = '내 음악 가져오기';
-        customAudioLenEl.textContent = '파일 열기';
-        customAudioInput.classList.remove('hidden');
-        customAudioStatusEl.classList.add('hidden');
+        customAudioStatusEl.textContent = '파일 열기';
+        customAudioStatusEl.className = 'text-xs font-extrabold text-[#854D0E] bg-white/80 px-2.5 py-1 rounded-full';
+        customAudioInputMain.classList.remove('hidden', 'pointer-events-none');
+        btnChangeCustomAudio.classList.add('hidden');
       }
     }
 
@@ -2433,40 +2452,39 @@
       draftCustomAudioBuffer = savedCustomAudioBuffer;
       draftCustomAudioName = savedCustomAudioName;
       draftCustomAudioDuration = savedCustomAudioDuration;
-      refreshMusicSelectionUI();
+      playingDraftKey = '';
       showView('music');
+      refreshMusicSelectionUI();
     });
 
     musicTrackBtns.forEach((btn) => {
       btn.addEventListener('click', async () => {
+        unlockAudioOnGesture();
         const idx = Number(btn.dataset.track);
         const key = `builtin:${idx}`;
-
         if (isPreviewAudioPlaying && playingDraftKey === key) {
           stopLiveAudio();
           return;
         }
-
         draftMusicMode = 'builtin';
         draftBuiltinIndex = idx;
         refreshMusicSelectionUI();
-        await startLiveAudio(true, false);
+        await startLiveAudio(true, false, key);
       });
     });
 
     btnPickCustomAudio.addEventListener('click', async (e) => {
-      if (e.target.closest('#btnChangeCustomAudio') || e.target === customAudioInput) return;
+      if (e.target === customAudioInputMain || e.target === customAudioInputChange) return;
       if (!draftCustomAudioBuffer) return;
-
+      unlockAudioOnGesture();
       if (isPreviewAudioPlaying && playingDraftKey === 'custom') {
         stopLiveAudio();
         return;
       }
-
       draftMusicMode = 'custom';
       draftBuiltinIndex = -1;
       refreshMusicSelectionUI();
-      await startLiveAudio(true, false);
+      await startLiveAudio(true, false, 'custom');
     });
 
     btnNoMusic.addEventListener('click', () => {
@@ -2476,20 +2494,18 @@
       refreshMusicSelectionUI();
     });
 
-    async function handleCustomAudioChange(e) {
-      const inputEl = e.target;
+    async function handleCustomAudioFileSelected(inputEl) {
       const file = inputEl.files && inputEl.files[0];
-      inputEl.value = '';
-      if (!file) return;
-
-      stopLiveAudio();
-      showToast('음악을 불러오고 있어요...', '🎵');
       try {
+        if (!file) return;
+        unlockAudioOnGesture();
+        stopLiveAudio();
+        showToast('음악을 불러오고 있어요...', '🎵');
         const arr = await file.arrayBuffer();
         const audioCtx = getSharedAudioContext();
         const decoded = await audioCtx.decodeAudioData(arr.slice(0));
-
         applyFadeToAudioBuffer(decoded, AUDIO_FADE_SEC);
+
         draftMusicMode = 'custom';
         draftBuiltinIndex = -1;
         draftCustomAudioFile = file;
@@ -2497,16 +2513,18 @@
         draftCustomAudioName = file.name.replace(/\.[^/.]+$/, '');
         draftCustomAudioDuration = decoded.duration;
         refreshMusicSelectionUI();
-        await startLiveAudio(true, false);
-        showToast(`'${draftCustomAudioName}' 음악을 바로 들려드려요!`, '🎶');
+        showToast(`'${draftCustomAudioName}' 음악을 가져왔어요!`, '🎶');
+        await startLiveAudio(true, false, 'custom');
       } catch (err) {
         console.error(err);
         showToast('지원하지 않는 음악 파일이에요. MP3 파일을 골라주세요.', '⚠️');
+      } finally {
+        inputEl.value = '';
       }
     }
 
-    customAudioInput.addEventListener('change', handleCustomAudioChange);
-    customAudioChangeInput.addEventListener('change', handleCustomAudioChange);
+    customAudioInputMain.addEventListener('change', () => handleCustomAudioFileSelected(customAudioInputMain));
+    customAudioInputChange.addEventListener('change', () => handleCustomAudioFileSelected(customAudioInputChange));
 
     btnMusicBack.addEventListener('click', () => {
       stopLiveAudio();
@@ -2514,6 +2532,7 @@
     });
 
     btnMusicConfirm.addEventListener('click', () => {
+      unlockAudioOnGesture();
       stopLiveAudio();
       savedMusicMode = draftMusicMode;
       savedBuiltinIndex = draftBuiltinIndex;
@@ -2524,14 +2543,11 @@
       if (savedMusicMode !== 'none') {
         homeSoundMuted = false;
       }
-      if (savedMusicMode === 'builtin' && savedBuiltinIndex >= 0) {
-        getBuiltinAudioBuffer(savedBuiltinIndex).catch(() => {});
-      }
       showView('home');
       showToast(savedMusicMode === 'none' ? '음악 없음으로 설정했어요.' : '음악이 적용되어 바로 재생됩니다!', '🎵');
     });
 
-    // ===== 4. 효과 페이지 (눈 / 반짝이 원터치 ON/OFF) =====
+    // ===== 4. 효과 페이지 =====
     function refreshEffectUI() {
       btnToggleSnow.classList.toggle('selected', snowEnabled);
       snowStateBadge.textContent = snowEnabled ? '켜짐' : '꺼짐';
@@ -2563,61 +2579,40 @@
 
     btnEffectConfirm.addEventListener('click', () => showView('home'));
 
-    // ===== 5. 크게 미리보기 & 실시간 조절 (글자 크기, 프레임 속도, 문구 바로 수정) =====
-    btnOpenPreview.addEventListener('click', () => showView('preview'));
-    btnPreviewBack.addEventListener('click', () => {
-      previewQuickEditSheet.classList.add('hidden');
-      previewQuickEditSheet.classList.remove('flex');
-      showView('home');
+    // ===== 5. 미리보기 화면 조절 버튼 & 바로 수정 =====
+    btnOpenPreview.addEventListener('click', () => {
+      unlockAudioOnGesture();
+      showView('preview');
     });
+    btnPreviewBack.addEventListener('click', () => showView('home'));
 
     btnFontSmaller.addEventListener('click', () => {
-      if (textFontSizePx <= 32) {
-        showToast('글자가 이미 가장 작은 크기예요.', '🔠');
-        return;
-      }
       textFontSizePx = Math.max(32, textFontSizePx - 8);
       textCacheKey = '';
       refreshPreviewAdjustUI();
     });
 
     btnFontLarger.addEventListener('click', () => {
-      if (textFontSizePx >= 64) {
-        showToast('글자가 이미 가장 큰 크기예요.', '🔠');
-        return;
-      }
       textFontSizePx = Math.min(64, textFontSizePx + 8);
       textCacheKey = '';
       refreshPreviewAdjustUI();
     });
 
     btnSpeedSlower.addEventListener('click', () => {
-      if (textScrollSpeed <= 24) {
-        showToast('이미 가장 느린 속도예요.', '🐢');
-        return;
-      }
       textScrollSpeed = Math.max(24, textScrollSpeed - 9);
-      animStartTime = performance.now();
       refreshPreviewAdjustUI();
     });
 
     btnSpeedFaster.addEventListener('click', () => {
-      if (textScrollSpeed >= 60) {
-        showToast('이미 가장 빠른 속도예요.', '🐇');
-        return;
-      }
       textScrollSpeed = Math.min(60, textScrollSpeed + 9);
-      animStartTime = performance.now();
       refreshPreviewAdjustUI();
     });
 
-    // 미리보기 위에서 바로 문구 수정하기
     btnPreviewQuickEdit.addEventListener('click', () => {
-      quickEditBody.value = savedTextBody;
       quickEditName.value = savedTextName;
+      quickEditBody.value = savedTextBody;
       previewQuickEditSheet.classList.remove('hidden');
       previewQuickEditSheet.classList.add('flex');
-      quickEditBody.focus();
     });
 
     btnCloseQuickEdit.addEventListener('click', () => {
@@ -2635,6 +2630,7 @@
       }
       textCacheKey = '';
       animStartTime = performance.now();
+      refreshPreviewAdjustUI();
       previewQuickEditSheet.classList.add('hidden');
       previewQuickEditSheet.classList.remove('flex');
       showToast('문구가 바로 적용되었어요!', '✏️');
@@ -2648,91 +2644,94 @@
       if (detail) savingDetailText.textContent = detail;
     }
 
-    // 모바일 대용량 MP4 다운로드 안정화 (재사용 URL 사용으로 조기 파기 방지)
-    function triggerDownload(url, fileName) {
+    function triggerDownload(blob, fileName) {
       try {
+        const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = fileName;
-        a.rel = 'noopener';
         document.body.appendChild(a);
         a.click();
         setTimeout(() => {
-          if (a.parentNode) a.parentNode.removeChild(a);
-        }, 1000);
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 12000);
       } catch (_) {}
     }
 
-    // Promise 타임아웃 유틸 (모바일 인코더/폰트 무한 대기 방지)
-    function withTimeout(promise, ms, errMsg = '작업 시간이 초과되었습니다.') {
-      return Promise.race([
-        promise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error(errMsg)), ms))
-      ]);
+    // 선택된 영상 길이에 맞춰 오디오를 자르거나 반복하고 끝부분 1.5초 부드러운 페이드아웃 적용
+    function sliceAndFadeAudioBuffer(audioBuffer, targetDurationSec) {
+      if (!audioBuffer) return null;
+      const sr = audioBuffer.sampleRate;
+      const numCh = Math.min(2, audioBuffer.numberOfChannels);
+      const targetSamples = Math.max(1024, Math.floor(targetDurationSec * sr));
+
+      if (Math.abs(audioBuffer.length - targetSamples) < sr * 0.25) {
+        return audioBuffer;
+      }
+
+      const audioCtx = getSharedAudioContext();
+      const out = audioCtx.createBuffer(numCh, targetSamples, sr);
+      const fadeSamples = Math.min(Math.floor(AUDIO_FADE_SEC * sr), Math.floor(targetSamples / 2));
+
+      for (let ch = 0; ch < numCh; ch++) {
+        const src = audioBuffer.getChannelData(ch);
+        const dst = out.getChannelData(ch);
+        for (let i = 0; i < targetSamples; i++) {
+          dst[i] = src[i % src.length];
+        }
+        for (let i = 0; i < fadeSamples; i++) {
+          const ratio = i / fadeSamples;
+          const smoothGain = 0.5 * (1 - Math.cos(Math.PI * ratio));
+          dst[targetSamples - 1 - i] *= smoothGain;
+        }
+      }
+      return out;
     }
 
     // 모바일 AudioEncoder(AAC) 호환성을 위해 44100Hz 스테레오 AudioBuffer로 안전 정규화
     async function normalizeAudioBufferForAAC(audioBuffer, targetDurationSec) {
-      const targetSampleRate = 44100;
-      const targetChannels = 2;
-      const safeDur = Math.min(audioBuffer.duration || targetDurationSec, targetDurationSec);
-      const targetLength = Math.max(1024, Math.floor(safeDur * targetSampleRate));
-
-      if (
-        audioBuffer.sampleRate === targetSampleRate &&
-        audioBuffer.numberOfChannels === targetChannels &&
-        audioBuffer.length >= targetLength
-      ) {
+      if (!audioBuffer) return null;
+      const targetRate = 44100;
+      const targetLength = Math.max(2048, Math.floor(targetDurationSec * targetRate));
+      if (audioBuffer.sampleRate === targetRate && audioBuffer.numberOfChannels === 2 && audioBuffer.length >= targetLength) {
         return audioBuffer;
       }
-
-      const OfflineCtx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
-      if (!OfflineCtx) return audioBuffer;
-
       try {
-        const offlineCtx = new OfflineCtx(targetChannels, targetLength, targetSampleRate);
-        const src = offlineCtx.createBufferSource();
+        const OfflineCtx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+        if (!OfflineCtx) return audioBuffer;
+        const offline = new OfflineCtx(2, targetLength, targetRate);
+        const src = offline.createBufferSource();
         src.buffer = audioBuffer;
-        src.connect(offlineCtx.destination);
+        src.connect(offline.destination);
         src.start(0);
-        return await offlineCtx.startRendering();
-      } catch (err) {
-        console.warn('오디오 정규화 건너뜀:', err);
+        return await offline.startRendering();
+      } catch (_) {
         return audioBuffer;
       }
     }
 
-    async function findSupportedVideoConfig(preferSoftware = false) {
-      const candidateCodecs = ['avc1.4d002a', 'avc1.640028', 'avc1.420028', 'avc1.4d0028', 'avc1.42001f'];
-      const hwMode = preferSoftware ? 'prefer-software' : 'no-preference';
-
-      for (const codec of candidateCodecs) {
-        const config = {
-          codec,
-          width: WIDTH,
-          height: HEIGHT,
-          bitrate: 2_400_000,
-          framerate: FPS,
-          hardwareAcceleration: hwMode,
-          avc: { format: 'avc' }
-        };
-        try {
-          const sup = await VideoEncoder.isConfigSupported(config);
-          if (sup && sup.supported) return config;
-        } catch (_) {}
-      }
-      return null;
+    function withTimeout(promise, ms, label) {
+      return Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error(`${label} timeout`)), ms))
+      ]);
     }
 
-    async function exportWithWebCodecs(preferSoftware = false) {
-      const rawAudioBuffer = await getActiveAudioBuffer(false);
-      const durationSec = rawAudioBuffer ? rawAudioBuffer.duration : getVideoDurationSec();
-      const totalFrames = Math.max(1, Math.round(durationSec * FPS));
+    async function exportWithWebCodecs(preferSoftware = false, customDurationSec = null) {
+      const loadedAudioBuffer = await getActiveAudioBuffer(false);
+      const durationSec = customDurationSec
+        ? Math.max(1, customDurationSec)
+        : (loadedAudioBuffer ? loadedAudioBuffer.duration : getVideoDurationSec());
+      const rawAudioBuffer = loadedAudioBuffer
+        ? sliceAndFadeAudioBuffer(loadedAudioBuffer, durationSec)
+        : null;
+      const totalFrames = Math.max(1, Math.round(durationSec * EXPORT_FPS));
 
       let audioBuffer = null;
       let canEncodeAudio = false;
 
-      if (rawAudioBuffer && typeof AudioEncoder !== 'undefined' && typeof AudioData !== 'undefined') {
+      if (rawAudioBuffer && typeof AudioEncoder !== 'undefined') {
         try {
           setSavingProgress(2, '배경 음악 준비 중...');
           audioBuffer = await normalizeAudioBufferForAAC(rawAudioBuffer, durationSec);
@@ -2743,19 +2742,33 @@
             bitrate: 128000
           });
           canEncodeAudio = Boolean(support && support.supported);
-        } catch (err) {
-          console.warn('AAC 오디오 인코더 미지원:', err);
+        } catch (_) {
           canEncodeAudio = false;
         }
       }
 
-      // 음악이 있는데 AAC 인코더가 미지원이면 무음 MP4 대신 안전 폴백으로 전환
-      if (rawAudioBuffer && !canEncodeAudio) {
-        throw new Error('AudioEncoder AAC unsupported');
-      }
+      const candidateCodecs = ['avc1.4d002a', 'avc1.640028', 'avc1.420028', 'avc1.42001f'];
+      const hwPref = preferSoftware ? 'prefer-software' : 'prefer-hardware';
+      let chosenCodec = null;
 
-      const videoConfig = await findSupportedVideoConfig(preferSoftware);
-      if (!videoConfig) throw new Error('VideoEncoder unsupported');
+      for (const codec of candidateCodecs) {
+        try {
+          const sup = await VideoEncoder.isConfigSupported({
+            codec,
+            width: WIDTH,
+            height: HEIGHT,
+            bitrate: EXPORT_BITRATE,
+            framerate: EXPORT_FPS,
+            hardwareAcceleration: hwPref,
+            avc: { format: 'avc' }
+          });
+          if (sup && sup.supported) {
+            chosenCodec = codec;
+            break;
+          }
+        } catch (_) {}
+      }
+      if (!chosenCodec) throw new Error('VideoEncoder unsupported');
 
       const muxerOptions = {
         target: new Mp4Muxer.ArrayBufferTarget(),
@@ -2777,63 +2790,63 @@
         output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
         error: (e) => { encErr = e; }
       });
-      videoEncoder.configure(videoConfig);
+
+      videoEncoder.configure({
+        codec: chosenCodec,
+        width: WIDTH,
+        height: HEIGHT,
+        bitrate: EXPORT_BITRATE,
+        framerate: EXPORT_FPS,
+        hardwareAcceleration: hwPref,
+        avc: { format: 'avc' }
+      });
 
       const offCanvas = document.createElement('canvas');
       offCanvas.width = WIDTH;
       offCanvas.height = HEIGHT;
       const offCtx = offCanvas.getContext('2d', { alpha: false });
 
-      const frameDurationUs = Math.round(1_000_000 / FPS);
-
       for (let i = 0; i < totalFrames; i++) {
+        if (exportCancelled || encErr || videoEncoder.state === 'closed') break;
+
+        // 85% 멈춤 방지: 인코더 대기열이 밀리면 숨 고르기
+        let waitGuard = 0;
+        while (videoEncoder.encodeQueueSize >= 4 && !exportCancelled && !encErr && waitGuard < 400) {
+          await new Promise((r) => setTimeout(r, 12));
+          waitGuard++;
+        }
         if (exportCancelled || encErr) break;
 
-        // 인코더 대기열 과부하 방지 (백프레셔 + 최대 15초 멈춤 감지)
-        let waitMs = 0;
-        while (videoEncoder.encodeQueueSize > 3 && !exportCancelled && !encErr) {
-          await new Promise((r) => setTimeout(r, 10));
-          waitMs += 10;
-          if (waitMs > 15000) {
-            encErr = new Error('VideoEncoder queue stalled');
-            break;
-          }
-        }
-        if (exportCancelled || encErr || videoEncoder.state !== 'configured') break;
-
-        drawSceneAtTime(offCtx, i / FPS);
+        drawSceneAtTime(offCtx, i / EXPORT_FPS);
         const frame = new VideoFrame(offCanvas, {
-          timestamp: Math.round((i * 1_000_000) / FPS),
-          duration: frameDurationUs
+          timestamp: Math.round((i * 1_000_000) / EXPORT_FPS),
+          duration: Math.round(1_000_000 / EXPORT_FPS)
         });
         try {
-          videoEncoder.encode(frame, { keyFrame: i % (FPS * 2) === 0 });
+          videoEncoder.encode(frame, { keyFrame: i % (EXPORT_FPS * 2) === 0 });
         } finally {
           frame.close();
         }
 
-        if (i % 10 === 0 || i === totalFrames - 1) {
-          const pct = canEncodeAudio ? 3 + ((i + 1) / totalFrames) * 82 : 3 + ((i + 1) / totalFrames) * 92;
+        if (i % 6 === 0 || i === totalFrames - 1) {
+          const pct = canEncodeAudio ? (i / totalFrames) * 84 : (i / totalFrames) * 95;
           setSavingProgress(pct, `화면 만드는 중 (${i + 1}/${totalFrames})`);
           await new Promise((r) => setTimeout(r, 0));
         }
       }
 
       if (exportCancelled) {
-        try { videoEncoder.close(); } catch (_) {}
+        try { if (videoEncoder.state !== 'closed') videoEncoder.close(); } catch (_) {}
         return null;
       }
       if (encErr) {
-        try { videoEncoder.close(); } catch (_) {}
+        try { if (videoEncoder.state !== 'closed') videoEncoder.close(); } catch (_) {}
         throw encErr;
       }
 
-      setSavingProgress(canEncodeAudio ? 86 : 96, '영상 화면 정리하는 중...');
-      try {
-        await withTimeout(videoEncoder.flush(), 20000, 'VideoEncoder flush timeout');
-      } finally {
-        try { videoEncoder.close(); } catch (_) {}
-      }
+      setSavingProgress(canEncodeAudio ? 86 : 96, '영상 정리 중...');
+      await withTimeout(videoEncoder.flush(), 25000, 'video flush');
+      if (videoEncoder.state !== 'closed') videoEncoder.close();
 
       if (canEncodeAudio && audioBuffer && !exportCancelled) {
         setSavingProgress(88, '배경 음악 합치는 중...');
@@ -2853,25 +2866,18 @@
           bitrate: 128000
         });
 
-        // AAC 표준 프레임(1024 샘플)의 2배수로 안정적 인코딩
-        const chunkSamples = 2048;
+        const chunkSamples = 1024 * 4;
         for (let offset = 0; offset < totalSamples; offset += chunkSamples) {
-          if (exportCancelled || aErr || audioEncoder.state !== 'configured') break;
+          if (exportCancelled || aErr || audioEncoder.state === 'closed') break;
+
+          let aWait = 0;
+          while (audioEncoder.encodeQueueSize >= 8 && !exportCancelled && !aErr && aWait < 300) {
+            await new Promise((r) => setTimeout(r, 10));
+            aWait++;
+          }
 
           const frames = Math.min(chunkSamples, totalSamples - offset);
-          // 마지막 극소량 잔여 샘플(<128)은 일부 모바일 AAC 인코더 오류를 유발하므로 깔끔히 종료
-          if (frames < 128) break;
-
-          let waitMs = 0;
-          while (audioEncoder.encodeQueueSize > 8 && !exportCancelled && !aErr) {
-            await new Promise((r) => setTimeout(r, 5));
-            waitMs += 5;
-            if (waitMs > 10000) {
-              aErr = new Error('AudioEncoder queue stalled');
-              break;
-            }
-          }
-          if (exportCancelled || aErr || audioEncoder.state !== 'configured') break;
+          if (frames < 128) break; // 너무 작은 마지막 잔여 샘플 AAC 오류 방지
 
           const planar = new Float32Array(frames * numCh);
           for (let ch = 0; ch < numCh; ch++) {
@@ -2893,45 +2899,43 @@
             audioData.close();
           }
 
-          if (offset % (chunkSamples * 30) === 0) {
+          if (offset % (chunkSamples * 20) === 0) {
             setSavingProgress(88 + (offset / totalSamples) * 10, '배경 음악 합치는 중...');
             await new Promise((r) => setTimeout(r, 0));
           }
         }
 
         if (aErr) {
-          try { audioEncoder.close(); } catch (_) {}
+          try { if (audioEncoder.state !== 'closed') audioEncoder.close(); } catch (_) {}
           throw aErr;
         }
-        try {
-          await withTimeout(audioEncoder.flush(), 15000, 'AudioEncoder flush timeout');
-        } finally {
-          try { audioEncoder.close(); } catch (_) {}
-        }
+        await withTimeout(audioEncoder.flush(), 15000, 'audio flush');
+        if (audioEncoder.state !== 'closed') audioEncoder.close();
       }
 
       if (exportCancelled) return null;
       setSavingProgress(99, 'MP4 파일 마무리 중...');
-      await new Promise((r) => setTimeout(r, 20));
       muxer.finalize();
       const outBlob = new Blob([muxer.target.buffer], { type: 'video/mp4' });
-      if (outBlob.size < 1024) {
-        throw new Error('Generated MP4 is empty');
+      if (!outBlob || outBlob.size < 1024) {
+        throw new Error('Empty MP4 output');
       }
-      return {
-        blob: outBlob,
-        ext: 'mp4'
-      };
+      return { blob: outBlob, ext: 'mp4' };
     }
 
-    async function exportWithMediaRecorderFallback() {
+    async function exportWithMediaRecorderFallback(customDurationSec = null) {
       if (typeof MediaRecorder === 'undefined') {
         throw new Error('MediaRecorder unsupported');
       }
 
-      const audioBuffer = await getActiveAudioBuffer(false);
-      const durationSec = audioBuffer ? audioBuffer.duration : getVideoDurationSec();
-      const stream = canvas.captureStream(FPS);
+      const loadedAudioBuffer = await getActiveAudioBuffer(false);
+      const durationSec = customDurationSec
+        ? Math.max(1, customDurationSec)
+        : (loadedAudioBuffer ? loadedAudioBuffer.duration : getVideoDurationSec());
+      const audioBuffer = loadedAudioBuffer
+        ? sliceAndFadeAudioBuffer(loadedAudioBuffer, durationSec)
+        : null;
+      const stream = canvas.captureStream(EXPORT_FPS);
       let recSource = null;
       let recDest = null;
 
@@ -2946,37 +2950,28 @@
           recSource.buffer = audioBuffer;
           recSource.connect(recDest);
           recDest.stream.getAudioTracks().forEach((t) => stream.addTrack(t));
-        } catch (err) {
-          console.warn('폴백 오디오 결합 실패:', err);
-        }
+        } catch (_) {}
       }
 
-      const mimeTypes = [
-        'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
-        'video/mp4',
-        'video/webm;codecs=vp9,opus',
-        'video/webm;codecs=vp8,opus',
-        'video/webm'
-      ];
-      const chosenMime = mimeTypes.find((m) => {
-        try { return MediaRecorder.isTypeSupported(m); } catch (_) { return false; }
-      }) || '';
-
-      const recorder = new MediaRecorder(
-        stream,
-        chosenMime ? { mimeType: chosenMime, videoBitsPerSecond: 2_400_000 } : undefined
-      );
+      const mimeTypes = ['video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+      const chosenMime = mimeTypes.find((m) => MediaRecorder.isTypeSupported(m)) || '';
+      const recorder = new MediaRecorder(stream, chosenMime ? { mimeType: chosenMime, videoBitsPerSecond: EXPORT_BITRATE } : undefined);
       const chunks = [];
       recorder.ondataavailable = (e) => {
         if (e.data && e.data.size > 0) chunks.push(e.data);
       };
 
       const donePromise = new Promise((resolve, reject) => {
-        recorder.onerror = (ev) => reject(ev.error || new Error('MediaRecorder error'));
         recorder.onstop = () => {
           const ext = chosenMime.includes('mp4') ? 'mp4' : 'webm';
-          resolve({ blob: new Blob(chunks, { type: chosenMime || 'video/webm' }), ext });
+          const blob = new Blob(chunks, { type: chosenMime || 'video/webm' });
+          if (blob.size < 512) {
+            reject(new Error('Empty MediaRecorder blob'));
+            return;
+          }
+          resolve({ blob, ext });
         };
+        recorder.onerror = (e) => reject(e);
       });
 
       recorder.start(250);
@@ -2988,33 +2983,24 @@
         const elapsed = (performance.now() - startMs) / 1000;
         if (elapsed >= durationSec) break;
         drawSceneAtTime(ctx, elapsed);
-        setSavingProgress((elapsed / durationSec) * 98, `안전 저장 중 (${formatTime(elapsed)} / ${formatTime(durationSec)})`);
-        await new Promise((r) => setTimeout(r, 1000 / FPS));
+        setSavingProgress((elapsed / durationSec) * 98, `${formatTime(elapsed)} / ${formatTime(durationSec)}`);
+        await new Promise((r) => setTimeout(r, 1000 / EXPORT_FPS));
       }
 
-      if (recSource) {
-        try { recSource.stop(); recSource.disconnect(); } catch (_) {}
-      }
-      if (recorder.state !== 'inactive') {
-        try { recorder.stop(); } catch (_) {}
-      }
-      stream.getTracks().forEach((t) => { try { t.stop(); } catch (_) {} });
+      if (recSource) { try { recSource.stop(); } catch (_) {} }
+      if (recorder.state !== 'inactive') recorder.stop();
 
       if (exportCancelled) return null;
-      const fallbackResult = await donePromise;
-      if (!fallbackResult || !fallbackResult.blob || fallbackResult.blob.size < 1024) {
-        throw new Error('Fallback recording is empty');
-      }
-      return fallbackResult;
+      return await donePromise;
     }
 
-    async function startExport() {
+    async function startExport(exportMode = 'short') {
       if (isExporting) return;
       isExporting = true;
       exportCancelled = false;
       stopLiveAudio();
 
-      // 저장 도중 스마트폰 화면 자동 꺼짐 방지 (WakeLock)
+      // 저장 도중 스마트폰 화면 자동 꺼짐 방지
       let wakeLock = null;
       if (navigator.wakeLock && navigator.wakeLock.request) {
         try { wakeLock = await navigator.wakeLock.request('screen'); } catch (_) {}
@@ -3024,7 +3010,6 @@
       showView('saving');
 
       try {
-        // 외부 폰트 로딩 최대 2초만 대기 (폰트 서버 장애 시 무한 대기 방지)
         if (document.fonts && document.fonts.ready) {
           await Promise.race([
             document.fonts.ready,
@@ -3033,31 +3018,33 @@
         }
         textCacheKey = '';
 
+        const targetDurationSec = exportMode === 'short'
+          ? getContentDurationSec()
+          : getVideoDurationSec();
+
         let result = null;
         const supportsFastMP4 = typeof VideoEncoder !== 'undefined' && typeof VideoFrame !== 'undefined' && typeof Mp4Muxer !== 'undefined';
 
         if (supportsFastMP4) {
           try {
-            // 1차 시도: 기본(하드웨어 가속 우선) 고속 MP4 인코딩
-            result = await exportWithWebCodecs(false);
+            result = await exportWithWebCodecs(false, targetDurationSec);
           } catch (hwErr) {
-            console.warn('1차 고속 인코딩 실패, 소프트웨어 인코더로 재시도:', hwErr);
+            console.warn('1차 고속 인코딩 실패, 소프트웨어 인코더 재시도:', hwErr);
             if (!exportCancelled) {
               try {
-                // 2차 시도: 소프트웨어 인코더로 고속 MP4 재시도 (삼성/안드로이드 기종별 HW 버그 우회)
                 setSavingProgress(0, '안정 모드로 다시 만들고 있어요...');
-                result = await exportWithWebCodecs(true);
+                result = await exportWithWebCodecs(true, targetDurationSec);
               } catch (swErr) {
-                console.warn('2차 소프트웨어 인코딩 실패, 안전 녹화 모드로 전환:', swErr);
+                console.warn('2차 소프트웨어 인코딩 실패, 안전 녹화 모드 전환:', swErr);
                 if (!exportCancelled) {
                   setSavingProgress(0, '안전 모드로 저장하고 있어요...');
-                  result = await exportWithMediaRecorderFallback();
+                  result = await exportWithMediaRecorderFallback(targetDurationSec);
                 }
               }
             }
           }
         } else {
-          result = await exportWithMediaRecorderFallback();
+          result = await exportWithMediaRecorderFallback(targetDurationSec);
         }
 
         if (result && result.blob && !exportCancelled) {
@@ -3065,14 +3052,22 @@
           if (lastExportUrl) URL.revokeObjectURL(lastExportUrl);
           lastExportBlob = result.blob;
           lastExportExt = result.ext;
+
           const now = new Date();
           const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
           lastExportFileName = `프레임공방_${stamp}.${result.ext}`;
           lastExportUrl = URL.createObjectURL(result.blob);
 
+          // 스마트폰 공유창 즉시 호출을 위해 영문 파일명 File 객체 사전 준비
+          try {
+            const shareMime = result.ext === 'mp4' ? 'video/mp4' : 'video/webm';
+            lastExportFile = new File([result.blob], `frame_studio_${stamp}.${result.ext}`, { type: shareMime });
+          } catch (_) {
+            lastExportFile = null;
+          }
+
           completeVideo.src = lastExportUrl;
-          completeVideo.load();
-          triggerDownload(lastExportUrl, lastExportFileName);
+          triggerDownload(result.blob, lastExportFileName);
           showView('complete');
         } else if (exportCancelled) {
           showView('preview');
@@ -3081,13 +3076,7 @@
       } catch (err) {
         console.error('영상 추출 오류:', err);
         showView('preview');
-        const isInApp = /KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line/i.test(navigator.userAgent);
-        showToast(
-          isInApp
-            ? "카카오톡/인앱에서는 저장이 막힐 수 있어요. 오른쪽 위 ⋮ 눌러 '다른 브라우저로 열기'를 해주세요!"
-            : '영상 저장 중 오류가 났어요. 다시 한 번 눌러주세요.',
-          '⚠️'
-        );
+        showToast('영상 저장 중 오류가 났어요. 다시 눌러주세요.', '⚠️');
       } finally {
         isExporting = false;
         if (wakeLock) {
@@ -3096,51 +3085,82 @@
       }
     }
 
-    btnStartExport.addEventListener('click', startExport);
+    btnStartExportShort.addEventListener('click', () => startExport('short'));
+    btnStartExportFull.addEventListener('click', () => startExport('full'));
     btnCancelExport.addEventListener('click', () => {
       exportCancelled = true;
     });
 
-    // ===== 완료 화면: 공유하기 & 처음으로 =====
-    btnShareVideo.addEventListener('click', async () => {
-      if (!lastExportBlob) return;
+    // ===== 완료 화면: 스마트폰 공유 팝업 (3단계 네이티브 시도 + 앱 내 공유 팝업) =====
+    async function tryNativeVideoShare() {
+      if (!lastExportBlob || typeof navigator.share !== 'function') return false;
 
-      const mimeType = lastExportExt === 'mp4' ? 'video/mp4' : 'video/webm';
-      // 모바일 공유 시트 호환성을 위해 영문/숫자 파일명 사용 (한글 파일명 시 일부 기기에서 공유 거부 방지)
-      const safeShareName = lastExportFileName.replace(/^프레임공방_/, 'frame_studio_');
-      const shareFile = new File([lastExportBlob], safeShareName, { type: mimeType });
+      const stamp = Date.now();
+      const baseMime = lastExportExt === 'mp4' ? 'video/mp4' : 'video/webm';
+      const primaryFile = lastExportFile || new File([lastExportBlob], `frame_studio_${stamp}.${lastExportExt}`, { type: baseMime });
 
-      if (typeof navigator.share === 'function') {
+      const attempts = [
+        () => navigator.share({ files: [primaryFile] }),
+        () => navigator.share({ files: [primaryFile], title: '프레임공방', text: '따뜻한 마음을 담아 영상을 보냅니다.' }),
+        () => {
+          const mp4File = new File([lastExportBlob], `frame_studio_${stamp}.mp4`, { type: 'video/mp4' });
+          return navigator.share({ files: [mp4File] });
+        }
+      ];
+
+      for (const run of attempts) {
         try {
-          // files만 단독 전달하는 것이 안드로이드 크롬·삼성 인터넷·아이폰 사파리에서 공유 시트 성공률이 가장 높음
-          if (!navigator.canShare || navigator.canShare({ files: [shareFile] })) {
-            await navigator.share({ files: [shareFile] });
-            return;
-          }
+          await run();
+          return true;
         } catch (err) {
-          // 사용자가 공유 창을 직접 닫은 경우 조용히 종료
-          if (err && err.name === 'AbortError') return;
-          console.warn('파일 공유 실패:', err);
+          if (err && err.name === 'AbortError') {
+            return true; // 사용자가 공유창을 열었다가 직접 닫은 경우
+          }
         }
       }
+      return false;
+    }
 
-      // 공유 시트를 지원하지 않는 환경(일부 인앱 브라우저 등)에서도 다시 다운로드 팝업을 띄우지 않고 안내만 표시
-      const isInApp = /KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line/i.test(navigator.userAgent);
-      showToast(
-        isInApp
-          ? '카톡 안에서는 공유창이 막혀 있어요. 이미 저장된 영상을 갤러리에서 보내주세요!'
-          : '이미 갤러리에 저장되어 있어요! 카톡·문자에서 동영상을 골라 보내주세요.',
-        '💬'
-      );
+    btnShareVideo.addEventListener('click', async () => {
+      if (!lastExportBlob) return;
+      const shared = await tryNativeVideoShare();
+      if (!shared) {
+        shareFallbackModal.classList.remove('hidden');
+        shareFallbackModal.classList.add('flex');
+      }
+    });
+
+    btnRetryNativeShare.addEventListener('click', async () => {
+      const shared = await tryNativeVideoShare();
+      if (shared) {
+        shareFallbackModal.classList.add('hidden');
+        shareFallbackModal.classList.remove('flex');
+      } else {
+        showToast('크롬이나 사파리 브라우저에서 열면 공유창이 바로 떠요!', 'ℹ️');
+      }
+    });
+
+    btnRedownloadFromShare.addEventListener('click', () => {
+      if (lastExportBlob) {
+        triggerDownload(lastExportBlob, lastExportFileName);
+        showToast('영상을 다시 저장했어요!', '📥');
+      }
+    });
+
+    btnCloseShareModal.addEventListener('click', () => {
+      shareFallbackModal.classList.add('hidden');
+      shareFallbackModal.classList.remove('flex');
     });
 
     btnGoHome.addEventListener('click', () => {
       completeVideo.pause();
+      shareFallbackModal.classList.add('hidden');
+      shareFallbackModal.classList.remove('flex');
       animStartTime = performance.now();
       showView('home');
     });
 
-    // ===== 인앱 브라우저(카카오톡 등) 감지 안내 =====
+    // ===== 인앱 브라우저 감지 =====
     if (/KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line/i.test(navigator.userAgent)) {
       inAppBanner.classList.remove('hidden');
       inAppBanner.classList.add('flex');
@@ -3150,15 +3170,33 @@
       inAppBanner.classList.remove('flex');
     });
 
-    // 스마트폰에서 홈 화면 전환·전화 수신 시 배경 음악 즉시 정지
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden && !isExporting) {
-        stopLiveAudio();
-      }
-    });
+    // ===== 안드로이드 크롬 홈 화면 추가 시 '프레임공방' 이름과 icon.png 연결 =====
+    function setupWebAppManifest() {
+      try {
+        const iconUrl = new URL('./icon.png', window.location.href).href;
+        const manifest = {
+          name: '프레임공방',
+          short_name: '프레임공방',
+          start_url: window.location.href,
+          display: 'standalone',
+          background_color: '#F4F5F7',
+          theme_color: '#FBC246',
+          icons: [
+            { src: iconUrl, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+            { src: iconUrl, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+          ]
+        };
+        const blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = URL.createObjectURL(blob);
+        document.head.appendChild(link);
+      } catch (_) {}
+    }
 
     // ===== 초기화 및 시작 =====
     window.addEventListener('load', () => {
+      setupWebAppManifest();
       buildDefaultBackground();
       initParticles();
       refreshEffectUI();
