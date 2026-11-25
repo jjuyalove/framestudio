@@ -4,6 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>프레임공방</title>
+  <!-- 카카오톡 인앱 브라우저 자동 탈출 (크롬/사파리로 즉시 열기) -->
+  <script>
+    (function () {
+      var ua = navigator.userAgent || '';
+      if (/KAKAOTALK/i.test(ua)) {
+        try {
+          window.location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(window.location.href);
+        } catch (_) {}
+      }
+    })();
+  </script>
   <!-- 스마트폰 홈 화면 추가 시 앱 이름(프레임공방) 및 아이콘(icon.png) 설정 -->
   <meta name="application-name" content="프레임공방" />
   <meta name="apple-mobile-web-app-title" content="프레임공방" />
@@ -406,6 +417,37 @@
     <canvas id="sceneCanvas" width="540" height="960"
       class="absolute inset-0 w-full h-full object-cover block z-0"></canvas>
 
+    <!-- 인앱 브라우저(카톡·네이버·인스타 등) 탈출 전용 안내 모달 -->
+    <div id="inAppEscapeModal" class="hidden absolute inset-0 z-[75] bg-black/70 backdrop-blur-sm items-center justify-center p-5">
+      <div class="w-full max-w-sm bg-white rounded-[30px] p-6 shadow-2xl text-center space-y-4">
+        <div class="flex justify-center">
+          <svg class="w-24 h-24 animate-bean-float" aria-hidden="true"><use href="#char-clapper" /></svg>
+        </div>
+        <div class="space-y-1.5">
+          <h2 class="text-2xl font-black text-[#3A3D42]"><span class="bean-underline">잠깐만요!</span></h2>
+          <p class="text-base font-extrabold text-slate-600 leading-relaxed">
+            카톡 안에서는 <span class="text-[#E11D48]">영상 저장</span>이 안 돼요.<br />
+            아래 버튼을 눌러 <strong>크롬·사파리</strong>로 열어주세요!
+          </p>
+        </div>
+        <div class="space-y-2.5 pt-1">
+          <button type="button" id="btnOpenExternalNow"
+            class="w-full py-4 px-4 rounded-2xl bg-gradient-to-r from-[#FBC246] via-[#F59E0B] to-[#F97316] active:scale-[0.98] text-white text-xl font-black shadow-lg shadow-amber-500/30 flex items-center justify-center gap-2">
+            <span>🌐</span>
+            <span>크롬 · 사파리로 바로 열기</span>
+          </button>
+          <button type="button" id="btnCopyUrlInApp"
+            class="w-full py-3 rounded-2xl bg-[#FFF8E1] border-2 border-[#FBC246] active:scale-[0.98] text-[#B45309] text-sm font-black">
+            📋 주소 복사하기 (안 열릴 때)
+          </button>
+          <button type="button" id="btnDismissInAppModal"
+            class="w-full py-2.5 rounded-2xl text-slate-400 text-sm font-bold">
+            그냥 여기서 둘러볼게요
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- =========================================================
          화면 1: 첫 화면 (상단 슬림 타이틀 + 시원한 중앙 여백 + 하단 4개 카드)
          ========================================================= -->
@@ -413,9 +455,9 @@
 
       <!-- 상단 인앱 브라우저 안내 + 슬림 타이틀 배너 -->
       <div class="space-y-2">
-        <div id="inAppBanner" class="hidden bg-[#F59E0B] text-white text-xs font-extrabold px-3 py-1.5 rounded-2xl items-center justify-between gap-2 shadow-md">
-          <span>저장이 안 되면 ⋮ 눌러 '다른 브라우저로 열기'</span>
-          <button type="button" id="closeInAppBanner" class="bg-black/20 px-2.5 py-0.5 rounded-lg shrink-0">닫기</button>
+        <div id="inAppBanner" class="hidden bg-[#F59E0B] text-white text-xs font-extrabold px-3 py-2 rounded-2xl items-center justify-between gap-2 shadow-md">
+          <span class="truncate">저장이 안 되면 크롬·사파리로 열어주세요</span>
+          <button type="button" id="btnBannerOpenExternal" class="bg-white text-[#B45309] px-2.5 py-1 rounded-xl font-black shrink-0 shadow-sm">바로 열기</button>
         </div>
 
         <div class="bean-header-pill relative rounded-[22px] px-3.5 py-2 flex items-center justify-center">
@@ -765,7 +807,7 @@
     </div>
 
     <!-- =========================================================
-         화면 5: 크게 미리보기 페이지 (픽토그램 + 글꼴/크기/속도 조절 + 2종 저장)
+         화면 5: 크게 미리보기 페이지 (픽토그램 + 글꼴/크기/속도 조절 + 직관적 2종 저장)
          ========================================================= -->
     <div id="view-preview" class="hidden absolute inset-0 z-30 flex-col justify-between p-3.5 sm:p-4 bg-gradient-to-b from-black/45 via-transparent to-black/75">
 
@@ -813,7 +855,7 @@
         </div>
       </div>
 
-      <!-- 하단: 실시간 글꼴·크기·속도 조절 카드 + 저장 버튼 2종 -->
+      <!-- 하단: 실시간 글꼴·크기·속도 조절 카드 + 어르신 친화 직관적 2종 저장 버튼 -->
       <div class="space-y-2 pb-0.5">
         <div class="bg-white/95 backdrop-blur-md rounded-[24px] p-3 shadow-2xl border-2 border-[#FBC246] space-y-2">
           <!-- 0) 실시간 글꼴 선택 4종 -->
@@ -889,18 +931,27 @@
           </div>
         </div>
 
-        <!-- 저장 버튼 2종: 글·사진 길이만큼 짧게 저장 / 음악 전체 길이 저장 -->
+        <!-- 저장 버튼 2종: 시간 크게 먼저 + 캐릭터 아이콘 + 동등한 색상 (음악 미선택 시 비활성화) -->
         <div class="grid grid-cols-2 gap-2.5">
+          <!-- 왼쪽: 짧게 저장 (따뜻한 주황색 + 슬레이트 캐릭터) -->
           <button type="button" id="btnStartExportShort"
-            class="py-3.5 px-3 rounded-[24px] bg-gradient-to-r from-[#FBC246] via-[#F59E0B] to-[#F97316] active:scale-[0.98] text-white shadow-2xl border-2 border-white/85 flex flex-col items-center justify-center gap-0.5 whitespace-nowrap">
-            <span class="text-base sm:text-lg font-black leading-tight">⚡ 글·사진 길이</span>
-            <span id="shortExportDurText" class="text-xs font-extrabold text-amber-50/95">약 15초 저장</span>
+            class="py-3 px-2.5 rounded-[24px] bg-gradient-to-r from-[#FBC246] via-[#F59E0B] to-[#F97316] active:scale-[0.98] text-white shadow-2xl border-2 border-white/90 flex items-center justify-center gap-1.5 transition">
+            <svg class="w-11 h-11 shrink-0 drop-shadow-sm" aria-hidden="true"><use href="#char-clapper" /></svg>
+            <div class="text-left min-w-0">
+              <span id="shortExportDurText" class="block text-base sm:text-lg font-black leading-tight whitespace-nowrap">15초 저장</span>
+              <span class="block text-[11px] sm:text-xs font-extrabold text-amber-50/95 leading-tight mt-0.5 whitespace-nowrap">짧게 · 추천</span>
+            </div>
           </button>
 
+          <!-- 오른쪽: 노래 끝까지 저장 (파란색 + 헤드폰 캐릭터 / 음악 없을 때 회색 비활성화) -->
           <button type="button" id="btnStartExportFull"
-            class="py-3.5 px-3 rounded-[24px] bg-white/95 active:scale-[0.98] text-[#3A3D42] shadow-2xl border-2 border-[#FBC246] flex flex-col items-center justify-center gap-0.5 whitespace-nowrap">
-            <span class="text-base sm:text-lg font-black leading-tight">🎵 음악 전체</span>
-            <span id="fullExportDurText" class="text-xs font-extrabold text-[#B45309]">음악 없음</span>
+            class="py-3 px-2.5 rounded-[24px] bg-slate-200/95 text-slate-400 shadow-lg border-2 border-slate-300/90 flex items-center justify-center gap-1.5 transition cursor-not-allowed"
+            disabled>
+            <svg id="fullExportCharIcon" class="w-11 h-11 shrink-0 opacity-45 grayscale transition" aria-hidden="true"><use href="#char-music" /></svg>
+            <div class="text-left min-w-0">
+              <span id="fullExportDurText" class="block text-base sm:text-lg font-black leading-tight whitespace-nowrap">음악 없음</span>
+              <span id="fullExportSubText" class="block text-[11px] sm:text-xs font-extrabold text-slate-400 leading-tight mt-0.5 whitespace-nowrap">노래 선택 시 가능</span>
+            </div>
           </button>
         </div>
       </div>
@@ -1024,9 +1075,10 @@
   <script>
     /**
      * 프레임공방 - 시니어 스마트폰 전용 쉬운 숏폼 영상 만들기
+     * - 카카오톡 인앱 브라우저 자동 탈출(크롬/사파리 전환) + 원터치 열기 안내
      * - 4가지 글꼴 선택 (단디체 / 동글동글 볼드 / 손글씨체(학교안심 오카리나) / 정묵바위체)
      * - 문구 화면 & 미리보기 화면 모두에서 실시간 글꼴 변경 지원
-     * - 540x960 (9:16) 24fps 1.6Mbps 고속 저장 + 2종 길이(글·사진 길이 / 음악 전체)
+     * - 540x960 (9:16) 24fps 1.6Mbps 고속 저장 + 직관적 2종 저장(글·사진 끝까지 / 음악 끝까지)
      */
 
     const canvas = document.getElementById('sceneCanvas');
@@ -1064,7 +1116,7 @@
         family: '"Donggle", "Pretendard", sans-serif',
         loadFamily: 'Donggle',
         weight: '700',
-        sizeScale: 1.32, // 동글체는 시각적 크기가 작아 1.32배 보정
+        sizeScale: 1.32,
         lineHeightRatio: 1.38,
         cssClass: 'font-dongle'
       },
@@ -1231,7 +1283,7 @@
         name: '희망찬 새해',
         duration: 20,
         url: './music/newyear.mp3',
-        notes: [329.63, 392, 440, 493.88, 440, 392, 329.63, 293.66, 329.63, 392, 440, 493.88, 440, 392, 440, 392, 329.63, 293.66, 261.63, 261.63]
+        notes: [329.63, 392, 440, 493.88, 440, 392, 329.63, 293.66, 329.63, 392, 523.25, 493.88, 440, 392, 440, 392, 329.63, 293.66, 261.63, 261.63]
       }
     ];
 
@@ -1300,8 +1352,12 @@
     const viewSaving = document.getElementById('view-saving');
     const viewComplete = document.getElementById('view-complete');
 
+    const inAppEscapeModal = document.getElementById('inAppEscapeModal');
+    const btnOpenExternalNow = document.getElementById('btnOpenExternalNow');
+    const btnCopyUrlInApp = document.getElementById('btnCopyUrlInApp');
+    const btnDismissInAppModal = document.getElementById('btnDismissInAppModal');
     const inAppBanner = document.getElementById('inAppBanner');
-    const closeInAppBanner = document.getElementById('closeInAppBanner');
+    const btnBannerOpenExternal = document.getElementById('btnBannerOpenExternal');
 
     const btnToggleHomeSound = document.getElementById('btnToggleHomeSound');
     const homeSoundIcon = document.getElementById('homeSoundIcon');
@@ -1370,6 +1426,8 @@
     const btnStartExportFull = document.getElementById('btnStartExportFull');
     const shortExportDurText = document.getElementById('shortExportDurText');
     const fullExportDurText = document.getElementById('fullExportDurText');
+    const fullExportSubText = document.getElementById('fullExportSubText');
+    const fullExportCharIcon = document.getElementById('fullExportCharIcon');
     const btnFontSmaller = document.getElementById('btnFontSmaller');
     const btnFontLarger = document.getElementById('btnFontLarger');
     const btnSpeedSlower = document.getElementById('btnSpeedSlower');
@@ -1416,12 +1474,70 @@
       return `${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`;
     }
 
+    // 어르신 친화 한글 시간 표기 (예: 15초, 1분 20초)
+    function formatKoreanDuration(sec) {
+      const total = Math.max(1, Math.round(sec));
+      const m = Math.floor(total / 60);
+      const s = total % 60;
+      if (m === 0) return `${s}초`;
+      if (s === 0) return `${m}분`;
+      return `${m}분 ${s}초`;
+    }
+
     function createSeededRandom(seed) {
       let s = seed >>> 0;
       return function () {
         s = (s * 1664525 + 1013904223) >>> 0;
         return s / 4294967296;
       };
+    }
+
+    // ===== 인앱 브라우저 외부 열기 (카톡·네이버·인스타·페북·라인) =====
+    function openInExternalBrowser() {
+      const ua = navigator.userAgent || '';
+      const targetUrl = window.location.href;
+
+      if (/KAKAOTALK/i.test(ua)) {
+        window.location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(targetUrl);
+        return;
+      }
+      if (/Android/i.test(ua)) {
+        const noProto = targetUrl.replace(/^https?:\/\//i, '');
+        const scheme = targetUrl.startsWith('http://') ? 'http' : 'https';
+        window.location.href = `intent://${noProto}#Intent;scheme=${scheme};package=com.android.chrome;end`;
+        return;
+      }
+      if (/LINE/i.test(ua)) {
+        const sep = targetUrl.includes('?') ? '&' : '?';
+        window.location.href = `${targetUrl}${sep}openExternalBrowser=1`;
+        return;
+      }
+      copyCurrentUrlToClipboard();
+      showToast('주소가 복사됐어요! 사파리 주소창에 붙여넣어 열어주세요.', '📋');
+    }
+
+    async function copyCurrentUrlToClipboard() {
+      const url = window.location.href;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(url);
+          return true;
+        }
+      } catch (_) {}
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = url;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        return true;
+      } catch (_) {
+        return false;
+      }
     }
 
     function getCurrentFontOpt() {
@@ -1438,7 +1554,6 @@
       textFontBtns.forEach((b) => b.classList.toggle('selected', b.dataset.font === fontKey));
       previewFontBtns.forEach((b) => b.classList.toggle('selected', b.dataset.font === fontKey));
 
-      // 입력창 및 추천 문구 카드에 선택한 글꼴 바로 반영
       const allFontClasses = ['font-dandi', 'font-dongle', 'font-ocarina', 'font-bawi'];
       [textNameInput, textBodyInput, quickEditName, quickEditBody].forEach((el) => {
         if (!el) return;
@@ -1458,7 +1573,6 @@
         showToast(`'${opt.label}' 글꼴로 바꿨어요!`, '🔤');
       }
 
-      // 선택한 웹폰트가 아직 로딩 전이면 로드 완료 후 캔버스 다시 그리기
       if (document.fonts && document.fonts.load) {
         try {
           await document.fonts.load(`${opt.weight} 36px "${opt.loadFamily}"`);
@@ -1604,18 +1718,30 @@
 
       previewFontBtns.forEach((b) => b.classList.toggle('selected', b.dataset.font === selectedFontKey));
 
+      // 왼쪽 저장 버튼: 시간 먼저 크게 표시
       const contentSec = getContentDurationSec();
       if (shortExportDurText) {
-        shortExportDurText.textContent = contentSec >= 60
-          ? `${formatTime(contentSec)} 저장`
-          : `약 ${Math.round(contentSec)}초 저장`;
+        shortExportDurText.textContent = `${formatKoreanDuration(contentSec)} 저장`;
       }
-      if (fullExportDurText) {
-        if (savedMusicMode === 'none') {
-          fullExportDurText.textContent = `음악 없음 (${Math.round(contentSec)}초)`;
+
+      // 오른쪽 음악 전체 저장 버튼: 음악 유무에 따라 활성화(파란색) / 비활성화(회색)
+      const hasMusic = savedMusicMode !== 'none';
+      if (btnStartExportFull && fullExportDurText && fullExportSubText && fullExportCharIcon) {
+        if (!hasMusic) {
+          btnStartExportFull.disabled = true;
+          btnStartExportFull.className = 'py-3 px-2.5 rounded-[24px] bg-slate-200/95 text-slate-400 shadow-lg border-2 border-slate-300/90 flex items-center justify-center gap-1.5 transition cursor-not-allowed';
+          fullExportCharIcon.className = 'w-11 h-11 shrink-0 opacity-45 grayscale transition';
+          fullExportDurText.textContent = '음악 없음';
+          fullExportSubText.textContent = '노래 선택 시 가능';
+          fullExportSubText.className = 'block text-[11px] sm:text-xs font-extrabold text-slate-400 leading-tight mt-0.5 whitespace-nowrap';
         } else {
           const fullSec = getVideoDurationSec();
-          fullExportDurText.textContent = `${formatTime(fullSec)} 저장`;
+          btnStartExportFull.disabled = false;
+          btnStartExportFull.className = 'py-3 px-2.5 rounded-[24px] bg-gradient-to-r from-[#60A5FA] via-[#3B82F6] to-[#2563EB] active:scale-[0.98] text-white shadow-2xl border-2 border-white/90 flex items-center justify-center gap-1.5 transition cursor-pointer';
+          fullExportCharIcon.className = 'w-11 h-11 shrink-0 drop-shadow-sm transition';
+          fullExportDurText.textContent = `${formatKoreanDuration(fullSec)} 저장`;
+          fullExportSubText.textContent = '노래 끝까지';
+          fullExportSubText.className = 'block text-[11px] sm:text-xs font-extrabold text-blue-50/95 leading-tight mt-0.5 whitespace-nowrap';
         }
       }
     }
@@ -3157,6 +3283,7 @@
 
     async function startExport(exportMode = 'short') {
       if (isExporting) return;
+      if (exportMode === 'full' && savedMusicMode === 'none') return;
       isExporting = true;
       exportCancelled = false;
       stopLiveAudio();
@@ -3170,7 +3297,6 @@
       showView('saving');
 
       try {
-        // 선택된 글꼴 로딩 보장
         const fontOpt = getCurrentFontOpt();
         if (document.fonts) {
           await Promise.race([
@@ -3247,7 +3373,10 @@
     }
 
     btnStartExportShort.addEventListener('click', () => startExport('short'));
-    btnStartExportFull.addEventListener('click', () => startExport('full'));
+    btnStartExportFull.addEventListener('click', () => {
+      if (savedMusicMode === 'none') return;
+      startExport('full');
+    });
     btnCancelExport.addEventListener('click', () => {
       exportCancelled = true;
     });
@@ -3321,14 +3450,24 @@
       showView('home');
     });
 
-    // ===== 인앱 브라우저 감지 =====
-    if (/KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line/i.test(navigator.userAgent)) {
+    // ===== 인앱 브라우저 감지 및 탈출 버튼 연결 =====
+    const isInAppBrowser = /KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line/i.test(navigator.userAgent || '');
+    if (isInAppBrowser) {
       inAppBanner.classList.remove('hidden');
       inAppBanner.classList.add('flex');
+      inAppEscapeModal.classList.remove('hidden');
+      inAppEscapeModal.classList.add('flex');
     }
-    closeInAppBanner.addEventListener('click', () => {
-      inAppBanner.classList.add('hidden');
-      inAppBanner.classList.remove('flex');
+
+    btnOpenExternalNow.addEventListener('click', openInExternalBrowser);
+    btnBannerOpenExternal.addEventListener('click', openInExternalBrowser);
+    btnCopyUrlInApp.addEventListener('click', async () => {
+      await copyCurrentUrlToClipboard();
+      showToast('주소가 복사됐어요! 크롬이나 사파리에 붙여넣어 주세요.', '📋');
+    });
+    btnDismissInAppModal.addEventListener('click', () => {
+      inAppEscapeModal.classList.add('hidden');
+      inAppEscapeModal.classList.remove('flex');
     });
 
     // ===== 안드로이드 크롬 홈 화면 추가 시 '프레임공방' 이름과 icon.png 연결 =====
