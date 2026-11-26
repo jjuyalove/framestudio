@@ -133,18 +133,14 @@
 
     /* 상단 플로팅 헤더 카드 */
     .bean-header-pill {
-      background: rgba(255, 255, 255, 0.93);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.96);
       border: 1.5px solid rgba(255, 255, 255, 0.98);
       box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
     }
 
     /* 첫 화면 4개 플로팅 카드 */
     .floating-card {
-      background: rgba(255, 253, 246, 0.96);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      background: rgba(255, 253, 246, 0.97);
       border: 2.5px solid #FBC246;
       box-shadow: 0 10px 26px rgba(245, 158, 11, 0.18), 0 2px 6px rgba(15, 23, 42, 0.06);
       transition: transform 0.14s ease, background-color 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease;
@@ -153,7 +149,7 @@
       transform: scale(0.96);
     }
     .floating-card.has-value {
-      background: rgba(255, 253, 246, 0.98);
+      background: rgba(255, 253, 246, 0.99);
       border-color: #F59E0B;
       box-shadow: 0 10px 26px rgba(245, 158, 11, 0.26), 0 2px 6px rgba(15, 23, 42, 0.06);
     }
@@ -223,18 +219,29 @@
       -webkit-overflow-scrolling: touch;
     }
 
-    /* 갤러리 썸네일 드래그 정렬 스타일 */
+    /* 갤러리 썸네일: 평소엔 세로 스크롤(pan-y) 허용, 꾹 누르면 드래그 */
     .gallery-thumb {
-      touch-action: none;
+      touch-action: pan-y;
+      -webkit-touch-callout: none;
       transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
     }
-    .gallery-thumb.is-dragging {
-      opacity: 0.35;
-      transform: scale(0.95);
+    .gallery-thumb.is-dragging-slot {
+      opacity: 0.25;
+      transform: scale(0.94);
+      border: 2.5px dashed #F59E0B !important;
+      background-color: #FEF3C7;
     }
-    .gallery-thumb.is-drag-over {
-      box-shadow: 0 0 0 4px #F59E0B;
-      transform: scale(1.03);
+    /* 손가락을 따라다니는 떠오른 사진 카드 */
+    .drag-ghost-card {
+      position: fixed;
+      z-index: 95;
+      pointer-events: none;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 3px solid #F59E0B;
+      box-shadow: 0 18px 36px rgba(15, 23, 42, 0.35), 0 0 0 3px rgba(251, 194, 70, 0.35);
+      transform: scale(1.08);
+      will-change: left, top;
     }
 
     /* 추천 문구 원터치 카드 */
@@ -253,12 +260,12 @@
 </head>
 <body>
 
-  <!-- 공용 복슬복슬 폼폼 캐릭터 5종 SVG 심볼 -->
+  <!-- 공용 복슬복슬 폼폼 캐릭터 5종 SVG 심볼 (모바일 GPU 경량화: 단일 필터 1겹 적용) -->
   <svg width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden;pointer-events:none;" aria-hidden="true">
     <defs>
-      <filter id="pom-fuzz" x="-20%" y="-20%" width="140%" height="140%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.24" numOctaves="2" seed="7" result="noise"/>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="4.6" xChannelSelector="R" yChannelSelector="G"/>
+      <filter id="pom-fuzz" x="-15%" y="-15%" width="130%" height="130%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.22" numOctaves="1" seed="7" result="noise"/>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="4.2" xChannelSelector="R" yChannelSelector="G"/>
       </filter>
 
       <radialGradient id="grad-pom-yellow" cx="42%" cy="38%" r="62%">
@@ -295,8 +302,7 @@
         <path d="M18 28 L27 32 M25 18 L32 25 M36 13 L39 22" stroke="#F59E0B" stroke-width="3.6" stroke-linecap="round"/>
         <path d="M28 68 Q16 64 15 52" stroke="#3F342F" stroke-width="3.8" stroke-linecap="round" fill="none"/>
         <circle cx="15" cy="51" r="4.5" fill="#3F342F"/>
-        <circle cx="56" cy="60" r="32" fill="#FACC15" opacity="0.45" filter="url(#pom-fuzz)"/>
-        <circle cx="56" cy="60" r="30.5" fill="url(#grad-pom-yellow)" filter="url(#pom-fuzz)"/>
+        <circle cx="56" cy="60" r="31.5" fill="url(#grad-pom-yellow)" filter="url(#pom-fuzz)"/>
         <circle cx="48" cy="55" r="3.6" fill="#3F342F"/>
         <path d="M68 51 L61 54.5 L68 58" stroke="#3F342F" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
         <path d="M51 63 Q57 62 63 63 C62 72, 52 72, 51 63 Z" fill="#3F342F"/>
@@ -318,8 +324,7 @@
         <path d="M46 90 Q46 102 38 104" stroke="#3F342F" stroke-width="4" stroke-linecap="round" fill="none"/>
         <path d="M66 90 Q66 102 74 104" stroke="#3F342F" stroke-width="4" stroke-linecap="round" fill="none"/>
         <path d="M84 19 L89 12 M90 27 L98 22 M93 36 L102 34" stroke="#F59E0B" stroke-width="3.6" stroke-linecap="round"/>
-        <circle cx="55" cy="60" r="32" fill="#FB923C" opacity="0.45" filter="url(#pom-fuzz)"/>
-        <circle cx="55" cy="60" r="30.5" fill="url(#grad-pom-orange)" filter="url(#pom-fuzz)"/>
+        <circle cx="55" cy="60" r="31.5" fill="url(#grad-pom-orange)" filter="url(#pom-fuzz)"/>
         <circle cx="48" cy="54" r="3.6" fill="#3F342F"/>
         <circle cx="65" cy="52" r="3.6" fill="#3F342F"/>
         <path d="M53 60 Q58.5 59 64 60 C63 69, 54 69, 53 60 Z" fill="#3F342F"/>
@@ -348,8 +353,7 @@
         <circle cx="16" cy="57" r="4.5" fill="#3F342F"/>
         <path d="M82 68 Q94 64 96 52" stroke="#3F342F" stroke-width="3.8" stroke-linecap="round" fill="none"/>
         <circle cx="96" cy="51" r="4.5" fill="#3F342F"/>
-        <circle cx="56" cy="60" r="32" fill="#FDA4AF" opacity="0.45" filter="url(#pom-fuzz)"/>
-        <circle cx="56" cy="60" r="30.5" fill="url(#grad-pom-pink)" filter="url(#pom-fuzz)"/>
+        <circle cx="56" cy="60" r="31.5" fill="url(#grad-pom-pink)" filter="url(#pom-fuzz)"/>
         <path d="M40 54 Q46 46 52 54" stroke="#3F342F" stroke-width="3.5" stroke-linecap="round" fill="none"/>
         <path d="M62 52 Q68 44 74 52" stroke="#3F342F" stroke-width="3.5" stroke-linecap="round" fill="none"/>
         <path d="M51 60 Q58 59 65 60 C64 71, 52 71, 51 60 Z" fill="#3F342F"/>
@@ -367,8 +371,7 @@
         <path d="M106 46 V34 L112 37" stroke="#3F342F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
         <circle cx="103.5" cy="46" r="3.2" fill="#3F342F"/>
         <path d="M24 58 C24 22, 88 22, 88 58" stroke="#3F342F" stroke-width="5" stroke-linecap="round" fill="none"/>
-        <circle cx="56" cy="62" r="31" fill="#60A5FA" opacity="0.45" filter="url(#pom-fuzz)"/>
-        <circle cx="56" cy="62" r="29.5" fill="url(#grad-pom-blue)" filter="url(#pom-fuzz)"/>
+        <circle cx="56" cy="62" r="30.5" fill="url(#grad-pom-blue)" filter="url(#pom-fuzz)"/>
         <ellipse cx="24" cy="61" rx="7" ry="13" transform="rotate(-8 24 61)" fill="#3F342F"/>
         <ellipse cx="27" cy="61" rx="3.5" ry="10" transform="rotate(-8 27 61)" fill="#FFFFFF"/>
         <ellipse cx="88" cy="61" rx="7" ry="13" transform="rotate(8 88 61)" fill="#3F342F"/>
@@ -392,8 +395,7 @@
         <circle cx="17" cy="54" r="4.5" fill="#3F342F"/>
         <path d="M82 70 Q94 66 95 55" stroke="#3F342F" stroke-width="3.8" stroke-linecap="round" fill="none"/>
         <circle cx="95" cy="54" r="4.5" fill="#3F342F"/>
-        <circle cx="56" cy="60" r="32" fill="#84CC16" opacity="0.45" filter="url(#pom-fuzz)"/>
-        <circle cx="56" cy="60" r="30.5" fill="url(#grad-pom-green)" filter="url(#pom-fuzz)"/>
+        <circle cx="56" cy="60" r="31.5" fill="url(#grad-pom-green)" filter="url(#pom-fuzz)"/>
         <circle cx="46" cy="54" r="3.6" fill="#3F342F"/>
         <circle cx="66" cy="54" r="3.6" fill="#3F342F"/>
         <ellipse cx="38" cy="61" rx="3.8" ry="2.2" fill="#FB7185" opacity="0.55"/>
@@ -405,7 +407,7 @@
   </svg>
 
   <!-- 상단 토스트 알림 (alert 미사용) -->
-  <div id="toastBox" class="fixed top-4 left-1/2 -translate-x-1/2 z-[80] hidden items-center gap-2 bg-[#3A3D42]/95 text-white text-base font-extrabold px-5 py-3 rounded-2xl shadow-2xl max-w-[90vw] backdrop-blur-md">
+  <div id="toastBox" class="fixed top-4 left-1/2 -translate-x-1/2 z-[80] hidden items-center gap-2 bg-[#3A3D42]/95 text-white text-base font-extrabold px-5 py-3 rounded-2xl shadow-2xl max-w-[90vw]">
     <span id="toastIcon" class="text-xl">✨</span>
     <span id="toastMessage">안내</span>
   </div>
@@ -418,7 +420,7 @@
       class="absolute inset-0 w-full h-full object-cover block z-0"></canvas>
 
     <!-- 인앱 브라우저(카톡·네이버·인스타 등) 탈출 전용 안내 모달 -->
-    <div id="inAppEscapeModal" class="hidden absolute inset-0 z-[75] bg-black/70 backdrop-blur-sm items-center justify-center p-5">
+    <div id="inAppEscapeModal" class="hidden absolute inset-0 z-[75] bg-black/70 items-center justify-center p-5">
       <div class="w-full max-w-sm bg-white rounded-[30px] p-6 shadow-2xl text-center space-y-4">
         <div class="flex justify-center">
           <svg class="w-24 h-24 animate-bean-float" aria-hidden="true"><use href="#char-clapper" /></svg>
@@ -449,7 +451,7 @@
     </div>
 
     <!-- =========================================================
-         화면 1: 첫 화면 (상단 슬림 타이틀 + 시원한 중앙 여백 + 하단 4개 카드)
+         화면 1: 첫 화면
          ========================================================= -->
     <div id="view-home" class="relative z-10 w-full h-full flex flex-col justify-between p-3.5 sm:p-4 bg-gradient-to-b from-black/15 via-transparent to-black/30">
 
@@ -471,7 +473,6 @@
             </div>
           </div>
 
-          <!-- 음악 소리 켜기/끄기 버튼 -->
           <button type="button" id="btnToggleHomeSound"
             class="hidden absolute top-2 right-2 items-center gap-1 px-2 py-1 rounded-xl bg-[#FFF8E1] text-[#B45309] border border-[#FDE68A] active:scale-95 text-[11px] font-black transition shadow-sm"
             aria-label="음악 소리 끄기 또는 켜기">
@@ -535,7 +536,7 @@
     </div>
 
     <!-- =========================================================
-         화면 1-2: 선택한 사진 확인 / 삭제(X) / 드래그 순서 변경 페이지
+         화면 1-2: 선택한 사진 확인 / 삭제(X) / 꾹 눌러 드래그 순서 변경
          ========================================================= -->
     <div id="view-gallery" class="hidden absolute inset-0 z-20 bg-[#F4F5F7] flex-col h-full">
       <header class="shrink-0 bg-white px-4 py-3.5 border-b border-slate-200/70 flex items-center justify-between">
@@ -546,20 +547,8 @@
         <span id="galleryCountLabel" class="px-3 py-1.5 rounded-2xl bg-[#FFF8E1] text-[#B45309] text-sm font-black">0장</span>
       </header>
 
-      <div class="smooth-scroll flex-1 min-h-0 overflow-y-auto p-4 space-y-3">
-        <div class="bg-white rounded-3xl px-4 py-3 shadow-sm border border-slate-100 flex items-center gap-3">
-          <svg class="w-16 h-16 shrink-0" aria-hidden="true"><use href="#char-gallery" /></svg>
-          <div class="text-left space-y-0.5">
-            <p class="text-base font-black text-[#3A3D42] leading-snug">
-              사진을 <span class="text-[#F59E0B]">꾹 눌러 옮기면</span> 순서가 바뀌어요!
-            </p>
-            <p class="text-xs font-bold text-slate-400">
-              오른쪽 위 ✕를 누르면 사진을 지울 수 있어요 (최대 20장)
-            </p>
-          </div>
-        </div>
-
-        <div id="galleryGrid" class="grid grid-cols-3 gap-3 pb-2"></div>
+      <div id="galleryScrollArea" class="smooth-scroll flex-1 min-h-0 overflow-y-auto p-4 space-y-3">
+        <div id="galleryGrid" class="grid grid-cols-3 gap-3 pb-4"></div>
 
         <div id="galleryEmptyNotice" class="hidden bg-white rounded-3xl p-8 text-center space-y-2 shadow-sm">
           <p class="text-3xl">🖼️</p>
@@ -581,7 +570,7 @@
     </div>
 
     <!-- =========================================================
-         화면 2: 문구 선택 페이지 (글꼴 선택 4종 포함)
+         화면 2: 문구 선택 페이지 (주제별 9종 중 3종 랜덤 표시)
          ========================================================= -->
     <div id="view-text" class="hidden absolute inset-0 z-20 bg-[#F4F5F7] flex-col h-full">
       <header class="shrink-0 bg-white px-4 py-3.5 border-b border-slate-200/70 flex items-center justify-between">
@@ -595,44 +584,6 @@
       </header>
 
       <div class="smooth-scroll flex-1 min-h-0 overflow-y-auto p-4 space-y-3.5">
-        <div class="bg-white rounded-3xl px-4 py-3 shadow-sm border border-slate-100 flex items-center gap-3">
-          <svg class="w-14 h-14 shrink-0" aria-hidden="true"><use href="#char-text" /></svg>
-          <div class="text-left space-y-0.5">
-            <p class="text-base font-black text-[#3A3D42] leading-snug">
-              원하는 <span class="text-[#E11D48]">글꼴과 안부 문구</span>를 골라보세요!
-            </p>
-            <p class="text-xs font-bold text-slate-400">
-              주제를 눌러 문구를 터치하면 바로 적용돼요
-            </p>
-          </div>
-        </div>
-
-        <!-- 글꼴 선택 4종 -->
-        <div class="bg-white p-3.5 rounded-3xl shadow-sm space-y-2">
-          <div class="flex items-center justify-between px-1">
-            <span class="text-base font-black text-[#3A3D42]">🔤 글꼴 고르기</span>
-            <span id="selectedFontLabel" class="text-xs font-extrabold text-[#B45309] bg-[#FFF8E1] px-2.5 py-0.5 rounded-full">단디체</span>
-          </div>
-          <div class="grid grid-cols-2 gap-2">
-            <button type="button" data-font="dandi"
-              class="text-font-btn select-chip selected py-2.5 px-3 rounded-2xl text-lg text-[#3A3D42] font-dandi font-bold">
-              단디체
-            </button>
-            <button type="button" data-font="dongle"
-              class="text-font-btn select-chip py-2.5 px-3 rounded-2xl text-2xl leading-none text-[#3A3D42] font-dongle">
-              동글동글
-            </button>
-            <button type="button" data-font="ocarina"
-              class="text-font-btn select-chip py-2.5 px-3 rounded-2xl text-lg text-[#3A3D42] font-ocarina">
-              손글씨체
-            </button>
-            <button type="button" data-font="bawi"
-              class="text-font-btn select-chip py-2.5 px-3 rounded-2xl text-lg text-[#3A3D42] font-bawi">
-              정묵바위체
-            </button>
-          </div>
-        </div>
-
         <div class="flex justify-center">
           <button type="button" data-preset="custom"
             class="text-preset-btn select-chip w-full max-w-[240px] py-3 px-5 rounded-3xl text-lg font-black text-[#3A3D42] flex items-center justify-center gap-2">
@@ -661,15 +612,18 @@
         </div>
 
         <div id="presetChoicesSection" class="hidden space-y-2.5">
-          <div class="flex items-center justify-between px-1">
-            <p id="presetChoicesTitle" class="text-base font-black text-[#3A3D42]">추천 문구 3가지</p>
-            <span class="text-xs font-extrabold text-[#B45309] bg-[#FFF8E1] px-2.5 py-1 rounded-full">누르면 바로 적용</span>
+          <div class="flex items-center justify-between gap-2 px-1">
+            <p id="presetChoicesTitle" class="text-base font-black text-[#3A3D42] truncate">추천 문구</p>
+            <button type="button" id="btnShufflePresets"
+              class="shrink-0 text-xs font-black text-[#B45309] bg-[#FFF8E1] border border-[#FBC246] active:scale-95 px-3 py-1.5 rounded-full transition">
+              🔄 다른 문구 보기
+            </button>
           </div>
           <div id="presetChoicesList" class="space-y-3"></div>
         </div>
 
         <div id="directWriteSection" class="space-y-1.5">
-          <textarea id="textBodyInput" rows="5"
+          <textarea id="textBodyInput" rows="6"
             class="w-full p-4 rounded-3xl bg-white border-2 border-transparent focus:border-[#FBC246] outline-none text-lg leading-relaxed font-dandi text-[#3A3D42] resize-none shadow-sm"
             placeholder="위 버튼을 눌러 추천 문구를 고르거나&#10;직접 안부글을 적어주세요.&#10;(비워두면 글자 없이 영상만 나와요)"></textarea>
         </div>
@@ -695,18 +649,9 @@
         <div class="w-14"></div>
       </header>
 
-      <div class="smooth-scroll flex-1 min-h-0 overflow-y-auto px-3.5 py-2.5 flex flex-col justify-between gap-2">
-        <div class="bg-white rounded-2xl px-3.5 py-2 shadow-sm border border-slate-100 flex items-center gap-2.5 shrink-0">
-          <svg class="w-12 h-12 shrink-0" aria-hidden="true"><use href="#char-music" /></svg>
-          <div class="text-left">
-            <p class="text-sm sm:text-base font-black text-[#3A3D42] leading-snug">
-              노래를 <span class="text-[#F59E0B]">누르면 바로 들리고</span>, 다시 누르면 멈춰요!
-            </p>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 gap-2 shrink-0">
-          <button type="button" data-track="0" class="music-track-btn select-chip px-3.5 py-2.5 rounded-2xl flex items-center justify-between">
+      <div class="smooth-scroll flex-1 min-h-0 overflow-y-auto px-3.5 py-3.5 flex flex-col gap-2.5">
+        <div class="grid grid-cols-1 gap-2.5 shrink-0">
+          <button type="button" data-track="0" class="music-track-btn select-chip px-4 py-3 rounded-2xl flex items-center justify-between">
             <div class="flex items-center gap-2.5 min-w-0">
               <span class="w-9 h-9 rounded-xl bg-[#FFF1F2] flex items-center justify-center text-lg shrink-0">🎄</span>
               <span class="text-base sm:text-lg font-black text-[#3A3D42] truncate">성탄절 캐롤</span>
@@ -714,7 +659,7 @@
             <span class="track-status text-xs font-extrabold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full shrink-0">▶ 듣기</span>
           </button>
 
-          <button type="button" data-track="1" class="music-track-btn select-chip px-3.5 py-2.5 rounded-2xl flex items-center justify-between">
+          <button type="button" data-track="1" class="music-track-btn select-chip px-4 py-3 rounded-2xl flex items-center justify-between">
             <div class="flex items-center gap-2.5 min-w-0">
               <span class="w-9 h-9 rounded-xl bg-[#FFFBEB] flex items-center justify-center text-lg shrink-0">☕</span>
               <span class="text-base sm:text-lg font-black text-[#3A3D42] truncate">따뜻한 겨울</span>
@@ -722,7 +667,7 @@
             <span class="track-status text-xs font-extrabold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full shrink-0">▶ 듣기</span>
           </button>
 
-          <button type="button" data-track="2" class="music-track-btn select-chip px-3.5 py-2.5 rounded-2xl flex items-center justify-between">
+          <button type="button" data-track="2" class="music-track-btn select-chip px-4 py-3 rounded-2xl flex items-center justify-between">
             <div class="flex items-center gap-2.5 min-w-0">
               <span class="w-9 h-9 rounded-xl bg-[#EFF6FF] flex items-center justify-center text-lg shrink-0">✈️</span>
               <span class="text-base sm:text-lg font-black text-[#3A3D42] truncate">즐거운 여행</span>
@@ -730,7 +675,7 @@
             <span class="track-status text-xs font-extrabold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full shrink-0">▶ 듣기</span>
           </button>
 
-          <button type="button" data-track="3" class="music-track-btn select-chip px-3.5 py-2.5 rounded-2xl flex items-center justify-between">
+          <button type="button" data-track="3" class="music-track-btn select-chip px-4 py-3 rounded-2xl flex items-center justify-between">
             <div class="flex items-center gap-2.5 min-w-0">
               <span class="w-9 h-9 rounded-xl bg-[#ECFDF5] flex items-center justify-center text-lg shrink-0">🌅</span>
               <span class="text-base sm:text-lg font-black text-[#3A3D42] truncate">희망찬 새해</span>
@@ -740,7 +685,7 @@
         </div>
 
         <div id="btnPickCustomAudio" role="button" tabindex="0"
-          class="custom-audio-yellow relative overflow-hidden w-full px-3.5 py-2.5 rounded-2xl flex items-center justify-between gap-2 cursor-pointer shrink-0 transition">
+          class="custom-audio-yellow relative overflow-hidden w-full px-4 py-3 rounded-2xl flex items-center justify-between gap-2 cursor-pointer shrink-0 transition">
           <input type="file" id="customAudioInputMain" accept="audio/*" class="native-file-overlay" aria-label="내 음악 파일 열기" />
           <div class="flex items-center gap-2.5 min-w-0">
             <span class="w-9 h-9 rounded-xl bg-white/90 flex items-center justify-center text-lg shrink-0">📂</span>
@@ -756,7 +701,7 @@
         </div>
 
         <button type="button" id="btnNoMusic"
-          class="select-chip selected w-full py-2.5 px-3.5 rounded-2xl flex items-center justify-center gap-2 text-base font-black text-[#3A3D42] shrink-0">
+          class="select-chip selected w-full py-3 px-4 rounded-2xl flex items-center justify-center gap-2 text-base font-black text-[#3A3D42] shrink-0">
           <span>🔇</span>
           <span>음악 없음</span>
         </button>
@@ -774,13 +719,10 @@
          화면 4: 효과 선택 플로팅 패널
          ========================================================= -->
     <div id="view-effect" class="hidden absolute inset-0 z-20 flex-col justify-end p-4 bg-black/20">
-      <div class="bg-[#F4F5F7]/95 backdrop-blur-md rounded-[30px] p-5 shadow-2xl space-y-4 border-2 border-white">
-        <div class="bg-white rounded-3xl px-4 py-3 shadow-sm border border-slate-100 flex items-center gap-3">
-          <svg class="w-16 h-16 shrink-0" aria-hidden="true"><use href="#char-effect" /></svg>
-          <div class="text-left space-y-0.5">
-            <h2 class="text-2xl font-black text-[#3A3D42]"><span class="bean-underline">4. 효과</span></h2>
-            <p class="text-xs font-bold text-slate-500">누르면 바로 켜지고, 다시 누르면 꺼져요!</p>
-          </div>
+      <div class="bg-[#F4F5F7]/95 rounded-[30px] p-5 shadow-2xl space-y-4 border-2 border-white">
+        <div class="flex items-center justify-center gap-2 pt-0.5">
+          <svg class="w-11 h-11 shrink-0" aria-hidden="true"><use href="#char-effect" /></svg>
+          <h2 class="text-2xl font-black text-[#3A3D42]"><span class="bean-underline">4. 효과</span></h2>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -814,7 +756,6 @@
       <!-- 상단: 줄바꿈 없는 직관적 SVG 픽토그램 버튼 + 타이머 -->
       <div class="flex items-center justify-between gap-2">
         <div class="flex items-center gap-2 shrink-0">
-          <!-- 뒤로가기 픽토그램 -->
           <button type="button" id="btnPreviewBack" aria-label="뒤로가기"
             class="w-[54px] h-[54px] rounded-2xl bg-white/95 active:scale-95 text-[#3A3D42] shadow-lg border-2 border-white flex flex-col items-center justify-center gap-0.5 whitespace-nowrap transition">
             <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
@@ -823,7 +764,6 @@
             <span class="text-[11px] font-black leading-none">뒤로</span>
           </button>
 
-          <!-- 글수정 픽토그램 -->
           <button type="button" id="btnPreviewQuickEdit" aria-label="글 수정"
             class="w-[54px] h-[54px] rounded-2xl bg-[#FFF8E1] active:scale-95 text-[#B45309] shadow-lg border-2 border-[#FBC246] flex flex-col items-center justify-center gap-0.5 whitespace-nowrap transition">
             <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
@@ -833,7 +773,6 @@
             <span class="text-[11px] font-black leading-none">글수정</span>
           </button>
 
-          <!-- 소리 켜기/끄기 픽토그램 -->
           <button type="button" id="btnTogglePreviewSound" aria-label="소리 켜기 또는 끄기"
             class="hidden w-[54px] h-[54px] rounded-2xl bg-white/95 active:scale-95 text-[#3A3D42] shadow-lg border-2 border-white flex-col items-center justify-center gap-0.5 whitespace-nowrap transition">
             <svg id="previewSoundOnSvg" class="w-6 h-6 text-[#F59E0B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
@@ -850,14 +789,14 @@
           </button>
         </div>
 
-        <div id="previewTimerBadge" class="px-3.5 py-2.5 rounded-2xl bg-[#3A3D42]/90 backdrop-blur-md text-[#FBC246] text-sm font-black whitespace-nowrap shrink-0 shadow-md">
+        <div id="previewTimerBadge" class="px-3.5 py-2.5 rounded-2xl bg-[#3A3D42]/90 text-[#FBC246] text-sm font-black whitespace-nowrap shrink-0 shadow-md">
           00:00 / 00:15
         </div>
       </div>
 
-      <!-- 하단: 실시간 글꼴·크기·속도 조절 카드 + 어르신 친화 직관적 2종 저장 버튼 -->
+      <!-- 하단: 실시간 글꼴·크기·속도 조절 카드 + 2종 저장 버튼 -->
       <div class="space-y-2 pb-0.5">
-        <div class="bg-white/95 backdrop-blur-md rounded-[24px] p-3 shadow-2xl border-2 border-[#FBC246] space-y-2">
+        <div class="bg-white rounded-[24px] p-3 shadow-2xl border-2 border-[#FBC246] space-y-2">
           <!-- 0) 실시간 글꼴 선택 4종 -->
           <div class="grid grid-cols-4 gap-1.5">
             <button type="button" data-font="dandi"
@@ -893,7 +832,7 @@
               <div id="fontStepDots" class="w-[66px] flex items-center justify-center gap-1.5" aria-hidden="true">
                 <span class="w-2.5 h-2.5 rounded-full bg-[#F59E0B]"></span>
                 <span class="w-2.5 h-2.5 rounded-full bg-[#F59E0B]"></span>
-                <span class="w-2.5 h-2.5 rounded-full bg-[#F59E0B]"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-slate-200"></span>
                 <span class="w-2.5 h-2.5 rounded-full bg-slate-200"></span>
                 <span class="w-2.5 h-2.5 rounded-full bg-slate-200"></span>
               </div>
@@ -919,7 +858,7 @@
               <div id="speedStepDots" class="w-[66px] flex items-center justify-center gap-1.5" aria-hidden="true">
                 <span class="w-2.5 h-2.5 rounded-full bg-[#F59E0B]"></span>
                 <span class="w-2.5 h-2.5 rounded-full bg-[#F59E0B]"></span>
-                <span class="w-2.5 h-2.5 rounded-full bg-[#F59E0B]"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-slate-200"></span>
                 <span class="w-2.5 h-2.5 rounded-full bg-slate-200"></span>
                 <span class="w-2.5 h-2.5 rounded-full bg-slate-200"></span>
               </div>
@@ -931,9 +870,8 @@
           </div>
         </div>
 
-        <!-- 저장 버튼 2종: 시간 크게 먼저 + 캐릭터 아이콘 + 동등한 색상 (음악 미선택 시 비활성화) -->
+        <!-- 저장 버튼 2종 -->
         <div class="grid grid-cols-2 gap-2.5">
-          <!-- 왼쪽: 짧게 저장 (따뜻한 주황색 + 슬레이트 캐릭터) -->
           <button type="button" id="btnStartExportShort"
             class="py-3 px-2.5 rounded-[24px] bg-gradient-to-r from-[#FBC246] via-[#F59E0B] to-[#F97316] active:scale-[0.98] text-white shadow-2xl border-2 border-white/90 flex items-center justify-center gap-1.5 transition">
             <svg class="w-11 h-11 shrink-0 drop-shadow-sm" aria-hidden="true"><use href="#char-clapper" /></svg>
@@ -943,7 +881,6 @@
             </div>
           </button>
 
-          <!-- 오른쪽: 노래 끝까지 저장 (파란색 + 헤드폰 캐릭터 / 음악 없을 때 회색 비활성화) -->
           <button type="button" id="btnStartExportFull"
             class="py-3 px-2.5 rounded-[24px] bg-slate-200/95 text-slate-400 shadow-lg border-2 border-slate-300/90 flex items-center justify-center gap-1.5 transition cursor-not-allowed"
             disabled>
@@ -957,7 +894,7 @@
       </div>
 
       <!-- 미리보기 위에서 바로 문구 수정하는 간편 팝업 시트 -->
-      <div id="previewQuickEditSheet" class="hidden absolute inset-0 z-40 bg-black/55 backdrop-blur-sm items-end p-3.5">
+      <div id="previewQuickEditSheet" class="hidden absolute inset-0 z-40 bg-black/55 items-end p-3.5">
         <div class="w-full bg-[#F4F5F7] rounded-[28px] p-4 shadow-2xl space-y-3 border-2 border-white">
           <div class="flex items-center justify-between">
             <h3 class="text-lg font-black text-[#3A3D42]">✏️ 문구 바로 수정하기</h3>
@@ -1009,7 +946,7 @@
     </div>
 
     <!-- =========================================================
-         화면 7: 저장 완료 화면 (배경 흰색 통일 + 공유하기 + 처음으로)
+         화면 7: 저장 완료 화면
          ========================================================= -->
     <div id="view-complete" class="hidden absolute inset-0 z-50 bg-[#F4F5F7] flex-col p-5 justify-between">
       <div class="flex items-center justify-center gap-2 pt-1">
@@ -1040,7 +977,7 @@
       </div>
 
       <!-- 기기 브라우저가 파일 공유를 막았을 때 열리는 앱 내 공유 팝업 -->
-      <div id="shareFallbackModal" class="hidden absolute inset-0 z-[60] bg-black/55 backdrop-blur-sm items-center justify-center p-5">
+      <div id="shareFallbackModal" class="hidden absolute inset-0 z-[60] bg-black/55 items-center justify-center p-5">
         <div class="w-full max-w-sm bg-white rounded-[30px] p-5 shadow-2xl space-y-4 text-center">
           <div class="flex justify-center">
             <svg class="w-16 h-16" aria-hidden="true"><use href="#char-text" /></svg>
@@ -1075,10 +1012,9 @@
   <script>
     /**
      * 프레임공방 - 시니어 스마트폰 전용 쉬운 숏폼 영상 만들기
-     * - 카카오톡 인앱 브라우저 자동 탈출(크롬/사파리 전환) + 원터치 열기 안내
-     * - 4가지 글꼴 선택 (단디체 / 동글동글 볼드 / 손글씨체(학교안심 오카리나) / 정묵바위체)
-     * - 문구 화면 & 미리보기 화면 모두에서 실시간 글꼴 변경 지원
-     * - 540x960 (9:16) 24fps 1.6Mbps 고속 저장 + 직관적 2종 저장(글·사진 끝까지 / 음악 끝까지)
+     * - 갤러리 20장 부드러운 스크롤 + 0.25초 꾹 눌러 사진 들어올리기(고스트 카드 + 실시간 자리 바꿈 + 자동 스크롤)
+     * - 오디오 스트리밍 재생(RAM 점유 최소화) + 24fps 렌더링 제한(발열 방지)
+     * - 카카오톡 인앱 브라우저 자동 탈출 + 4종 글꼴 + 2종 직관적 저장
      */
 
     const canvas = document.getElementById('sceneCanvas');
@@ -1086,6 +1022,7 @@
     const WIDTH = canvas.width;   // 540
     const HEIGHT = canvas.height; // 960
     const EXPORT_FPS = 24;
+    const PREVIEW_FRAME_MS = 1000 / 24;
     const EXPORT_BITRATE = 1_600_000;
     const MAX_PHOTOS = 20;
 
@@ -1141,8 +1078,8 @@
     };
 
     let selectedFontKey = 'dandi';
-    let textFontSizePx = 48;
-    let textScrollSpeed = 42;
+    let textFontSizePx = 40;
+    let textScrollSpeed = 33;
 
     let textCacheCanvas = null;
     let textCacheWidth = 0;
@@ -1153,7 +1090,7 @@
     textLayerCanvas.height = HEIGHT;
     const textLayerCtx = textLayerCanvas.getContext('2d');
 
-    // ===== 6개 주제별 추천 안부 문구 (각 3종) =====
+    // ===== 6개 주제별 추천 안부 문구 (각 9종: 짧은 안부 ~ 따뜻한 편지글, 3개 랜덤 표시) =====
     const TEXT_PRESET_CATEGORIES = {
       winter: {
         label: '❄️ 겨울 문구',
@@ -1169,6 +1106,30 @@
           {
             title: '눈꽃처럼 고운 겨울',
             body: '새하얀 눈꽃처럼\n당신의 겨울날도 맑고 곱게\n피어나길 바랍니다.\n\n추운 계절이지만 마음만은\n늘 봄날처럼 따뜻하세요.'
+          },
+          {
+            title: '짧고 다정한 겨울 안부',
+            body: '날씨가 많이 추워졌어요.\n목도리 꼭 챙기시고\n오늘도 따뜻하고\n행복한 하루 보내세요!'
+          },
+          {
+            title: '겨울 햇살 같은 하루',
+            body: '창가로 스며드는\n겨울 햇살처럼\n오늘 하루가 포근하고\n웃음 가득하시길 바랍니다.'
+          },
+          {
+            title: '하얀 눈을 보며 띄우는 편지',
+            body: '창밖에 내리는 하얀 눈을 보니\n문득 소중한 얼굴이 떠오릅니다.\n\n차가운 바람이 불어와도\n함께 나눈 따뜻한 기억 덕분에\n마음만은 참 든든하네요.\n\n늘 건강하시고 포근한 겨울 보내세요.'
+          },
+          {
+            title: '겨울밤의 평안한 인사',
+            body: '겨울밤이 깊어갈수록\n따뜻한 말 한마디가\n참 고맙게 느껴집니다.\n\n오늘 하루도 수고 많으셨습니다.\n이불 포근히 덮으시고\n편안한 밤 되시길 바랍니다.'
+          },
+          {
+            title: '추위를 녹이는 응원',
+            body: '꽁꽁 언 날씨 속에서도\n마음만은 얼지 않도록\n따뜻한 응원을 보냅니다.\n\n올겨울도 좋은 일들만\n눈송이처럼 소복소복\n쌓이시길 기원합니다.'
+          },
+          {
+            title: '봄을 기다리는 겨울 편지',
+            body: '겨울이 유난히 춥게 느껴져도\n머지않아 따뜻한 봄이\n찾아올 것을 알고 있습니다.\n\n그날까지 몸도 마음도\n아픈 곳 없이 건강하게\n잘 지내시길 두 손 모아 빕니다.'
           }
         ]
       },
@@ -1186,6 +1147,30 @@
           {
             title: '행복한 선물 같은 하루',
             body: '올 한 해 고마웠던 마음을 담아\n따뜻한 성탄 인사 전합니다.\n\n오늘 하루가 선물처럼\n행복하고 포근한 시간 되세요.\n메리 크리스마스!'
+          },
+          {
+            title: '짧고 정겨운 성탄 인사',
+            body: '즐겁고 따뜻한 성탄절입니다.\n사랑하는 분들과 웃음 가득한\n행복한 하루 보내세요.\n메리 크리스마스!'
+          },
+          {
+            title: '은은한 별빛 같은 축복',
+            body: '성탄의 맑은 별빛이\n가정마다 환하게 비추어\n기쁨과 감사만 가득하길\n진심으로 기원합니다.'
+          },
+          {
+            title: '고마운 분께 보내는 성탄 편지',
+            body: '거리마다 캐롤이 울려 퍼지니\n고마운 얼굴들이 하나둘 떠오릅니다.\n\n올 한 해 곁에서 힘이 되어 주셔서\n참 감사했습니다.\n\n사랑과 웃음이 넘치는\n포근한 성탄절 보내시길 바랍니다.'
+          },
+          {
+            title: '화이트 크리스마스 소망',
+            body: '하얀 눈이 내리는\n포근한 성탄절을 그려 봅니다.\n\n소중한 가족들과 둘러앉아\n따뜻한 음식 나누며\n오래 기억에 남을\n행복한 성탄절 되세요.'
+          },
+          {
+            title: '마음을 전하는 작은 카드',
+            body: '크고 화려한 선물보다\n진심이 담긴 인사 한마디가\n더 오래 남는 것 같습니다.\n\n당신의 오늘이 세상에서\n가장 따뜻하길 바랍니다.\n메리 크리스마스!'
+          },
+          {
+            title: '기쁨이 가득한 겨울 축제',
+            body: '추운 겨울을 환하게 밝혀주는\n기쁜 성탄절이 찾아왔습니다.\n\n걱정은 잠시 내려놓으시고\n마음껏 웃고 감사하는\n복된 성탄절 보내세요.'
           }
         ]
       },
@@ -1203,6 +1188,30 @@
           {
             title: '오늘도 평안한 하루',
             body: '잘 지내고 계시지요?\n\n별일 없이 평안하고\n소소한 웃음이 가득한\n오늘 하루가 되시길\n진심으로 응원합니다.'
+          },
+          {
+            title: '짧은 아침 안부',
+            body: '좋은 하루 시작하셨나요?\n오늘도 기분 좋은 일만\n가득하시길 바랍니다.\n늘 응원합니다!'
+          },
+          {
+            title: '보고 싶은 마음을 담아',
+            body: '자주 연락드리지 못해도\n마음속으로 늘 생각하고 있어요.\n건강하게 잘 지내시다가\n곧 반갑게 만나요!'
+          },
+          {
+            title: '정겹게 띄우는 짧은 편지',
+            body: '세월이 참 빠르게 흘러갑니다.\n바쁘다는 핑계로 안부 한 번\n전하지 못해 늘 미안한 마음이었어요.\n\n그래도 마음만은 늘 가까이에 있습니다.\n오늘도 건강하고 웃는 하루 보내세요.'
+          },
+          {
+            title: '고마운 인연에게',
+            body: '살아가면서 마음을 나눌 수 있는\n좋은 분을 곁에 둔다는 것이\n얼마나 큰 복인지 모릅니다.\n\n언제나 변함없이 반가운 분,\n오늘도 평안하고 행복하세요.'
+          },
+          {
+            title: '소소한 행복을 빌며',
+            body: '거창한 일이 아니더라도\n맛있는 식사 한 끼,\n따뜻한 햇살 한 줌에\n미소 지을 수 있는\n여유로운 하루 되시길 바랍니다.'
+          },
+          {
+            title: '마음이 전해지는 안부글',
+            body: '멀리 있어도 마음은\n언제나 한걸음 거리입니다.\n\n요즘 몸은 어떠신가요?\n무리하지 마시고 편안하게\n좋은 시간 보내시길 바랍니다.'
           }
         ]
       },
@@ -1220,6 +1229,30 @@
           {
             title: '따뜻한 옷차림 당부',
             body: '아침저녁으로 바람이\n제법 차가워졌습니다.\n\n외출하실 때 목도리와 외투\n꼭 따뜻하게 챙겨 입으시고\n늘 건강하고 평안하세요.'
+          },
+          {
+            title: '짧은 건강 당부',
+            body: '요즘 감기가 유행이에요.\n따뜻한 물 자주 드시고\n식사 거르지 마세요.\n건강이 제일입니다!'
+          },
+          {
+            title: '빙판길 조심 인사',
+            body: '날씨가 많이 추워졌습니다.\n외출하실 때 미끄러운 길\n항상 조심하시고\n안전하고 건강한 하루 보내세요.'
+          },
+          {
+            title: '정성껏 전하는 건강 편지',
+            body: '나이 들수록 무엇보다\n건강이 가장 큰 재산이라는 말이\n참 깊이 와닿습니다.\n\n바쁘시더라도 잠깐씩 쉬어가며\n몸과 마음을 잘 돌보시길 바랍니다.\n언제나 활기찬 모습으로 뵙고 싶습니다.'
+          },
+          {
+            title: '따뜻한 밥 한 끼의 힘',
+            body: '추운 날에는 든든하게\n잘 챙겨 드시는 게 보약이래요.\n\n입맛 없으셔도 제때 식사하시고\n따뜻한 국물과 함께\n기운 가득 채우시길 바랍니다.'
+          },
+          {
+            title: '마음까지 건강한 하루',
+            body: '몸이 건강해야 마음도 즐겁고,\n마음이 편해야 몸도 가벼워집니다.\n\n오늘은 걱정 내려놓으시고\n가볍게 산책하며\n상쾌한 하루 보내세요.'
+          },
+          {
+            title: '환절기·겨울철 안부 편지',
+            body: '기온 변화가 심한 요즘,\n몸살이나 감기 걸리지 않으셨는지\n걱정이 됩니다.\n\n외출 후엔 손발 따뜻하게 씻으시고\n충분히 주무시며 건강 꼭 챙기세요.\n늘 건강하시길 기도합니다.'
           }
         ]
       },
@@ -1237,6 +1270,30 @@
           {
             title: '아쉬움은 보내고 기쁨만',
             body: '힘들었던 일들은\n가는 해와 함께 훌훌 털어버리고,\n\n좋은 기억과 감사한 마음만\n가득 남는 따뜻한 연말\n보내시길 바랍니다.'
+          },
+          {
+            title: '짧고 따뜻한 연말 인사',
+            body: '올 한 해도 정말 고생 많으셨어요.\n남은 날들도 웃음 가득하게\n행복한 연말 보내시길 바랍니다!'
+          },
+          {
+            title: '달력 마지막 장을 넘기며',
+            body: '어느새 달력도 마지막 한 장만\n남아 있네요.\n올 한 해 베풀어 주신 따뜻한 마음\n깊이 감사드립니다.'
+          },
+          {
+            title: '한 해를 정리하는 감사 편지',
+            body: '올 한 해도 참 빠르게 지나갔습니다.\n기쁜 날도, 조금 지치는 날도 있었지만\n돌아보니 곁에 계신 분들 덕분에\n참 감사한 한 해였습니다.\n\n남은 며칠 평안히 마무리하시고\n따뜻한 연말 보내시길 바랍니다.'
+          },
+          {
+            title: '아름다운 마무리를 기원하며',
+            body: '한 해의 끝자락에 서니\n소중한 인연들이 더욱 귀하게\n느껴집니다.\n\n올 한 해 애쓰신 스스로에게도\n따뜻한 박수를 보내며\n포근한 연말 되시길 빕니다.'
+          },
+          {
+            title: '가족과 함께하는 송년 인사',
+            body: '추운 바람이 불어오는 연말이지만\n사랑하는 가족과 함께라면\n어디든 따뜻합니다.\n\n웃음꽃 피는 즐거운 연말,\n건강하고 평안하게 보내세요.'
+          },
+          {
+            title: '고마움으로 채우는 12월',
+            body: '올 한 해 보내주신 응원과 배려\n마음 깊이 간직하겠습니다.\n\n다가오는 새해에도 좋은 인연\n오래오래 이어가길 바라며,\n행복한 연말 되시길 기원합니다.'
           }
         ]
       },
@@ -1254,12 +1311,36 @@
           {
             title: '복이 굴러들어오는 새해',
             body: '반짝이는 새해 아침입니다.\n\n올 한 해 원하시는 일마다\n좋은 소식이 가득하시고\n가정에 평안과 복이\n넘쳐나길 기원합니다.'
+          },
+          {
+            title: '짧고 힘찬 새해 인사',
+            body: '새해 복 많이 받으세요!\n올 한 해도 늘 건강하시고\n행복한 일만 가득하시길\n진심으로 기원합니다.'
+          },
+          {
+            title: '첫 해처럼 빛나는 한 해',
+            body: '붉게 떠오르는 새해 아침 해처럼\n올 한 해가 환하고 힘차게\n빛나시길 응원합니다.\n새해 복 많이 받으세요!'
+          },
+          {
+            title: '정성스레 띄우는 새해 편지',
+            body: '새로운 한 해가 힘차게 열렸습니다.\n지난 한 해 베풀어 주신 은혜와 사랑에\n진심으로 감사드립니다.\n\n새해에는 걱정보다 웃음이,\n아픔보다 건강이 가득한\n복된 한 해 되시길 두 손 모아 빕니다.'
+          },
+          {
+            title: '가정의 평안을 비는 신년 인사',
+            body: '새해 아침, 가족 모두의 건강과\n평안을 먼저 기원합니다.\n\n집안마다 화목하고 기쁜 소식이\n끊이지 않는 복된 한 해\n보내시길 바랍니다.'
+          },
+          {
+            title: '새로운 시작을 응원하며',
+            body: '새해라는 말만 들어도\n마음이 설레고 힘이 납니다.\n\n올해 계획하신 모든 일들이\n하나하나 기쁘게 이루어지는\n멋진 한 해 되시길 응원합니다!'
+          },
+          {
+            title: '웃음으로 시작하는 새해',
+            body: '새해 첫날의 환한 미소가\n일 년 내내 이어지길 바랍니다.\n\n좋은 사람들과 맛있는 음식 나누며\n건강하고 행복하게 보내는\n최고의 한 해 되세요!'
           }
         ]
       }
     };
 
-    // ===== 기본 음악 4곡 (music 폴더 연결: travel=겨울, Warmth=여행) =====
+    // ===== 기본 음악 4곡 (music 폴더 연결) =====
     const BUILTIN_TRACKS = [
       {
         name: '성탄절 캐롤',
@@ -1301,14 +1382,14 @@
     let savedMusicMode = 'none';
     let savedBuiltinIndex = -1;
     let savedCustomAudioFile = null;
-    let savedCustomAudioBuffer = null;
+    let savedCustomAudioUrl = null;
     let savedCustomAudioName = '';
     let savedCustomAudioDuration = 0;
 
     let draftMusicMode = 'none';
     let draftBuiltinIndex = -1;
     let draftCustomAudioFile = null;
-    let draftCustomAudioBuffer = null;
+    let draftCustomAudioUrl = null;
     let draftCustomAudioName = '';
     let draftCustomAudioDuration = 0;
 
@@ -1319,17 +1400,21 @@
     const sparkles = [];
     const sparkleSprites = [];
 
-    let sharedAudioCtx = null;
-    let liveAudioSource = null;
-    let liveAudioGain = null;
+    const liveAudioEl = new Audio();
+    liveAudioEl.preload = 'metadata';
+    liveAudioEl.playsInline = true;
+
+    let fallbackAudioCtx = null;
+    let fallbackAudioSource = null;
     let isPreviewAudioPlaying = false;
     let playingDraftKey = '';
     let audioPlayReqId = 0;
     let homeSoundMuted = false;
     let activeBgAudioKey = '';
-    const builtinBufferCache = new Map();
 
     let animStartTime = performance.now();
+    let lastRenderTime = 0;
+    let rafId = null;
     let isExporting = false;
     let exportCancelled = false;
     let lastExportBlob = null;
@@ -1384,6 +1469,7 @@
     const badgeEffect = document.getElementById('badgeEffect');
 
     const btnGalleryBack = document.getElementById('btnGalleryBack');
+    const galleryScrollArea = document.getElementById('galleryScrollArea');
     const galleryCountLabel = document.getElementById('galleryCountLabel');
     const galleryGrid = document.getElementById('galleryGrid');
     const galleryEmptyNotice = document.getElementById('galleryEmptyNotice');
@@ -1395,11 +1481,10 @@
     const textNameInput = document.getElementById('textNameInput');
     const btnTextConfirm = document.getElementById('btnTextConfirm');
     const textPresetBtns = document.querySelectorAll('.text-preset-btn');
-    const textFontBtns = document.querySelectorAll('.text-font-btn');
     const previewFontBtns = document.querySelectorAll('.preview-font-btn');
-    const selectedFontLabel = document.getElementById('selectedFontLabel');
     const presetChoicesSection = document.getElementById('presetChoicesSection');
     const presetChoicesTitle = document.getElementById('presetChoicesTitle');
+    const btnShufflePresets = document.getElementById('btnShufflePresets');
     const presetChoicesList = document.getElementById('presetChoicesList');
     const directWriteSection = document.getElementById('directWriteSection');
     const textConfirmFooter = document.getElementById('textConfirmFooter');
@@ -1474,7 +1559,6 @@
       return `${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`;
     }
 
-    // 어르신 친화 한글 시간 표기 (예: 15초, 1분 20초)
     function formatKoreanDuration(sec) {
       const total = Math.max(1, Math.round(sec));
       const m = Math.floor(total / 60);
@@ -1492,7 +1576,21 @@
       };
     }
 
-    // ===== 인앱 브라우저 외부 열기 (카톡·네이버·인스타·페북·라인) =====
+    function clearLastExportMemory() {
+      try {
+        completeVideo.pause();
+        completeVideo.removeAttribute('src');
+        completeVideo.load();
+      } catch (_) {}
+      if (lastExportUrl) {
+        URL.revokeObjectURL(lastExportUrl);
+        lastExportUrl = null;
+      }
+      lastExportBlob = null;
+      lastExportFile = null;
+    }
+
+    // ===== 인앱 브라우저 외부 열기 =====
     function openInExternalBrowser() {
       const ua = navigator.userAgent || '';
       const targetUrl = window.location.href;
@@ -1544,14 +1642,11 @@
       return FONT_OPTIONS[selectedFontKey] || FONT_OPTIONS.dandi;
     }
 
-    // 글꼴 변경 시 문구 화면·미리보기 버튼·입력창·캔버스 즉시 동기화
     async function selectFont(fontKey, showNotice = false) {
       if (!FONT_OPTIONS[fontKey]) return;
       selectedFontKey = fontKey;
       const opt = FONT_OPTIONS[fontKey];
 
-      if (selectedFontLabel) selectedFontLabel.textContent = opt.label;
-      textFontBtns.forEach((b) => b.classList.toggle('selected', b.dataset.font === fontKey));
       previewFontBtns.forEach((b) => b.classList.toggle('selected', b.dataset.font === fontKey));
 
       const allFontClasses = ['font-dandi', 'font-dongle', 'font-ocarina', 'font-bawi'];
@@ -1566,6 +1661,7 @@
       });
 
       textCacheKey = '';
+      lastRenderTime = 0;
       if (currentView === 'preview') {
         refreshPreviewAdjustUI();
       }
@@ -1577,19 +1673,16 @@
         try {
           await document.fonts.load(`${opt.weight} 36px "${opt.loadFamily}"`);
           textCacheKey = '';
+          lastRenderTime = 0;
           if (currentView === 'preview') refreshPreviewAdjustUI();
         } catch (_) {}
       }
     }
 
-    textFontBtns.forEach((btn) => {
-      btn.addEventListener('click', () => selectFont(btn.dataset.font, false));
-    });
     previewFontBtns.forEach((btn) => {
       btn.addEventListener('click', () => selectFont(btn.dataset.font, true));
     });
 
-    // 글·사진 길이 계산
     function getContentDurationSec() {
       const hasText = Boolean(savedTextBody.trim() || savedTextName.trim());
       if (hasText) {
@@ -1609,7 +1702,6 @@
       return DEFAULT_NO_AUDIO_SEC;
     }
 
-    // 음악 전체 길이 기준 영상 길이 계산
     function getVideoDurationSec() {
       if (savedMusicMode === 'builtin' && savedBuiltinIndex >= 0) {
         return BUILTIN_TRACKS[savedBuiltinIndex].duration || 20;
@@ -1622,7 +1714,11 @@
 
     // ===== 화면 전환 관리 =====
     function showView(viewName) {
+      if (currentView === 'gallery' && viewName !== 'gallery') {
+        cancelGalleryDrag();
+      }
       currentView = viewName;
+      lastRenderTime = 0;
       const views = {
         home: viewHome,
         gallery: viewGallery,
@@ -1647,20 +1743,53 @@
       if (viewName === 'home' || viewName === 'effect') {
         refreshHomeBadges();
         syncBackgroundMusicPlayback();
+        startAnimLoop();
       } else if (viewName === 'preview') {
         animStartTime = performance.now();
         refreshSoundToggleUI();
         refreshPreviewAdjustUI();
         syncBackgroundMusicPlayback(true);
+        startAnimLoop();
       } else {
+        stopAnimLoop();
         stopLiveAudio();
       }
     }
+    // ===== 실시간 캔버스 루프 (24fps 제한 + 숨김 화면·백그라운드 완전 절전) =====
+    function isCanvasVisibleView() {
+      return currentView === 'home' || currentView === 'effect' || currentView === 'preview';
+    }
 
-    function getSavedMusicKey() {
-      if (savedMusicMode === 'builtin' && savedBuiltinIndex >= 0) return `builtin:${savedBuiltinIndex}`;
-      if (savedMusicMode === 'custom' && savedCustomAudioBuffer) return `custom:${savedCustomAudioName}:${savedCustomAudioDuration}`;
-      return 'none';
+    function stopAnimLoop() {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+    }
+
+    function startAnimLoop() {
+      if (rafId === null && !isExporting && !document.hidden && isCanvasVisibleView()) {
+        lastRenderTime = 0;
+        rafId = requestAnimationFrame(animateLoop);
+      }
+    }
+
+    function animateLoop(now) {
+      rafId = null;
+      if (isExporting || document.hidden || !isCanvasVisibleView()) {
+        return;
+      }
+      if (now - lastRenderTime >= PREVIEW_FRAME_MS) {
+        lastRenderTime = now;
+        const totalDur = getVideoDurationSec();
+        const elapsed = ((now - animStartTime) / 1000) % totalDur;
+        drawSceneAtTime(ctx, elapsed);
+
+        if (currentView === 'preview') {
+          previewTimerBadge.textContent = `${formatTime(elapsed)} / ${formatTime(totalDur)}`;
+        }
+      }
+      rafId = requestAnimationFrame(animateLoop);
     }
 
     function refreshSoundToggleUI() {
@@ -1718,13 +1847,11 @@
 
       previewFontBtns.forEach((b) => b.classList.toggle('selected', b.dataset.font === selectedFontKey));
 
-      // 왼쪽 저장 버튼: 시간 먼저 크게 표시
       const contentSec = getContentDurationSec();
       if (shortExportDurText) {
         shortExportDurText.textContent = `${formatKoreanDuration(contentSec)} 저장`;
       }
 
-      // 오른쪽 음악 전체 저장 버튼: 음악 유무에 따라 활성화(파란색) / 비활성화(회색)
       const hasMusic = savedMusicMode !== 'none';
       if (btnStartExportFull && fullExportDurText && fullExportSubText && fullExportCharIcon) {
         if (!hasMusic) {
@@ -1952,7 +2079,7 @@
       return result;
     }
 
-    // ===== 2배 고해상도 글자 캐시 (선택한 글꼴 반영 + 모바일 최대 높이 3800px 방어) =====
+    // ===== 2배 고해상도 글자 캐시 =====
     function ensureTextCache(bodyText, nameText) {
       const fontOpt = getCurrentFontOpt();
       const scaledFont = Math.round(textFontSizePx * (WIDTH / 720) * fontOpt.sizeScale);
@@ -2023,7 +2150,7 @@
       textCacheKey = key;
     }
 
-    // ===== 편지 상승 애니메이션 그리기 (처음 1.5초 서서히 등장 + 상/하단 마스크) =====
+    // ===== 편지 상승 애니메이션 그리기 =====
     function drawLetterText(targetCtx, tSec) {
       if (!savedTextBody.trim() && !savedTextName.trim()) return;
       ensureTextCache(savedTextBody, savedTextName);
@@ -2151,36 +2278,48 @@
       drawLetterText(targetCtx, tSec);
     }
 
-    // ===== 실시간 캔버스 루프 =====
-    function animateLoop(now) {
-      if (!isExporting) {
-        const totalDur = getVideoDurationSec();
-        const elapsed = ((now - animStartTime) / 1000) % totalDur;
-        drawSceneAtTime(ctx, elapsed);
+    // ===== 실시간 캔버스 루프 (24fps 제한 + 숨김 화면·백그라운드 완전 정지) =====
+    function isCanvasVisibleView() {
+      return currentView === 'home' || currentView === 'effect' || currentView === 'preview';
+    }
 
-        if (currentView === 'preview') {
-          previewTimerBadge.textContent = `${formatTime(elapsed)} / ${formatTime(totalDur)}`;
+    function animateLoop(now) {
+      if (!isExporting && !document.hidden && isCanvasVisibleView()) {
+        if (now - lastRenderTime >= PREVIEW_FRAME_MS) {
+          lastRenderTime = now;
+          const totalDur = getVideoDurationSec();
+          const elapsed = ((now - animStartTime) / 1000) % totalDur;
+          drawSceneAtTime(ctx, elapsed);
+
+          if (currentView === 'preview') {
+            previewTimerBadge.textContent = `${formatTime(elapsed)} / ${formatTime(totalDur)}`;
+          }
         }
       }
       requestAnimationFrame(animateLoop);
     }
 
-    // ===== 공용 AudioContext & 잡음 없는 오디오 처리 =====
-    function getSharedAudioContext() {
-      if (!sharedAudioCtx || sharedAudioCtx.state === 'closed') {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        sharedAudioCtx = new AudioCtx();
-      }
-      return sharedAudioCtx;
-    }
-
-    function unlockAudioOnGesture() {
-      try {
-        const ctxAudio = getSharedAudioContext();
-        if (ctxAudio.state === 'suspended') {
-          ctxAudio.resume().catch(() => {});
-        }
-      } catch (_) {}
+    // ===== 초경량 오디오 스트리밍 재생 =====
+    function readAudioDurationFromUrl(url) {
+      return new Promise((resolve) => {
+        const probe = new Audio();
+        probe.preload = 'metadata';
+        let settled = false;
+        const done = (val) => {
+          if (settled) return;
+          settled = true;
+          probe.removeAttribute('src');
+          probe.load();
+          resolve(val);
+        };
+        probe.onloadedmetadata = () => {
+          const d = Number.isFinite(probe.duration) && probe.duration > 0 ? probe.duration : 0;
+          done(d);
+        };
+        probe.onerror = () => done(0);
+        setTimeout(() => done(0), 3000);
+        probe.src = url;
+      });
     }
 
     function applyFadeToAudioBuffer(buffer, fadeSec = AUDIO_FADE_SEC) {
@@ -2203,30 +2342,7 @@
       return buffer;
     }
 
-    async function getBuiltinAudioBuffer(trackIdx) {
-      if (builtinBufferCache.has(trackIdx)) {
-        return builtinBufferCache.get(trackIdx);
-      }
-
-      const track = BUILTIN_TRACKS[trackIdx];
-      const audioCtx = getSharedAudioContext();
-
-      if (track.url) {
-        try {
-          const res = await fetch(track.url);
-          if (res.ok) {
-            const arr = await res.arrayBuffer();
-            const decoded = await audioCtx.decodeAudioData(arr.slice(0));
-            applyFadeToAudioBuffer(decoded, AUDIO_FADE_SEC);
-            track.duration = decoded.duration;
-            builtinBufferCache.set(trackIdx, decoded);
-            return decoded;
-          }
-        } catch (err) {
-          console.warn(`MP3 로드 실패(${track.url}), 안전 폴백 멜로디 사용:`, err);
-        }
-      }
-
+    function synthesizeFallbackBuffer(audioCtx, track) {
       const sampleRate = 44100;
       const duration = track.duration || 20;
       const totalSamples = Math.floor(sampleRate * duration);
@@ -2258,99 +2374,159 @@
         }
       }
 
-      applyFadeToAudioBuffer(buffer, AUDIO_FADE_SEC);
-      builtinBufferCache.set(trackIdx, buffer);
-      return buffer;
+      return applyFadeToAudioBuffer(buffer, AUDIO_FADE_SEC);
     }
 
-    async function getActiveAudioBuffer(useDraft = false) {
-      const mode = useDraft ? draftMusicMode : savedMusicMode;
-      const bIdx = useDraft ? draftBuiltinIndex : savedBuiltinIndex;
-      const cBuf = useDraft ? draftCustomAudioBuffer : savedCustomAudioBuffer;
+    async function decodeSelectedAudioForExport(tempAudioCtx) {
+      if (savedMusicMode === 'builtin' && savedBuiltinIndex >= 0) {
+        const track = BUILTIN_TRACKS[savedBuiltinIndex];
+        if (track.url) {
+          try {
+            const res = await fetch(track.url);
+            if (res.ok) {
+              const arr = await res.arrayBuffer();
+              const decoded = await tempAudioCtx.decodeAudioData(arr.slice(0));
+              applyFadeToAudioBuffer(decoded, AUDIO_FADE_SEC);
+              track.duration = decoded.duration;
+              return decoded;
+            }
+          } catch (err) {
+            console.warn(`MP3 디코딩 실패(${track.url}), 폴백 멜로디 사용:`, err);
+          }
+        }
+        return synthesizeFallbackBuffer(tempAudioCtx, track);
+      }
 
-      if (mode === 'builtin' && bIdx >= 0) {
-        return await getBuiltinAudioBuffer(bIdx);
+      if (savedMusicMode === 'custom' && savedCustomAudioFile) {
+        const arr = await savedCustomAudioFile.arrayBuffer();
+        const decoded = await tempAudioCtx.decodeAudioData(arr.slice(0));
+        applyFadeToAudioBuffer(decoded, AUDIO_FADE_SEC);
+        savedCustomAudioDuration = decoded.duration;
+        return decoded;
       }
-      if (mode === 'custom' && cBuf) {
-        return cBuf;
-      }
+
       return null;
     }
 
     function stopLiveAudio() {
       audioPlayReqId++;
-      const src = liveAudioSource;
-      const gain = liveAudioGain;
-      liveAudioSource = null;
-      liveAudioGain = null;
+      try {
+        liveAudioEl.pause();
+        liveAudioEl.currentTime = 0;
+      } catch (_) {}
+
+      if (fallbackAudioSource) {
+        try { fallbackAudioSource.stop(); } catch (_) {}
+        fallbackAudioSource = null;
+      }
+      if (fallbackAudioCtx) {
+        fallbackAudioCtx.close().catch(() => {});
+        fallbackAudioCtx = null;
+      }
+
       isPreviewAudioPlaying = false;
       activeBgAudioKey = '';
       playingDraftKey = '';
-
-      if (src && gain && sharedAudioCtx && sharedAudioCtx.state === 'running') {
-        try {
-          const now = sharedAudioCtx.currentTime;
-          gain.gain.cancelScheduledValues(now);
-          gain.gain.setValueAtTime(Math.max(0.0001, gain.gain.value), now);
-          gain.gain.linearRampToValueAtTime(0, now + 0.06);
-          src.stop(now + 0.07);
-        } catch (_) {
-          try { src.stop(); } catch (__) {}
-        }
-      } else if (src) {
-        try { src.stop(); } catch (_) {}
-      }
 
       if (currentView === 'music') {
         refreshMusicSelectionUI();
       }
     }
 
+    liveAudioEl.addEventListener('ended', () => {
+      if (!liveAudioEl.loop) {
+        stopLiveAudio();
+      }
+    });
+
     async function startLiveAudio(useDraft = false, loop = true, draftKey = '') {
-      unlockAudioOnGesture();
       stopLiveAudio();
       const myReqId = ++audioPlayReqId;
 
-      const buffer = await getActiveAudioBuffer(useDraft);
-      if (!buffer || myReqId !== audioPlayReqId) return false;
+      const mode = useDraft ? draftMusicMode : savedMusicMode;
+      const bIdx = useDraft ? draftBuiltinIndex : savedBuiltinIndex;
+      const cUrl = useDraft ? draftCustomAudioUrl : savedCustomAudioUrl;
 
-      const audioCtx = getSharedAudioContext();
-      if (audioCtx.state === 'suspended') {
-        await audioCtx.resume().catch(() => {});
-      }
-      if (myReqId !== audioPlayReqId) return false;
-
-      const source = audioCtx.createBufferSource();
-      const gainNode = audioCtx.createGain();
-      const now = audioCtx.currentTime;
-
-      source.buffer = buffer;
-      source.loop = loop;
-      gainNode.gain.setValueAtTime(0, now);
-      gainNode.gain.linearRampToValueAtTime(1, now + 0.04);
-
-      source.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-      source.onended = () => {
-        if (liveAudioSource === source && !loop) {
-          stopLiveAudio();
-        }
-      };
-
-      source.start(now + 0.01);
-      liveAudioSource = source;
-      liveAudioGain = gainNode;
-      isPreviewAudioPlaying = true;
-      if (!useDraft) {
-        activeBgAudioKey = getSavedMusicKey();
+      let targetUrl = '';
+      if (mode === 'builtin' && bIdx >= 0) {
+        targetUrl = BUILTIN_TRACKS[bIdx].url || '';
+      } else if (mode === 'custom' && cUrl) {
+        targetUrl = cUrl;
       } else {
-        playingDraftKey = draftKey;
-        refreshMusicSelectionUI();
+        return false;
       }
-      if (currentView === 'preview') {
-        refreshPreviewAdjustUI();
+
+      if (targetUrl) {
+        try {
+          liveAudioEl.loop = loop;
+          liveAudioEl.volume = 0.92;
+          if (liveAudioEl.getAttribute('data-src') !== targetUrl) {
+            liveAudioEl.src = targetUrl;
+            liveAudioEl.setAttribute('data-src', targetUrl);
+          }
+          liveAudioEl.currentTime = 0;
+
+          liveAudioEl.onloadedmetadata = () => {
+            if (Number.isFinite(liveAudioEl.duration) && liveAudioEl.duration > 0) {
+              if (mode === 'builtin' && bIdx >= 0) {
+                BUILTIN_TRACKS[bIdx].duration = liveAudioEl.duration;
+              } else if (mode === 'custom') {
+                if (useDraft) draftCustomAudioDuration = liveAudioEl.duration;
+                else savedCustomAudioDuration = liveAudioEl.duration;
+              }
+              if (currentView === 'preview') refreshPreviewAdjustUI();
+            }
+          };
+
+          await liveAudioEl.play();
+          if (myReqId !== audioPlayReqId) {
+            liveAudioEl.pause();
+            return false;
+          }
+
+          isPreviewAudioPlaying = true;
+          if (!useDraft) {
+            activeBgAudioKey = getSavedMusicKey();
+          } else {
+            playingDraftKey = draftKey;
+            refreshMusicSelectionUI();
+          }
+          if (currentView === 'preview') refreshPreviewAdjustUI();
+          return true;
+        } catch (playErr) {
+          if (mode === 'builtin' && bIdx >= 0 && myReqId === audioPlayReqId) {
+            try {
+              const AudioCtx = window.AudioContext || window.webkitAudioContext;
+              fallbackAudioCtx = new AudioCtx();
+              if (fallbackAudioCtx.state === 'suspended') {
+                await fallbackAudioCtx.resume().catch(() => {});
+              }
+              if (myReqId !== audioPlayReqId) return false;
+              const buf = synthesizeFallbackBuffer(fallbackAudioCtx, BUILTIN_TRACKS[bIdx]);
+              const src = fallbackAudioCtx.createBufferSource();
+              src.buffer = buf;
+              src.loop = loop;
+              src.connect(fallbackAudioCtx.destination);
+              src.onended = () => {
+                if (!loop && fallbackAudioSource === src) stopLiveAudio();
+              };
+              src.start(0);
+              fallbackAudioSource = src;
+              isPreviewAudioPlaying = true;
+              if (!useDraft) {
+                activeBgAudioKey = getSavedMusicKey();
+              } else {
+                playingDraftKey = draftKey;
+                refreshMusicSelectionUI();
+              }
+              return true;
+            } catch (_) {}
+          }
+          console.warn('오디오 스트리밍 재생 실패:', playErr);
+          return false;
+        }
       }
-      return true;
+      return false;
     }
 
     async function syncBackgroundMusicPlayback(forceRestart = false) {
@@ -2369,7 +2545,6 @@
 
     function toggleHomeSoundMute() {
       if (savedMusicMode === 'none') return;
-      unlockAudioOnGesture();
       homeSoundMuted = !homeSoundMuted;
       refreshSoundToggleUI();
       if (homeSoundMuted) {
@@ -2386,12 +2561,186 @@
 
     document.addEventListener('visibilitychange', () => {
       if (document.hidden && !isExporting) {
+        stopAnimLoop();
         stopLiveAudio();
+      } else if (!document.hidden && !isExporting && isCanvasVisibleView()) {
+        startAnimLoop();
       }
     });
 
-    // ===== 1. 갤러리 사진 선택 / OOM 방지 경량화 / 삭제(X) / 드래그 순서 변경 =====
-    let dragFromIndex = -1;
+    window.addEventListener('pagehide', () => {
+      stopAnimLoop();
+      stopLiveAudio();
+      clearLastExportMemory();
+    });
+
+    // ===== 1. 갤러리 사진 선택 / 부드러운 스크롤 / 꾹 눌러 실시간 드래그 정렬 =====
+    const dragState = {
+      pending: false,
+      active: false,
+      index: -1,
+      movedOrder: false,
+      startX: 0,
+      startY: 0,
+      lastX: 0,
+      lastY: 0,
+      offsetX: 0,
+      offsetY: 0,
+      width: 0,
+      height: 0,
+      timer: null,
+      ghostEl: null,
+      autoScrollRaf: null
+    };
+
+    function positionDragGhost(clientX, clientY) {
+      if (!dragState.ghostEl) return;
+      dragState.ghostEl.style.left = `${clientX - dragState.offsetX}px`;
+      dragState.ghostEl.style.top = `${clientY - dragState.offsetY}px`;
+    }
+
+    function runGalleryAutoScroll() {
+      if (!dragState.active || !galleryScrollArea) {
+        dragState.autoScrollRaf = null;
+        return;
+      }
+      const rect = galleryScrollArea.getBoundingClientRect();
+      const edgeZone = 68;
+      let delta = 0;
+      if (dragState.lastY < rect.top + edgeZone) {
+        delta = -Math.ceil(((rect.top + edgeZone - dragState.lastY) / edgeZone) * 12);
+      } else if (dragState.lastY > rect.bottom - edgeZone) {
+        delta = Math.ceil(((dragState.lastY - (rect.bottom - edgeZone)) / edgeZone) * 12);
+      }
+      if (delta !== 0) {
+        galleryScrollArea.scrollTop += delta;
+        checkGalleryDragSwap(dragState.lastX, dragState.lastY);
+      }
+      dragState.autoScrollRaf = requestAnimationFrame(runGalleryAutoScroll);
+    }
+
+    function checkGalleryDragSwap(clientX, clientY) {
+      if (!dragState.active || dragState.index < 0) return;
+      const elUnder = document.elementFromPoint(clientX, clientY);
+      const targetCard = elUnder ? elUnder.closest('.gallery-thumb') : null;
+      if (!targetCard) return;
+      const toIdx = Number(targetCard.dataset.index);
+      if (Number.isNaN(toIdx) || toIdx < 0 || toIdx === dragState.index) return;
+
+      const [moved] = draftImages.splice(dragState.index, 1);
+      draftImages.splice(toIdx, 0, moved);
+      dragState.index = toIdx;
+      dragState.movedOrder = true;
+      renderGalleryGrid();
+    }
+
+    function activateGalleryDrag(cardEl, idx) {
+      if (!dragState.pending || currentView !== 'gallery') return;
+      dragState.pending = false;
+      dragState.active = true;
+      dragState.index = idx;
+      dragState.movedOrder = false;
+
+      if (navigator.vibrate) {
+        try { navigator.vibrate(25); } catch (_) {}
+      }
+
+      const rect = cardEl.getBoundingClientRect();
+      dragState.width = rect.width;
+      dragState.height = rect.height;
+      dragState.offsetX = dragState.lastX - rect.left;
+      dragState.offsetY = dragState.lastY - rect.top;
+
+      // 손가락 위로 떠오르는 복제 카드(고스트) 생성
+      const ghost = document.createElement('div');
+      ghost.className = 'drag-ghost-card';
+      ghost.style.width = `${rect.width}px`;
+      ghost.style.height = `${rect.height}px`;
+
+      const ghostImg = document.createElement('img');
+      ghostImg.src = draftImages[idx].thumbUrl;
+      ghostImg.className = 'w-full h-full object-cover';
+      ghost.appendChild(ghostImg);
+
+      const ghostBadge = document.createElement('span');
+      ghostBadge.className = 'absolute bottom-1.5 left-1.5 px-2.5 py-0.5 rounded-lg bg-[#F59E0B] text-white text-xs font-black shadow';
+      ghostBadge.textContent = '이동 중';
+      ghost.appendChild(ghostBadge);
+
+      document.body.appendChild(ghost);
+      dragState.ghostEl = ghost;
+      positionDragGhost(dragState.lastX, dragState.lastY);
+
+      renderGalleryGrid();
+      dragState.autoScrollRaf = requestAnimationFrame(runGalleryAutoScroll);
+    }
+
+    function cancelGalleryDrag() {
+      if (dragState.timer) {
+        clearTimeout(dragState.timer);
+        dragState.timer = null;
+      }
+      if (dragState.autoScrollRaf) {
+        cancelAnimationFrame(dragState.autoScrollRaf);
+        dragState.autoScrollRaf = null;
+      }
+      if (dragState.ghostEl) {
+        dragState.ghostEl.remove();
+        dragState.ghostEl = null;
+      }
+      const wasActive = dragState.active;
+      const didMove = dragState.movedOrder;
+      dragState.pending = false;
+      dragState.active = false;
+      dragState.index = -1;
+      dragState.movedOrder = false;
+
+      if (wasActive) {
+        renderGalleryGrid();
+        if (didMove) {
+          showToast('사진 순서를 바꿨어요!', '🔀');
+        }
+      }
+    }
+
+    window.addEventListener('touchmove', (ev) => {
+      if (dragState.active) {
+        ev.preventDefault();
+      }
+    }, { passive: false });
+
+    window.addEventListener('pointermove', (ev) => {
+      if (dragState.pending) {
+        const dx = Math.abs(ev.clientX - dragState.startX);
+        const dy = Math.abs(ev.clientY - dragState.startY);
+        dragState.lastX = ev.clientX;
+        dragState.lastY = ev.clientY;
+        if (dx > 10 || dy > 10) {
+          clearTimeout(dragState.timer);
+          dragState.timer = null;
+          dragState.pending = false;
+        }
+        return;
+      }
+      if (dragState.active) {
+        dragState.lastX = ev.clientX;
+        dragState.lastY = ev.clientY;
+        positionDragGhost(ev.clientX, ev.clientY);
+        checkGalleryDragSwap(ev.clientX, ev.clientY);
+      }
+    });
+
+    window.addEventListener('pointerup', () => {
+      if (dragState.pending || dragState.active) {
+        cancelGalleryDrag();
+      }
+    });
+
+    window.addEventListener('pointercancel', () => {
+      if (dragState.pending || dragState.active) {
+        cancelGalleryDrag();
+      }
+    });
 
     function renderGalleryGrid() {
       galleryCountLabel.textContent = `${draftImages.length}장`;
@@ -2405,7 +2754,8 @@
 
       draftImages.forEach((item, idx) => {
         const card = document.createElement('div');
-        card.className = 'gallery-thumb relative aspect-[3/4] rounded-2xl overflow-hidden bg-slate-200 shadow-md border-2 border-white select-none cursor-grab';
+        const isSlot = dragState.active && dragState.index === idx;
+        card.className = `gallery-thumb relative aspect-[3/4] rounded-2xl overflow-hidden bg-slate-200 shadow-md border-2 border-white select-none cursor-grab ${isSlot ? 'is-dragging-slot' : ''}`;
         card.dataset.index = String(idx);
 
         const imgEl = document.createElement('img');
@@ -2431,46 +2781,22 @@
           showToast('사진을 지웠어요.', '🗑️');
         });
 
+        card.addEventListener('contextmenu', (ev) => ev.preventDefault());
+
         card.addEventListener('pointerdown', (ev) => {
           if (ev.target === delBtn) return;
-          dragFromIndex = idx;
-          card.classList.add('is-dragging');
-          if (card.setPointerCapture) {
-            try { card.setPointerCapture(ev.pointerId); } catch (_) {}
-          }
+          if (ev.button && ev.button !== 0) return;
+          cancelGalleryDrag();
+          dragState.pending = true;
+          dragState.startX = ev.clientX;
+          dragState.startY = ev.clientY;
+          dragState.lastX = ev.clientX;
+          dragState.lastY = ev.clientY;
+          const holdMs = ev.pointerType === 'mouse' ? 140 : 250;
+          dragState.timer = setTimeout(() => {
+            activateGalleryDrag(card, idx);
+          }, holdMs);
         });
-
-        card.addEventListener('pointermove', (ev) => {
-          if (dragFromIndex < 0) return;
-          const elUnder = document.elementFromPoint(ev.clientX, ev.clientY);
-          const targetCard = elUnder ? elUnder.closest('.gallery-thumb') : null;
-          galleryGrid.querySelectorAll('.gallery-thumb').forEach((c) => c.classList.remove('is-drag-over'));
-          if (targetCard && Number(targetCard.dataset.index) !== dragFromIndex) {
-            targetCard.classList.add('is-drag-over');
-          }
-        });
-
-        const finishDrag = (ev) => {
-          if (dragFromIndex < 0) return;
-          const elUnder = document.elementFromPoint(ev.clientX, ev.clientY);
-          const targetCard = elUnder ? elUnder.closest('.gallery-thumb') : null;
-          const toIdx = targetCard ? Number(targetCard.dataset.index) : -1;
-
-          galleryGrid.querySelectorAll('.gallery-thumb').forEach((c) => {
-            c.classList.remove('is-dragging', 'is-drag-over');
-          });
-
-          if (toIdx >= 0 && toIdx !== dragFromIndex) {
-            const [moved] = draftImages.splice(dragFromIndex, 1);
-            draftImages.splice(toIdx, 0, moved);
-            renderGalleryGrid();
-            showToast('사진 순서를 바꿨어요!', '🔀');
-          }
-          dragFromIndex = -1;
-        };
-
-        card.addEventListener('pointerup', finishDrag);
-        card.addEventListener('pointercancel', finishDrag);
 
         card.appendChild(imgEl);
         card.appendChild(numBadge);
@@ -2576,9 +2902,6 @@
       }
     }
 
-    galleryInputHome.addEventListener('change', () => handleGalleryFilesSelected(galleryInputHome));
-    galleryInputAdd.addEventListener('change', () => handleGalleryFilesSelected(galleryInputAdd));
-
     btnOpenGallery.addEventListener('click', (e) => {
       if (e.target === galleryInputHome) return;
       if (selectedImages.length > 0) {
@@ -2588,11 +2911,19 @@
       }
     });
 
-    btnGalleryBack.addEventListener('click', () => showView('home'));
+    galleryInputHome.addEventListener('change', () => handleGalleryFilesSelected(galleryInputHome));
+    galleryInputAdd.addEventListener('change', () => handleGalleryFilesSelected(galleryInputAdd));
+
+    btnGalleryBack.addEventListener('click', () => {
+      cancelGalleryDrag();
+      showView('home');
+    });
 
     btnGalleryConfirm.addEventListener('click', () => {
+      cancelGalleryDrag();
       selectedImages = [...draftImages];
       animStartTime = performance.now();
+      lastRenderTime = 0;
       showView('home');
       showToast(
         selectedImages.length > 0
@@ -2602,7 +2933,25 @@
       );
     });
 
-    // ===== 2. 문구 페이지 =====
+    // ===== 2. 문구 페이지 (주제별 9종 중 3종 랜덤 표시) =====
+    const lastShownPresetIndices = {};
+
+    function pickRandomThreeIndices(categoryKey, totalCount) {
+      const all = Array.from({ length: totalCount }, (_, i) => i);
+      const prev = lastShownPresetIndices[categoryKey] || [];
+      const fresh = all.filter((i) => !prev.includes(i));
+      const pool = fresh.length >= 3 ? fresh : all;
+
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+
+      const picked = pool.slice(0, 3);
+      lastShownPresetIndices[categoryKey] = picked;
+      return picked;
+    }
+
     function updateTextPresetUI(selectedKey) {
       draftTextPreset = selectedKey;
       textPresetBtns.forEach((btn) => {
@@ -2613,10 +2962,12 @@
 
       if (selectedKey && TEXT_PRESET_CATEGORIES[selectedKey]) {
         const cat = TEXT_PRESET_CATEGORIES[selectedKey];
-        presetChoicesTitle.textContent = `${cat.label} (3가지)`;
+        presetChoicesTitle.textContent = `${cat.label}`;
         presetChoicesList.innerHTML = '';
 
-        cat.items.forEach((item) => {
+        const indices = pickRandomThreeIndices(selectedKey, cat.items.length);
+        indices.forEach((itemIdx) => {
+          const item = cat.items[itemIdx];
           const btn = document.createElement('button');
           btn.type = 'button';
           btn.className = 'preset-choice-card w-full p-4 rounded-3xl text-left space-y-1.5';
@@ -2648,6 +2999,12 @@
         textConfirmFooter.classList.remove('hidden');
       }
     }
+
+    btnShufflePresets.addEventListener('click', () => {
+      if (draftTextPreset && TEXT_PRESET_CATEGORIES[draftTextPreset]) {
+        updateTextPresetUI(draftTextPreset);
+      }
+    });
 
     btnOpenText.addEventListener('click', () => {
       textBodyInput.value = savedTextBody;
@@ -2714,7 +3071,7 @@
         }
       });
 
-      const hasCustom = Boolean(draftCustomAudioBuffer);
+      const hasCustom = Boolean(draftCustomAudioUrl);
       btnPickCustomAudio.classList.toggle('selected', draftMusicMode === 'custom');
       btnNoMusic.classList.toggle('selected', draftMusicMode === 'none');
 
@@ -2740,7 +3097,7 @@
       draftMusicMode = savedMusicMode;
       draftBuiltinIndex = savedBuiltinIndex;
       draftCustomAudioFile = savedCustomAudioFile;
-      draftCustomAudioBuffer = savedCustomAudioBuffer;
+      draftCustomAudioUrl = savedCustomAudioUrl;
       draftCustomAudioName = savedCustomAudioName;
       draftCustomAudioDuration = savedCustomAudioDuration;
       playingDraftKey = '';
@@ -2750,7 +3107,6 @@
 
     musicTrackBtns.forEach((btn) => {
       btn.addEventListener('click', async () => {
-        unlockAudioOnGesture();
         const idx = Number(btn.dataset.track);
         const key = `builtin:${idx}`;
         if (isPreviewAudioPlaying && playingDraftKey === key) {
@@ -2766,8 +3122,7 @@
 
     btnPickCustomAudio.addEventListener('click', async (e) => {
       if (e.target === customAudioInputMain || e.target === customAudioInputChange) return;
-      if (!draftCustomAudioBuffer) return;
-      unlockAudioOnGesture();
+      if (!draftCustomAudioUrl) return;
       if (isPreviewAudioPlaying && playingDraftKey === 'custom') {
         stopLiveAudio();
         return;
@@ -2789,20 +3144,27 @@
       const file = inputEl.files && inputEl.files[0];
       try {
         if (!file) return;
-        unlockAudioOnGesture();
         stopLiveAudio();
         showToast('음악을 불러오고 있어요...', '🎵');
-        const arr = await file.arrayBuffer();
-        const audioCtx = getSharedAudioContext();
-        const decoded = await audioCtx.decodeAudioData(arr.slice(0));
-        applyFadeToAudioBuffer(decoded, AUDIO_FADE_SEC);
+
+        const newUrl = URL.createObjectURL(file);
+        const dur = await readAudioDurationFromUrl(newUrl);
+        if (dur <= 0) {
+          URL.revokeObjectURL(newUrl);
+          showToast('지원하지 않는 음악 파일이에요. MP3 파일을 골라주세요.', '⚠️');
+          return;
+        }
+
+        if (draftCustomAudioUrl && draftCustomAudioUrl !== savedCustomAudioUrl) {
+          URL.revokeObjectURL(draftCustomAudioUrl);
+        }
 
         draftMusicMode = 'custom';
         draftBuiltinIndex = -1;
         draftCustomAudioFile = file;
-        draftCustomAudioBuffer = decoded;
+        draftCustomAudioUrl = newUrl;
         draftCustomAudioName = file.name.replace(/\.[^/.]+$/, '');
-        draftCustomAudioDuration = decoded.duration;
+        draftCustomAudioDuration = dur;
         refreshMusicSelectionUI();
         showToast(`'${draftCustomAudioName}' 음악을 가져왔어요!`, '🎶');
         await startLiveAudio(true, false, 'custom');
@@ -2819,16 +3181,21 @@
 
     btnMusicBack.addEventListener('click', () => {
       stopLiveAudio();
+      if (draftCustomAudioUrl && draftCustomAudioUrl !== savedCustomAudioUrl) {
+        URL.revokeObjectURL(draftCustomAudioUrl);
+      }
       showView('home');
     });
 
     btnMusicConfirm.addEventListener('click', () => {
-      unlockAudioOnGesture();
       stopLiveAudio();
+      if (savedCustomAudioUrl && savedCustomAudioUrl !== draftCustomAudioUrl) {
+        URL.revokeObjectURL(savedCustomAudioUrl);
+      }
       savedMusicMode = draftMusicMode;
       savedBuiltinIndex = draftBuiltinIndex;
       savedCustomAudioFile = draftCustomAudioFile;
-      savedCustomAudioBuffer = draftCustomAudioBuffer;
+      savedCustomAudioUrl = draftCustomAudioUrl;
       savedCustomAudioName = draftCustomAudioName;
       savedCustomAudioDuration = draftCustomAudioDuration;
       if (savedMusicMode !== 'none') {
@@ -2860,42 +3227,45 @@
 
     btnToggleSnow.addEventListener('click', () => {
       snowEnabled = !snowEnabled;
+      lastRenderTime = 0;
       refreshEffectUI();
     });
 
     btnToggleSparkle.addEventListener('click', () => {
       sparkleEnabled = !sparkleEnabled;
+      lastRenderTime = 0;
       refreshEffectUI();
     });
 
     btnEffectConfirm.addEventListener('click', () => showView('home'));
 
     // ===== 5. 미리보기 화면 조절 버튼 & 바로 수정 =====
-    btnOpenPreview.addEventListener('click', () => {
-      unlockAudioOnGesture();
-      showView('preview');
-    });
+    btnOpenPreview.addEventListener('click', () => showView('preview'));
     btnPreviewBack.addEventListener('click', () => showView('home'));
 
     btnFontSmaller.addEventListener('click', () => {
       textFontSizePx = Math.max(32, textFontSizePx - 8);
       textCacheKey = '';
+      lastRenderTime = 0;
       refreshPreviewAdjustUI();
     });
 
     btnFontLarger.addEventListener('click', () => {
       textFontSizePx = Math.min(64, textFontSizePx + 8);
       textCacheKey = '';
+      lastRenderTime = 0;
       refreshPreviewAdjustUI();
     });
 
     btnSpeedSlower.addEventListener('click', () => {
       textScrollSpeed = Math.max(24, textScrollSpeed - 9);
+      lastRenderTime = 0;
       refreshPreviewAdjustUI();
     });
 
     btnSpeedFaster.addEventListener('click', () => {
       textScrollSpeed = Math.min(60, textScrollSpeed + 9);
+      lastRenderTime = 0;
       refreshPreviewAdjustUI();
     });
 
@@ -2921,6 +3291,7 @@
       }
       textCacheKey = '';
       animStartTime = performance.now();
+      lastRenderTime = 0;
       refreshPreviewAdjustUI();
       previewQuickEditSheet.classList.add('hidden');
       previewQuickEditSheet.classList.remove('flex');
@@ -2950,7 +3321,7 @@
       } catch (_) {}
     }
 
-    function sliceAndFadeAudioBuffer(audioBuffer, targetDurationSec) {
+    function sliceAndFadeAudioBuffer(audioCtx, audioBuffer, targetDurationSec) {
       if (!audioBuffer) return null;
       const sr = audioBuffer.sampleRate;
       const numCh = Math.min(2, audioBuffer.numberOfChannels);
@@ -2960,7 +3331,6 @@
         return audioBuffer;
       }
 
-      const audioCtx = getSharedAudioContext();
       const out = audioCtx.createBuffer(numCh, targetSamples, sr);
       const fadeSamples = Math.min(Math.floor(AUDIO_FADE_SEC * sr), Math.floor(targetSamples / 2));
 
@@ -2981,11 +3351,14 @@
 
     async function normalizeAudioBufferForAAC(audioBuffer, targetDurationSec) {
       if (!audioBuffer) return null;
-      const targetRate = 44100;
-      const targetLength = Math.max(2048, Math.floor(targetDurationSec * targetRate));
-      if (audioBuffer.sampleRate === targetRate && audioBuffer.numberOfChannels === 2 && audioBuffer.length >= targetLength) {
+      const sr = audioBuffer.sampleRate;
+      const numCh = audioBuffer.numberOfChannels;
+      // AAC 표준(44.1kHz/48kHz, 1~2채널)이면 불필요한 전체 복제(RAM 2배 점유) 생략
+      if ((sr === 44100 || sr === 48000) && (numCh === 1 || numCh === 2)) {
         return audioBuffer;
       }
+      const targetRate = 44100;
+      const targetLength = Math.max(2048, Math.floor(targetDurationSec * targetRate));
       try {
         const OfflineCtx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
         if (!OfflineCtx) return audioBuffer;
@@ -3007,13 +3380,12 @@
       ]);
     }
 
-    async function exportWithWebCodecs(preferSoftware = false, customDurationSec = null) {
-      const loadedAudioBuffer = await getActiveAudioBuffer(false);
+    async function exportWithWebCodecs(preferSoftware, customDurationSec, tempAudioCtx, loadedAudioBuffer) {
       const durationSec = customDurationSec
         ? Math.max(1, customDurationSec)
         : (loadedAudioBuffer ? loadedAudioBuffer.duration : getVideoDurationSec());
-      const rawAudioBuffer = loadedAudioBuffer
-        ? sliceAndFadeAudioBuffer(loadedAudioBuffer, durationSec)
+      let rawAudioBuffer = loadedAudioBuffer
+        ? sliceAndFadeAudioBuffer(tempAudioCtx, loadedAudioBuffer, durationSec)
         : null;
       const totalFrames = Math.max(1, Math.round(durationSec * EXPORT_FPS));
 
@@ -3024,6 +3396,7 @@
         try {
           setSavingProgress(2, '배경 음악 준비 중...');
           audioBuffer = await normalizeAudioBufferForAAC(rawAudioBuffer, durationSec);
+          rawAudioBuffer = null;
           const support = await AudioEncoder.isConfigSupported({
             codec: 'mp4a.40.2',
             sampleRate: audioBuffer.sampleRate,
@@ -3201,6 +3574,8 @@
         if (audioEncoder.state !== 'closed') audioEncoder.close();
       }
 
+      audioBuffer = null;
+
       if (exportCancelled) return null;
       setSavingProgress(99, 'MP4 파일 마무리 중...');
       muxer.finalize();
@@ -3211,17 +3586,16 @@
       return { blob: outBlob, ext: 'mp4' };
     }
 
-    async function exportWithMediaRecorderFallback(customDurationSec = null) {
+    async function exportWithMediaRecorderFallback(customDurationSec, tempAudioCtx, loadedAudioBuffer) {
       if (typeof MediaRecorder === 'undefined') {
         throw new Error('MediaRecorder unsupported');
       }
 
-      const loadedAudioBuffer = await getActiveAudioBuffer(false);
       const durationSec = customDurationSec
         ? Math.max(1, customDurationSec)
         : (loadedAudioBuffer ? loadedAudioBuffer.duration : getVideoDurationSec());
       const audioBuffer = loadedAudioBuffer
-        ? sliceAndFadeAudioBuffer(loadedAudioBuffer, durationSec)
+        ? sliceAndFadeAudioBuffer(tempAudioCtx, loadedAudioBuffer, durationSec)
         : null;
       const stream = canvas.captureStream(EXPORT_FPS);
       let recSource = null;
@@ -3229,12 +3603,11 @@
 
       if (audioBuffer) {
         try {
-          const audioCtx = getSharedAudioContext();
-          if (audioCtx.state === 'suspended') {
-            await audioCtx.resume().catch(() => {});
+          if (tempAudioCtx.state === 'suspended') {
+            await tempAudioCtx.resume().catch(() => {});
           }
-          recDest = audioCtx.createMediaStreamDestination();
-          recSource = audioCtx.createBufferSource();
+          recDest = tempAudioCtx.createMediaStreamDestination();
+          recSource = tempAudioCtx.createBufferSource();
           recSource.buffer = audioBuffer;
           recSource.connect(recDest);
           recDest.stream.getAudioTracks().forEach((t) => stream.addTrack(t));
@@ -3288,6 +3661,7 @@
       isExporting = true;
       exportCancelled = false;
       stopLiveAudio();
+      clearLastExportMemory();
 
       let wakeLock = null;
       if (navigator.wakeLock && navigator.wakeLock.request) {
@@ -3296,6 +3670,9 @@
 
       setSavingProgress(0, '영상 준비 중...');
       showView('saving');
+
+      let tempAudioCtx = null;
+      let loadedAudioBuffer = null;
 
       try {
         const fontOpt = getCurrentFontOpt();
@@ -3307,38 +3684,44 @@
         }
         textCacheKey = '';
 
+        if (savedMusicMode !== 'none') {
+          setSavingProgress(1, '음악 불러오는 중...');
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          tempAudioCtx = new AudioCtx();
+          loadedAudioBuffer = await decodeSelectedAudioForExport(tempAudioCtx);
+        }
+
         const targetDurationSec = exportMode === 'short'
           ? getContentDurationSec()
-          : getVideoDurationSec();
+          : (loadedAudioBuffer ? loadedAudioBuffer.duration : getVideoDurationSec());
 
         let result = null;
         const supportsFastMP4 = typeof VideoEncoder !== 'undefined' && typeof VideoFrame !== 'undefined' && typeof Mp4Muxer !== 'undefined';
 
         if (supportsFastMP4) {
           try {
-            result = await exportWithWebCodecs(false, targetDurationSec);
+            result = await exportWithWebCodecs(false, targetDurationSec, tempAudioCtx, loadedAudioBuffer);
           } catch (hwErr) {
             console.warn('1차 고속 인코딩 실패, 소프트웨어 인코더 재시도:', hwErr);
             if (!exportCancelled) {
               try {
                 setSavingProgress(0, '안정 모드로 다시 만들고 있어요...');
-                result = await exportWithWebCodecs(true, targetDurationSec);
+                result = await exportWithWebCodecs(true, targetDurationSec, tempAudioCtx, loadedAudioBuffer);
               } catch (swErr) {
                 console.warn('2차 소프트웨어 인코딩 실패, 안전 녹화 모드 전환:', swErr);
                 if (!exportCancelled) {
                   setSavingProgress(0, '안전 모드로 저장하고 있어요...');
-                  result = await exportWithMediaRecorderFallback(targetDurationSec);
+                  result = await exportWithMediaRecorderFallback(targetDurationSec, tempAudioCtx, loadedAudioBuffer);
                 }
               }
             }
           }
         } else {
-          result = await exportWithMediaRecorderFallback(targetDurationSec);
+          result = await exportWithMediaRecorderFallback(targetDurationSec, tempAudioCtx, loadedAudioBuffer);
         }
 
         if (result && result.blob && !exportCancelled) {
           setSavingProgress(100, '완성되었습니다!');
-          if (lastExportUrl) URL.revokeObjectURL(lastExportUrl);
           lastExportBlob = result.blob;
           lastExportExt = result.ext;
 
@@ -3366,9 +3749,17 @@
         showView('preview');
         showToast('영상 저장 중 오류가 났어요. 다시 눌러주세요.', '⚠️');
       } finally {
+        loadedAudioBuffer = null;
+        if (tempAudioCtx) {
+          try { await tempAudioCtx.close(); } catch (_) {}
+          tempAudioCtx = null;
+        }
         isExporting = false;
         if (wakeLock) {
           try { await wakeLock.release(); } catch (_) {}
+        }
+        if (isCanvasVisibleView()) {
+          startAnimLoop();
         }
       }
     }
@@ -3444,7 +3835,7 @@
     });
 
     btnGoHome.addEventListener('click', () => {
-      completeVideo.pause();
+      clearLastExportMemory();
       shareFallbackModal.classList.add('hidden');
       shareFallbackModal.classList.remove('flex');
       animStartTime = performance.now();
@@ -3504,7 +3895,7 @@
       refreshEffectUI();
       refreshPreviewAdjustUI();
       refreshHomeBadges();
-      requestAnimationFrame(animateLoop);
+      startAnimLoop();
     });
   </script>
 </body>
